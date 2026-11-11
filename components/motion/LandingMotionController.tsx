@@ -733,6 +733,7 @@ function setupLearningScrollytelling(
       .timeline({
         defaults: { ease: "none" },
         scrollTrigger: {
+          id: FAQ_RAIL_TRIGGER_ID,
           trigger: section,
           start: "top top",
           end: () => `+=${Math.max(window.innerHeight * 1.8, travel() * 5)}`,
@@ -1599,11 +1600,61 @@ const PINNED_REVEAL_PROGRESS: Record<string, number> = {
   "final-cta": 1,
 };
 
+const FAQ_RAIL_TRIGGER_ID = "faq-rail";
+// Timeline position where every FAQ card is revealed and the rail has not moved.
+const FAQ_RAIL_REVEALED_PROGRESS = 0.44;
+
 function setupSectionNavigation(
   ScrollTrigger: ReturnType<typeof getGsap>["ScrollTrigger"],
 ) {
   const sectionOf = (element: HTMLElement) =>
     element.closest<HTMLElement>("section[data-px], footer[data-px]") ?? element;
+
+  /*
+    FAQ static mode. Navigating to the FAQ shows all four cards at once (grid on
+    desktop, vertical list on phones; see app/globals.css). The pinned rail is
+    disabled with its timeline parked at "all cards revealed, no travel", and its
+    pin spacing is removed before positions are measured. The cinematic rail
+    comes back once the section is entirely below the viewport (the visitor
+    scrolled back up past it) or when navigating to another section, so the
+    layout change always happens off screen or as part of a jump.
+  */
+  const faqSection = select<HTMLElement>("[data-px='learning']");
+  const isFaqStatic = () => faqSection?.dataset.faqMode === "static";
+
+  /** Returns true when the layout actually changed. */
+  const setFaqStatic = (staticMode: boolean) => {
+    if (!faqSection || isFaqStatic() === staticMode) {
+      return false;
+    }
+    const rail = ScrollTrigger.getById(FAQ_RAIL_TRIGGER_ID);
+    if (staticMode) {
+      if (rail) {
+        rail.disable(true, true);
+        rail.animation?.progress(FAQ_RAIL_REVEALED_PROGRESS).pause();
+      }
+      faqSection.dataset.faqMode = "static";
+    } else {
+      delete faqSection.dataset.faqMode;
+      rail?.enable();
+    }
+    ScrollTrigger.refresh();
+    return true;
+  };
+
+  let restoreQueued = false;
+  const onScroll = () => {
+    if (!isFaqStatic() || restoreQueued || !faqSection) {
+      return;
+    }
+    restoreQueued = true;
+    requestAnimationFrame(() => {
+      restoreQueued = false;
+      if (isFaqStatic() && faqSection.getBoundingClientRect().top > window.innerHeight) {
+        setFaqStatic(false);
+      }
+    });
+  };
 
   const destinationFor = (element: HTMLElement) => {
     if (element.id === "top") {
@@ -1618,7 +1669,7 @@ function setupSectionNavigation(
         (trigger.trigger === section || trigger.trigger.contains(element)),
     );
 
-    if (pinned) {
+    if (pinned && !(section === faqSection && isFaqStatic())) {
       const progress = PINNED_REVEAL_PROGRESS[section.dataset.px ?? ""] ?? 1;
       const position = pinned.start + (pinned.end - pinned.start) * progress;
       // Stay one pixel inside the pin so the section is still pinned in view.
@@ -1651,13 +1702,22 @@ function setupSectionNavigation(
       return false;
     }
 
-    window.scrollTo({ top: destinationFor(element), behavior: "instant" });
-    settleAnimations();
-    // A second pass after layout settles (pins and spacers can shift by a frame).
-    requestAnimationFrame(() => {
+    // Layout first (it changes pin spacing), then measure the destination.
+    const layoutChanged = setFaqStatic(faqSection !== null && sectionOf(element) === faqSection);
+
+    // Land, then (if pin spacing changed) re-measure every pin at the new position
+    // and land again, so no other section is left pinned over the destination.
+    const land = () => {
       window.scrollTo({ top: destinationFor(element), behavior: "instant" });
+      if (layoutChanged) {
+        ScrollTrigger.refresh();
+        window.scrollTo({ top: destinationFor(element), behavior: "instant" });
+      }
       settleAnimations();
-    });
+    };
+    land();
+    // A second pass after layout settles (pins and spacers can shift by a frame).
+    requestAnimationFrame(land);
 
     if (options.updateHistory && window.location.hash !== `#${id}`) {
       history.pushState(null, "", `#${id}`);
@@ -1693,12 +1753,17 @@ function setupSectionNavigation(
 
   document.addEventListener("click", onClick);
   window.addEventListener("popstate", onPopState);
+  window.addEventListener("scroll", onScroll, { passive: true });
 
   return {
     goTo,
     cleanup: () => {
       document.removeEventListener("click", onClick);
       window.removeEventListener("popstate", onPopState);
+      window.removeEventListener("scroll", onScroll);
+      if (faqSection) {
+        delete faqSection.dataset.faqMode;
+      }
     },
   };
 }

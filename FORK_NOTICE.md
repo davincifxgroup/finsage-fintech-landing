@@ -58,6 +58,13 @@ confirmed for commercial use.
     section top), and finish any scrub smoothing at once. Normal scrolling keeps
     every original animation. A direct hash URL skips the opening intro.
   - **FAQ rail:** the horizontal travel starts once every card has appeared (0.44
-    instead of 0.38 of the pinned timeline), giving a clean landing point.
+    instead of 0.38 of the pinned timeline).
+  - **FAQ static mode:** reaching the FAQ through navigation (menu, footer or card
+    link, direct `#faq` URL, back/forward) shows all four cards at once in a 4-column
+    grid on desktop and a vertical list on phones (2 columns from 640px). The rail's
+    pinned trigger is disabled with its timeline parked at "all revealed", and pins
+    are re-measured before landing. The cinematic rail returns once the section is
+    entirely below the viewport, or when navigating elsewhere, so the switch happens
+    off screen. Cards keep their 318:396 proportions. Styles: `app/globals.css`.
   - **Risk note:** the How It Works note is dimmed only while motion runs, so it
     stays readable with reduced motion.

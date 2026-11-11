@@ -4,7 +4,7 @@ const learningCards = [
     title: "No Upfront Price",
     description: (
       <>
-        The license is never paid in advance.
+        The license is never paid in advance.{" "}
         <br />
         Partner commissions cover it over time.
       </>
@@ -17,7 +17,7 @@ const learningCards = [
     title: "Account Binding",
     description: (
       <>
-        One advisor on one broker account is
+        One advisor on one broker account is{" "}
         <br />
         one license, tied to ForexLAB.
       </>
@@ -30,7 +30,7 @@ const learningCards = [
     title: "After Payoff",
     description: (
       <>
-        Same support and updates as a regular
+        Same support and updates as a regular{" "}
         <br />
         buyer, under the developer&rsquo;s terms.
       </>
@@ -43,7 +43,7 @@ const learningCards = [
     title: "Costs & Risk",
     description: (
       <>
-        Spreads, commissions and trading risk
+        Spreads, commissions and trading risk{" "}
         <br />
         stay yours. Profit is never promised.
       </>
@@ -174,7 +174,7 @@ export function LearningSection() {
               lg:leading-[calc(var(--u)*51)]
             "
           >
-            Questions, Answered
+            Questions, Answered{" "}
             <br />
             Plainly.
           </h2>

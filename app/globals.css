@@ -1,1 +1,85 @@
 @import "tailwindcss";
+
+/* ==============================================================
+   FAQ STATIC LAYOUT (ForexLAB Access)
+
+   Applied only when the FAQ is reached through navigation (menu,
+   footer or card link, direct #faq URL, back/forward). The section's
+   pinned horizontal rail is switched off for that time, and all four
+   cards are shown at once: a grid on desktop, a vertical list on
+   phones. Ordinary top-to-bottom scrolling keeps the original
+   cinematic rail; see setupSectionNavigation in
+   components/motion/LandingMotionController.tsx.
+
+   Cards keep their original 318:396 proportions, so the decorative
+   artwork (preserveAspectRatio="none") is never distorted.
+============================================================== */
+[data-px="learning"][data-faq-mode="static"] {
+  aspect-ratio: auto;
+  min-height: 0;
+}
+
+[data-faq-mode="static"] [data-px="learning.carousel"] {
+  overflow: visible;
+}
+
+[data-faq-mode="static"] [data-px="learning.track"] {
+  display: grid;
+  width: auto;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  transform: none !important;
+}
+
+[data-faq-mode="static"] [data-px="learning.track"] > article {
+  width: auto;
+  height: auto;
+  aspect-ratio: 318 / 396;
+}
+
+[data-faq-mode="static"] [data-px="learning.track"] > article h3 {
+  white-space: normal;
+}
+
+@media (min-width: 640px) {
+  [data-faq-mode="static"] [data-px="learning.track"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  /* The design-frame stage becomes a normal block, so the section grows with the grid. */
+  [data-faq-mode="static"] [data-px="learning.stage"] {
+    position: relative;
+    inset: auto;
+    padding-bottom: calc(var(--u) * 110);
+  }
+
+  [data-faq-mode="static"] [data-px="learning.carousel"] {
+    position: relative;
+    top: auto;
+    left: auto;
+    margin-top: calc(var(--u) * 315);
+    margin-left: calc(var(--u) * 116);
+    width: calc(var(--u) * 966);
+  }
+
+  [data-faq-mode="static"] [data-px="learning.track"] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: calc(var(--u) * 7);
+  }
+
+  [data-faq-mode="static"] [data-px="learning.track"] > article h3 {
+    font-size: calc(var(--u) * 22);
+    line-height: calc(var(--u) * 26);
+  }
+
+  /* Narrower cards: let the descriptions wrap naturally instead of the rail's fixed breaks. */
+  [data-faq-mode="static"] [data-px="learning.track"] > article p br {
+    display: none;
+  }
+
+  [data-faq-mode="static"] [data-px="learning.track"] > article [data-px$=".copy"] {
+    right: calc(var(--u) * 24);
+  }
+}
