@@ -40,6 +40,10 @@ confirmed for commercial use.
   `content/export_active_brokers.py` (refuses any roster other than the approved six:
   IC Markets, Tickmill, RoboForex, IC Trading, Fusion Markets, FP Markets). Snapshot
   taken from a disposable Rebate database prepared with migrate + seed_demo.
+- Advisor catalog (branch `access-catalog`): homepage panel, `/advisors` and
+  `/advisors/[slug]`, fed by the Rebate public catalog API; see [CATALOG.md](CATALOG.md).
+  The approved Access mark in the advisor panel is no longer rotated by the scroll
+  animation (brand rule); only its glow turns.
 - Links: authentication and accounts stay in ForexLAB Rebate (`lib/site.ts`,
   `NEXT_PUBLIC_REBATE_URL`, `NEXT_PUBLIC_MAIN_SITE_URL`).
 - Layout, typography, gradients, spacing and GSAP motion are kept from upstream.

@@ -697,7 +697,7 @@ function setupInvestGptScroll(
           scrub: 0.65,
         },
       })
-      .to(symbol, { rotation: 270, transformOrigin: "50% 50%" }, 0)
+      .to(symbol, { scale: 1.06, transformOrigin: "50% 50%" }, 0)
       .to(
         glow,
         { rotation: -80, scale: 1.02, transformOrigin: "50% 50%" },

@@ -21,7 +21,15 @@ const resourceLinks: NavLink[] = [
   { label: "Risk Disclosure", href: "#risk" },
 ];
 
-export function Footer() {
+export function Footer({ anchorBase = "" }: { anchorBase?: string } = {}) {
+  // On subpages in-page anchors point back to the homepage ("/#faq").
+  const withBase = (list: NavLink[]) =>
+    list.map((link) => (link.href.startsWith("#") ? { ...link, href: anchorBase + link.href } : link));
+  const nav = withBase(navigationLinks);
+  const tools = withBase(toolLinks);
+  const resources = withBase(resourceLinks);
+  const logoHref = anchorBase ? anchorBase : "#top";
+
   return (
     <footer
       data-px="footer"
@@ -83,25 +91,25 @@ export function Footer() {
           "
         >
           <div>
-            <FooterLogo />
+            <FooterLogo href={logoHref} />
           </div>
 
           <FooterColumn
             dataPx="footer.navigation.mobile"
             title="Access"
-            links={navigationLinks}
+            links={nav}
           />
 
           <FooterColumn
             dataPx="footer.tools.mobile"
             title="Account"
-            links={toolLinks}
+            links={tools}
           />
 
           <FooterColumn
             dataPx="footer.resources.mobile"
             title="ForexLAB"
-            links={resourceLinks}
+            links={resources}
           />
         </div>
 
@@ -131,7 +139,7 @@ export function Footer() {
               lg:top-[calc(var(--u)*122)]
             "
           >
-            <FooterLogo />
+            <FooterLogo href={logoHref} />
           </div>
 
           {/* ================================================== */}
@@ -149,7 +157,7 @@ export function Footer() {
             <FooterColumn
               dataPx="footer.navigation"
               title="Access"
-              links={navigationLinks}
+              links={nav}
             />
           </div>
 
@@ -168,7 +176,7 @@ export function Footer() {
             <FooterColumn
               dataPx="footer.tools"
               title="Account"
-              links={toolLinks}
+              links={tools}
             />
           </div>
 
@@ -187,7 +195,7 @@ export function Footer() {
             <FooterColumn
               dataPx="footer.resources"
               title="ForexLAB"
-              links={resourceLinks}
+              links={resources}
             />
           </div>
         </div>
@@ -279,11 +287,11 @@ export function Footer() {
 /* LOGO                                                         */
 /* ============================================================ */
 
-function FooterLogo() {
+function FooterLogo({ href }: { href: string }) {
   return (
     <a
       data-px="footer.logo"
-      href="#top"
+      href={href}
       className="
         inline-flex items-center
         gap-[10px]

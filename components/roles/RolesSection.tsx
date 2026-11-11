@@ -1,4 +1,9 @@
+import type { AdvisorCard } from "@/lib/catalog";
+import { formatPrice } from "@/lib/catalog";
 import { asset, links } from "@/lib/site";
+
+/** Advisors shown directly in the homepage panel; the full list lives at /advisors. */
+const PANEL_LIMIT = 3;
 
 // The customer benefit in plain English. No allocation figures are published.
 const roles = [
@@ -43,7 +48,8 @@ const roles = [
   },
 ];
 
-export function RolesSection() {
+export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
+  const hasAdvisors = advisors.length > 0;
   return (
     <section
       id="mechanism"
@@ -469,20 +475,83 @@ export function RolesSection() {
                 Expert Advisors.
               </h3>
 
-              <p
-                data-px="roles.investgpt.description"
-                className="
-                  mt-6 text-[13px]
-                  leading-[18px] text-white/95
+              {hasAdvisors ? (
+                <ul
+                  data-px="roles.investgpt.advisors"
+                  aria-label="Published advisors"
+                  className="
+                    mt-6 w-full max-w-[460px]
 
-                  lg:mt-[calc(var(--u)*22)]
-                  lg:text-[calc(var(--u)*13)]
-                  lg:leading-[calc(var(--u)*18)]
-                "
-              >
-                The first advisors are in evaluation. Listings appear only when approved.
-              </p>
+                    lg:mt-[calc(var(--u)*22)]
+                    lg:w-[calc(var(--u)*430)]
+                    lg:max-w-none
+                  "
+                >
+                  {advisors.slice(0, PANEL_LIMIT).map((advisor) => (
+                    <li key={advisor.slug} className="border-t border-white/35 last:border-b">
+                      <a
+                        href={`/advisors/${advisor.slug}`}
+                        className="
+                          group block py-[11px]
 
+                          lg:py-[calc(var(--u)*10)]
+                        "
+                      >
+                        <span className="flex items-baseline justify-between gap-4">
+                          <span
+                            className="
+                              text-[15px] font-bold leading-[20px]
+                              group-hover:underline group-hover:underline-offset-2
+
+                              lg:text-[calc(var(--u)*15)]
+                              lg:leading-[calc(var(--u)*20)]
+                            "
+                          >
+                            {advisor.name}
+                          </span>
+                          <span
+                            className="
+                              shrink-0 text-[13px] font-bold leading-[20px]
+
+                              lg:text-[calc(var(--u)*13)]
+                              lg:leading-[calc(var(--u)*20)]
+                            "
+                          >
+                            {formatPrice(advisor.currentPrice)}
+                          </span>
+                        </span>
+                        <span
+                          className="
+                            mt-[3px] block truncate text-[12px] leading-[17px] text-white/85
+
+                            lg:mt-[calc(var(--u)*3)]
+                            lg:text-[calc(var(--u)*12)]
+                            lg:leading-[calc(var(--u)*17)]
+                          "
+                        >
+                          {advisor.platforms.join(" / ")} · by {advisor.vendor.displayName} · {advisor.shortDescription}
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p
+                  data-px="roles.investgpt.description"
+                  className="
+                    mt-6 text-[13px]
+                    leading-[18px] text-white/95
+
+                    lg:mt-[calc(var(--u)*22)]
+                    lg:text-[calc(var(--u)*13)]
+                    lg:leading-[calc(var(--u)*18)]
+                  "
+                >
+                  The first advisors are in evaluation. Listings appear only when approved.
+                </p>
+              )}
+
+              {hasAdvisors ? null : (
               <ul
                 data-px="roles.investgpt.features"
                 className="
@@ -498,20 +567,24 @@ export function RolesSection() {
                 <li>→ &nbsp; Compatible brokers and account types</li>
                 <li>→ &nbsp; Approved license price and support terms</li>
               </ul>
+              )}
 
               <a
                 data-px="roles.investgpt.cta"
-                href={links.register}
-                className="
-                  mt-12 inline-flex
+                href={hasAdvisors ? "/advisors" : links.register}
+                className={`
+                  ${hasAdvisors ? "mt-8 lg:mt-[calc(var(--u)*26)]" : "mt-12 lg:mt-[calc(var(--u)*51)]"}
+                  inline-flex
                   text-[13px] font-bold
                   leading-none text-white
 
-                  lg:mt-[calc(var(--u)*51)]
                   lg:text-[calc(var(--u)*13)]
-                "
+                `}
               >
-                Create Your Account&nbsp; →
+                {hasAdvisors
+                  ? `View all ${advisors.length > PANEL_LIMIT ? `${advisors.length} ` : ""}advisors`
+                  : "Create Your Account"}
+                &nbsp; →
               </a>
             </div>
           </div>
