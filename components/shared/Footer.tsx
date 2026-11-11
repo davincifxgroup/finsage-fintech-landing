@@ -1,24 +1,23 @@
-const navigationLinks = [
-  "Home",
-  "Discover",
-  "InvestGPT",
-  "Portfolio Toolbox",
+import { asset, links, type NavLink } from "@/lib/site";
+
+const navigationLinks: NavLink[] = [
+  { label: "Advisors", href: "#advisors" },
+  { label: "How It Works", href: "#how-it-works" },
+  { label: "Our Testing", href: "#testing" },
+  { label: "Brokers", href: "#brokers" },
+  { label: "FAQ", href: "#faq" },
 ];
 
-const toolLinks = [
-  "Watchlist",
-  "Market Movers",
-  "AI Stock Picker",
-  "Smart Signals",
-  "Stocklist",
+const toolLinks: NavLink[] = [
+  { label: "Log In", href: links.login },
+  { label: "Create Account", href: links.register },
+  { label: "Dashboard", href: links.dashboard },
 ];
 
-const resourceLinks = [
-  "Affiliate Program",
-  "Academy",
-  "API for Signal DB",
-  "Pricing Plans",
-  "Podcast",
+const resourceLinks: NavLink[] = [
+  { label: "EA Forex LAB", href: links.mainSite },
+  { label: "ForexLAB Rebate", href: links.rebate },
+  { label: "Risk Disclosure", href: "#risk" },
 ];
 
 export function Footer() {
@@ -88,19 +87,19 @@ export function Footer() {
 
           <FooterColumn
             dataPx="footer.navigation.mobile"
-            title="Navigation"
+            title="Access"
             links={navigationLinks}
           />
 
           <FooterColumn
             dataPx="footer.tools.mobile"
-            title="Tools"
+            title="Account"
             links={toolLinks}
           />
 
           <FooterColumn
             dataPx="footer.resources.mobile"
-            title="Resources"
+            title="ForexLAB"
             links={resourceLinks}
           />
         </div>
@@ -148,7 +147,7 @@ export function Footer() {
           >
             <FooterColumn
               dataPx="footer.navigation"
-              title="Navigation"
+              title="Access"
               links={navigationLinks}
             />
           </div>
@@ -167,7 +166,7 @@ export function Footer() {
           >
             <FooterColumn
               dataPx="footer.tools"
-              title="Tools"
+              title="Account"
               links={toolLinks}
             />
           </div>
@@ -186,7 +185,7 @@ export function Footer() {
           >
             <FooterColumn
               dataPx="footer.resources"
-              title="Resources"
+              title="ForexLAB"
               links={resourceLinks}
             />
           </div>
@@ -210,7 +209,7 @@ export function Footer() {
         >
           <a
             data-px="footer.legal.privacy"
-            href="#"
+            href={links.privacy}
             className="
               whitespace-nowrap
               text-[13px]
@@ -226,7 +225,7 @@ export function Footer() {
 
           <a
             data-px="footer.legal.terms"
-            href="#"
+            href={links.terms}
             className="
               whitespace-nowrap
               text-[13px]
@@ -237,7 +236,7 @@ export function Footer() {
               lg:leading-[calc(var(--u)*15)]
             "
           >
-            Terms of Use
+            Terms of Service
           </a>
         </div>
 
@@ -268,7 +267,7 @@ export function Footer() {
             lg:tracking-[-0.07em]
           "
         >
-          FinSage
+          Access
         </div>
       </div>
     </footer>
@@ -283,7 +282,7 @@ function FooterLogo() {
   return (
     <a
       data-px="footer.logo"
-      href="#"
+      href="#top"
       className="
         inline-flex items-center
         gap-[10px]
@@ -291,64 +290,22 @@ function FooterLogo() {
         lg:gap-[calc(var(--u)*10)]
       "
     >
-      <span
+      {/* Approved V2 compact horizontal logo (light-background variant). */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         data-px="footer.logo.mark"
-        aria-hidden="true"
+        src={asset("/brand/forexlab-access-header-light.svg")}
+        alt="ForexLAB Access"
+        width={332}
+        height={64}
         className="
-          relative block
-          h-[23px] w-[35px]
-          shrink-0
+          block h-[40px] w-auto
+          -ml-[8px]
 
-          lg:h-[calc(var(--u)*23)]
-          lg:w-[calc(var(--u)*35)]
+          lg:-ml-[calc(var(--u)*8)]
+          lg:h-[calc(var(--u)*40)]
         "
-      >
-        {/* FILLED CIRCLE */}
-
-        <span
-          className="
-            absolute
-            left-0 top-1/2
-            h-[22px] w-[22px]
-            -translate-y-1/2
-            rounded-full
-            bg-black
-
-            lg:h-[calc(var(--u)*22)]
-            lg:w-[calc(var(--u)*22)]
-          "
-        />
-
-        {/* OUTLINED CIRCLE */}
-
-        <span
-          className="
-            absolute
-            right-0 top-1/2
-            h-[21px] w-[21px]
-            -translate-y-1/2
-            rounded-full
-            border border-black
-            bg-transparent
-
-            lg:h-[calc(var(--u)*21)]
-            lg:w-[calc(var(--u)*21)]
-          "
-        />
-      </span>
-
-      <span
-        className="
-          text-[21px]
-          font-bold
-          leading-none
-          tracking-[-0.035em]
-
-          lg:text-[calc(var(--u)*21)]
-        "
-      >
-        FinSage
-      </span>
+      />
     </a>
   );
 }
@@ -364,7 +321,7 @@ function FooterColumn({
 }: {
   dataPx: string;
   title: string;
-  links: string[];
+  links: NavLink[];
 }) {
   return (
     <nav data-px={dataPx}>
@@ -394,10 +351,10 @@ function FooterColumn({
         "
       >
         {links.map((link, index) => (
-          <li key={link}>
+          <li key={link.label}>
             <a
               data-px={`${dataPx}.link.${index + 1}`}
-              href="#"
+              href={link.href}
               className="
                 block
                 whitespace-nowrap
@@ -410,7 +367,7 @@ function FooterColumn({
                 lg:leading-[calc(var(--u)*16)]
               "
             >
-              {link}
+              {link.label}
             </a>
           </li>
         ))}

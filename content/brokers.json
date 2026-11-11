@@ -1,0 +1,27 @@
+[
+  {
+    "name": "Tickmill",
+    "accountType": "Raw",
+    "instruments": "FX, Metals"
+  },
+  {
+    "name": "RoboForex",
+    "accountType": "Prime",
+    "instruments": "FX, Metals"
+  },
+  {
+    "name": "IC Trading",
+    "accountType": "Raw Spread",
+    "instruments": "FX, Metals"
+  },
+  {
+    "name": "Fusion Markets",
+    "accountType": "Zero",
+    "instruments": "FX, Metals"
+  },
+  {
+    "name": "FP Markets",
+    "accountType": "Raw",
+    "instruments": "FX, Metals"
+  }
+]

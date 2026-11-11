@@ -1,39 +1,42 @@
+import { asset, links } from "@/lib/site";
+
+// How a confirmed partner commission is divided under Access.
 const roles = [
   {
-    title: "Day Traders",
+    title: "ForexLAB · 50%",
     description: (
       <>
-        Live signals and momentum
+        Retains half of each confirmed
         <br />
-        indicators to capture intraday
+        partner commission for selection,
         <br />
-        and swing opportunities.
+        verification and support.
       </>
     ),
     icon: "chart",
   },
   {
-    title: "Long-term Investors",
+    title: "Distributable Pool · 50%",
     description: (
       <>
-        In-depth research and strategic value
+        Split equally among the active
         <br />
-        assessment to create lasting wealth
+        licenses on your account, each capped
         <br />
-        through time.
+        at its agreed license price.
       </>
     ),
     icon: "card",
   },
   {
-    title: "Advisors & Planners",
+    title: "After Payoff · You",
     description: (
       <>
-        Client-ready reports and portfolio
+        Once a license price is covered,
         <br />
-        optimization features for superior
+        its share goes to your standard
         <br />
-        advisory outcomes.
+        ForexLAB Rebate cashback.
       </>
     ),
     icon: "folder",
@@ -43,6 +46,7 @@ const roles = [
 export function RolesSection() {
   return (
     <section
+      id="mechanism"
       data-px="roles"
       className="
         roles relative isolate w-full overflow-hidden bg-white
@@ -113,7 +117,7 @@ export function RolesSection() {
               lg:text-[calc(var(--u)*13)]
             "
           >
-            Roles
+            The Mechanism
           </span>
         </div>
 
@@ -144,7 +148,7 @@ export function RolesSection() {
               lg:leading-[calc(var(--u)*52)]
             "
           >
-            Solutions for Every Market Role.
+            How the License Price Is Covered.
           </h2>
 
           <p
@@ -161,9 +165,9 @@ export function RolesSection() {
               lg:leading-[calc(var(--u)*19)]
             "
           >
-            Whether you trade, invest, advise, or research, FinSage seamlessly
+            Brokers pay ForexLAB a partner commission on your trading. There is no{" "}
             <br className="hidden lg:block" />
-            integrates into your workflow.
+            fixed payoff date, and no trading means no debt or extra payment.
           </p>
         </div>
 
@@ -265,6 +269,7 @@ export function RolesSection() {
 
         {/* INVESTGPT */}
         <div
+          id="advisors"
           data-px="roles.investgpt"
           className="
             mt-20 grid overflow-hidden
@@ -352,44 +357,13 @@ export function RolesSection() {
                   lg:w-[calc(var(--u)*34)]
                 "
               >
-                <span
-                  className="
-                    absolute left-1/2 top-[2px]
-                    h-0 w-0 -translate-x-1/2
-
-                    border-l-[17px]
-                    border-r-[17px]
-                    border-t-[15px]
-
-                    border-l-transparent
-                    border-r-transparent
-                    border-t-black
-
-                    lg:top-[calc(var(--u)*2)]
-                    lg:border-l-[calc(var(--u)*17)]
-                    lg:border-r-[calc(var(--u)*17)]
-                    lg:border-t-[calc(var(--u)*15)]
-                  "
-                />
-
-                <span
-                  className="
-                    absolute bottom-[2px] left-1/2
-                    h-0 w-0 -translate-x-1/2
-
-                    border-b-[15px]
-                    border-l-[17px]
-                    border-r-[17px]
-
-                    border-b-black
-                    border-l-transparent
-                    border-r-transparent
-
-                    lg:bottom-[calc(var(--u)*2)]
-                    lg:border-b-[calc(var(--u)*15)]
-                    lg:border-l-[calc(var(--u)*17)]
-                    lg:border-r-[calc(var(--u)*17)]
-                  "
+                {/* Approved ForexLAB Access mark replaces the original symbol. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={asset("/brand/forexlab-access-mark-light.svg")}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 h-full w-full"
                 />
               </div>
             </div>
@@ -472,7 +446,7 @@ export function RolesSection() {
                   "
                 />
 
-                <span>InvestGPT</span>
+                <span>Advisor Catalog</span>
               </div>
 
               <h3
@@ -490,9 +464,9 @@ export function RolesSection() {
                   lg:leading-[calc(var(--u)*30)]
                 "
               >
-                AI Tools for Smarter
+                Independently Selected
                 <br />
-                Investing Decisions.
+                Expert Advisors.
               </h3>
 
               <p
@@ -506,7 +480,7 @@ export function RolesSection() {
                   lg:leading-[calc(var(--u)*18)]
                 "
               >
-                Your 24/7 AI analyst for instant market answers.
+                The first advisors are in evaluation. Listings appear only when approved.
               </p>
 
               <ul
@@ -520,14 +494,14 @@ export function RolesSection() {
                   lg:text-[calc(var(--u)*13)]
                 "
               >
-                <li>→ &nbsp; Live data analysis</li>
-                <li>→ &nbsp; Tech &amp; fundamental insights</li>
-                <li>→ &nbsp; Just ask, get immediate answers</li>
+                <li>→ &nbsp; Dated test evidence and known limits</li>
+                <li>→ &nbsp; Compatible brokers and account types</li>
+                <li>→ &nbsp; Approved license price and support terms</li>
               </ul>
 
               <a
                 data-px="roles.investgpt.cta"
-                href="#"
+                href={links.register}
                 className="
                   mt-12 inline-flex
                   text-[13px] font-bold
@@ -537,7 +511,7 @@ export function RolesSection() {
                   lg:text-[calc(var(--u)*13)]
                 "
               >
-                Start Chatting&nbsp; →
+                Create Your Account&nbsp; →
               </a>
             </div>
           </div>

@@ -1,3 +1,5 @@
+import { links } from "@/lib/site";
+
 export function FinalCTA() {
   return (
     <section
@@ -182,9 +184,9 @@ export function FinalCTA() {
                 lg:tracking-[-0.055em]
               "
             >
-              Trade smarter, let
+              Start with one
               <br />
-              AI handle the market.
+              ForexLAB account.
             </h2>
 
             {/* ================================================= */}
@@ -192,6 +194,7 @@ export function FinalCTA() {
             {/* ================================================= */}
 
             <p
+              id="risk"
               data-px="final-cta.description"
               className="
                 mt-7
@@ -210,13 +213,11 @@ export function FinalCTA() {
                 lg:tracking-[0.005em]
               "
             >
-              As you navigate through overwhelming data and emotions, our AI
-              agents provide in-depth
+              Create your account, link an eligible broker account and apply once listings open.{" "}
               <br className="hidden lg:block" />
-              research across stocks, crypto, forex, and ETFs. They help you
-              make confident, rational
+              Access does not change spreads or commissions. Trading involves risk of capital{" "}
               <br className="hidden lg:block" />
-              trading and investment decisions.
+              loss, and past or simulated results never guarantee future performance.
             </p>
 
             {/* ================================================= */}
@@ -225,7 +226,7 @@ export function FinalCTA() {
 
             <a
               data-px="final-cta.button"
-              href="#"
+              href={links.register}
               className="
                 mt-12
                 inline-flex
@@ -256,7 +257,7 @@ export function FinalCTA() {
                 lg:text-[calc(var(--u)*13)]
               "
             >
-              Get Started
+              Get Access
             </a>
           </div>
         </div>

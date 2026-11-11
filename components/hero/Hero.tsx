@@ -3,22 +3,16 @@ import "@fontsource/lato/900.css";
 
 import type { CSSProperties } from "react";
 
-const tickerItems = [
-  { name: "Alphabet", value: "↗ +0.85%" },
-  { name: "Amazon", value: "↗ +2.05%" },
-  { name: "Meta", value: "↗ +1.67%" },
-  { name: "Vanguard", value: "↘ +0.90%" },
-  { name: "Apple", value: "↗ +0.78%" },
-  { name: "Nvidia", value: "↗ +2.34%" },
-];
+import { asset, primaryNav } from "@/lib/site";
 
-const navigationItems = [
-  "Favorites",
-  "Market Movers",
-  "AI Picks",
-  "Trade Alerts",
-  "History",
-  "Explore",
+// Program facts only: no market prices, returns or performance figures.
+const tickerItems = [
+  { name: "Upfront license price", value: "None" },
+  { name: "ForexLAB share", value: "50%" },
+  { name: "Distributable pool", value: "50%" },
+  { name: "Active licenses / account", value: "Up to 3" },
+  { name: "Platforms", value: "MT4 / MT5" },
+  { name: "After payoff", value: "Cashback" },
 ];
 
 /* ============================================================
@@ -104,18 +98,19 @@ const heroBackgroundStyle: CSSProperties = {
 
 export function Hero() {
   return (
-    <section data-px="hero" className="hero relative min-h-screen overflow-hidden">
+    <section id="top" data-px="hero" className="hero relative min-h-screen overflow-hidden">
       {/* =====================================================
           1. MARKET TICKER
       ====================================================== */}
       <div data-px="hero.ticker" className="hero-ticker relative z-30 h-7 w-full overflow-hidden bg-black text-white">
-        <div className="hero-ticker-track grid h-full w-full grid-cols-6 items-center">
-          {tickerItems.map((item) => (
+        {/* Fewer columns on narrow screens so labels never overlap. */}
+        <div className="hero-ticker-track grid h-full w-full grid-cols-2 items-center md:grid-cols-3 lg:grid-cols-6">
+          {tickerItems.map((item, index) => (
             <div
               key={item.name}
-              className="
+              className={`
                 hero-ticker-item
-                flex
+                ${index >= 3 ? "hidden lg:flex" : index >= 2 ? "hidden md:flex" : "flex"}
                 h-full
                 min-w-0
                 items-center
@@ -123,7 +118,7 @@ export function Hero() {
                 px-5
                 text-[11px]
                 leading-none
-              "
+              `}
             >
               <span className="hero-ticker-name whitespace-nowrap">
                 {item.name}
@@ -247,62 +242,24 @@ export function Hero() {
           {/* =================================================
               BRAND
           ================================================== */}
-          <div data-px="hero.brand" className="hero-brand flex items-center">
-            <div
+          <a data-px="hero.brand" href="#top" className="hero-brand flex items-center">
+            {/* Approved V2 compact horizontal logo (light-background variant). */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={asset("/brand/forexlab-access-header-light.svg")}
+              alt="ForexLAB Access"
+              width={332}
+              height={64}
               className="
-                hero-brand-mark
-                relative
-                h-[calc(var(--u)*18)]
-                w-[calc(var(--u)*28)]
-                shrink-0
+                hero-brand-logo
+                block
+                h-[max(calc(var(--u)*34),28px)]
+                w-auto
+                -ml-[calc(var(--u)*6)]
+                -mt-[calc(var(--u)*8)]
               "
-            >
-              <div
-                className="
-                  hero-brand-circle
-                  hero-brand-circle-left
-                  absolute
-                  left-0
-                  top-1/2
-                  h-[calc(var(--u)*18)]
-                  w-[calc(var(--u)*18)]
-                  -translate-y-1/2
-                  rounded-full
-                  bg-black
-                "
-              />
-
-              <div
-                className="
-                  hero-brand-circle
-                  hero-brand-circle-right
-                  absolute
-                  left-[calc(var(--u)*11)]
-                  top-1/2
-                  h-[calc(var(--u)*18)]
-                  w-[calc(var(--u)*18)]
-                  -translate-y-1/2
-                  rounded-full
-                  border
-                  border-black
-                  bg-white
-                "
-              />
-            </div>
-
-            <span
-              className="
-                hero-brand-name
-                -ml-[calc(var(--u)*2)]
-                whitespace-nowrap
-                text-[calc(var(--u)*18)]
-                font-normal
-                leading-[calc(var(--u)*18)]
-              "
-            >
-              FinSage
-            </span>
-          </div>
+            />
+          </a>
 
           {/* =================================================
               NAVIGATION
@@ -317,15 +274,16 @@ export function Hero() {
               flex
               flex-col
               items-end
-              text-[calc(var(--u)*11)]
+              text-[max(calc(var(--u)*11),12px)]
               font-normal
-              leading-[calc(var(--u)*21.2)]
+              leading-[max(calc(var(--u)*21.2),21px)]
             "
+            aria-label="Main"
           >
-            {navigationItems.map((item) => (
+            {primaryNav.map((item) => (
               <a
-                key={item}
-                href="#"
+                key={item.label}
+                href={item.href}
                 data-px="hero.nav.item"
                 className="
                   hero-navigation-item
@@ -335,7 +293,7 @@ export function Hero() {
                   underline-offset-[calc(var(--u)*1)]
                 "
               >
-                {item}
+                {item.label}
               </a>
             ))}
           </nav>
@@ -367,10 +325,20 @@ export function Hero() {
             -translate-x-1/2
             -translate-y-1/2
             [container-type:inline-size]
+
+            max-md:top-[calc(50%+44px)]
+            max-md:flex
+            max-md:aspect-auto
+            max-md:w-[calc(100vw-40px)]
+            max-md:flex-col
+            max-md:items-center
+            max-md:gap-5
           "
         >
           {/* =================================================
               ARTWORK
+              The artwork is its own container so the circle offsets
+              scale with it (identical on desktop; reused on mobile).
           ================================================== */}
           <div
             data-px="hero.artwork"
@@ -382,6 +350,12 @@ export function Hero() {
               h-[7.128906cqw]
               w-[12.988281cqw]
               -translate-x-1/2
+              [container-type:inline-size]
+
+              max-md:static
+              max-md:h-[18.66cqw]
+              max-md:w-[34cqw]
+              max-md:translate-x-0
             "
           >
             <div className="hero-artwork-stage relative h-full w-full">
@@ -404,7 +378,7 @@ export function Hero() {
                 className="
                   hero-artwork-circle
                   absolute
-                  left-[1.464844cqw]
+                  left-[11.278195cqw]
                   top-1/2
                   aspect-square
                   h-full
@@ -419,7 +393,7 @@ export function Hero() {
                 className="
                   hero-artwork-circle
                   absolute
-                  left-[2.929688cqw]
+                  left-[22.556391cqw]
                   top-1/2
                   aspect-square
                   h-full
@@ -434,7 +408,7 @@ export function Hero() {
                 className="
                   hero-artwork-circle
                   absolute
-                  left-[4.394531cqw]
+                  left-[33.834586cqw]
                   top-1/2
                   aspect-square
                   h-full
@@ -449,7 +423,7 @@ export function Hero() {
                 className="
                   hero-artwork-circle
                   absolute
-                  left-[5.859375cqw]
+                  left-[45.112782cqw]
                   top-1/2
                   aspect-square
                   h-full
@@ -479,9 +453,16 @@ export function Hero() {
               font-normal
               leading-[1.367188cqw]
               tracking-[0.001953125cqw]
+
+              max-md:static
+              max-md:max-w-[300px]
+              max-md:translate-x-0
+              max-md:whitespace-normal
+              max-md:text-[13px]
+              max-md:leading-[19px]
             "
           >
-            On-demand AI insights for stocks, ETFs, crypto, and forex.
+            Independently evaluated Expert Advisors for MT4 and MT5 traders.
           </p>
 
           {/* =================================================
@@ -496,32 +477,37 @@ export function Hero() {
               top-[25.292969cqw]
               -translate-x-1/2
               text-center
-              text-[5.957031cqw]
+              text-[5.2cqw]
               font-black
-              leading-[6.152344cqw]
+              leading-[5.6cqw]
               tracking-normal
+
+              max-md:static
+              max-md:translate-x-0
+              max-md:text-[34px]
+              max-md:leading-[38px]
             "
           >
             <span
-              className="block whitespace-nowrap"
+              className="block whitespace-nowrap max-md:whitespace-normal max-md:text-balance"
               style={{
                 transform:
                   "translate(0.09765625cqw, 0.1171875cqw) scaleX(0.985) scaleY(1.16)",
                 transformOrigin: "center center",
               }}
             >
-              Data-Powered
+              Expert-Tested Trading Bots.
             </span>
 
             <span
-              className="block whitespace-nowrap"
+              className="block whitespace-nowrap max-md:mt-1 max-md:whitespace-normal max-md:text-balance"
               style={{
                 transform:
                   "translate(-0.244140625cqw, 0.1171875cqw) scaleX(0.985) scaleY(1.16)",
                 transformOrigin: "center center",
               }}
             >
-              Investment Strategies.
+              Without the Upfront Price.
             </span>
           </h1>
 
@@ -540,15 +526,20 @@ export function Hero() {
               -translate-x-1/2
               flex-col
               gap-[0.195313cqw]
+
+              max-md:static
+              max-md:w-full
+              max-md:translate-x-0
+              max-md:gap-[3px]
             "
           >
-            <textarea
+            {/* Same framed panel as the original prompt box; static copy instead of an input. */}
+            <div
               data-px="hero.prompt.input"
               className="
                 hero-prompt-input
                 h-[7.617188cqw]
                 w-full
-                resize-none
                 rounded-[0.78125cqw]
                 border
                 border-black
@@ -558,13 +549,25 @@ export function Hero() {
                 text-[0.976563cqw]
                 font-normal
                 leading-[1.367188cqw]
-                outline-none
-              "
-              placeholder="Type a ticker or question..."
-            />
 
-            <button
-              type="button"
+                max-md:h-auto
+                max-md:rounded-[10px]
+                max-md:px-4
+                max-md:py-[14px]
+                max-md:text-[13px]
+                max-md:leading-[19px]
+              "
+            >
+              Your allocation of confirmed broker partner commissions covers the agreed
+              license price, so there is no upfront payment. Access requires a verified
+              broker account and license approval.{" "}
+              <a href="#how-it-works" className="whitespace-nowrap underline underline-offset-2">
+                How It Works →
+              </a>
+            </div>
+
+            <a
+              href="#advisors"
               data-px="hero.prompt.submit"
               className="
                 hero-prompt-submit
@@ -579,10 +582,14 @@ export function Hero() {
                 font-normal
                 leading-none
                 text-white
+
+                max-md:h-[46px]
+                max-md:rounded-[11px]
+                max-md:text-[14px]
               "
             >
-              Ask AI →
-            </button>
+              Explore Advisors →
+            </a>
           </div>
         </div>
       </div>

@@ -1,8 +1,9 @@
-const tabs = ["NVDA", "Stocks", "Opportunities", "Apple"];
+const tabs = ["Advisor", "Broker Account", "License", "Cashback"];
 
 export function ChallengesSection() {
   return (
     <section
+      id="how-it-works"
       data-px="challenges"
       className="
         challenges relative isolate
@@ -103,7 +104,7 @@ export function ChallengesSection() {
               lg:text-[calc(var(--u)*13)]
             "
           >
-            Challenges
+            How It Works
           </span>
         </div>
 
@@ -144,9 +145,9 @@ export function ChallengesSection() {
               lg:leading-[calc(var(--u)*52)]
             "
           >
-            Instant AI Insights
+            From Approval
             <br />
-            in Seconds.
+            to Cashback.
           </h2>
 
           <p
@@ -163,11 +164,11 @@ export function ChallengesSection() {
               lg:leading-[calc(var(--u)*20)]
             "
           >
-            Institutional-grade AI agents analyze stocks, crypto, forex,
+            Choose an advisor, verify your broker account and{" "}
             <br className="hidden lg:block" />
-            and ETFs in real time, providing actionable insights
+            receive approved access. Commissions cover the{" "}
             <br className="hidden lg:block" />
-            for quick, informed decisions.
+            license price, then your share returns as cashback.
           </p>
         </div>
 
@@ -177,7 +178,7 @@ export function ChallengesSection() {
 
         <nav
           data-px="challenges.tabs"
-          aria-label="AI insight categories"
+          aria-label="Access steps"
           className="
             mt-10 flex flex-wrap items-center gap-[2px]
 
@@ -260,7 +261,7 @@ export function ChallengesSection() {
                 lg:text-[calc(var(--u)*16)]
               "
             >
-              Should I buy NVDA now?
+              How is my advisor license covered?
             </h3>
 
             <div
@@ -329,7 +330,7 @@ export function ChallengesSection() {
             >
               <CodeLine>
                 <span className="text-[#a6a6a6]">
-                  def analyze_nvidia():
+                  def activate_access(client):
                 </span>
               </CodeLine>
 
@@ -337,7 +338,7 @@ export function ChallengesSection() {
                 <span className="text-[#ffbe00]">print</span>
                 <span className="text-[#d0d0d0]">(</span>
                 <span className="text-[#009e8e]">
-                  &quot;[INFO] Starting AI analysis of NVIDIA...&quot;
+                  &quot;[STEP 1] Choose an advisor and review its evaluation and terms&quot;
                 </span>
                 <span className="text-[#d0d0d0]">)</span>
               </CodeLine>
@@ -346,7 +347,7 @@ export function ChallengesSection() {
 
               <CodeLine indent={1}>
                 <span className="text-[#9c9c9c]">
-                  # Fundamental Agent Analysis
+                  # Broker account verification
                 </span>
               </CodeLine>
 
@@ -354,26 +355,26 @@ export function ChallengesSection() {
                 <span className="text-[#ffbe00]">print</span>
                 <span className="text-[#d0d0d0]">(</span>
                 <span className="text-[#009e8e]">
-                  &quot;[INFO] Analyzing fundamental data...&quot;
+                  &quot;[STEP 2] Verify a broker account in the ForexLAB partner program&quot;
                 </span>
                 <span className="text-[#d0d0d0]">)</span>
               </CodeLine>
 
               <CodeLine indent={1}>
                 <span className="text-[#d8d8d8]">
-                  P_E_ratio = 65
+                  license = request_license(advisor, broker_account)
                 </span>
                 <span className="text-[#8d8d8d]">
-                  &nbsp;&nbsp;&nbsp;# P/E ratio for NVIDIA
+                  &nbsp;&nbsp;&nbsp;# one advisor + one account
                 </span>
               </CodeLine>
 
               <CodeLine indent={1}>
                 <span className="text-[#d8d8d8]">
-                  sector_avg = 28
+                  status = review(license)
                 </span>
                 <span className="text-[#8d8d8d]">
-                  &nbsp;&nbsp;&nbsp;# Sector average
+                  &nbsp;&nbsp;&nbsp;# ForexLAB approval required
                 </span>
               </CodeLine>
 
@@ -381,7 +382,7 @@ export function ChallengesSection() {
                 <span className="text-[#6ec5ff]">if</span>
                 <span className="text-[#d8d8d8]">
                   {" "}
-                  P_E_ratio &gt; sector_avg:
+                  status == &quot;approved&quot;:
                 </span>
               </CodeLine>
 
@@ -389,16 +390,15 @@ export function ChallengesSection() {
                 <span className="text-[#a7a7a7]">print</span>
                 <span className="text-[#757575]">(f</span>
                 <span className="text-[#009e8e]">
-                  &quot;[INFO] P/E ratio: {"{P_E_ratio}"}x, significantly above
-                  sector average of {"{sector_avg}"}x. Justified by strong YoY
-                  growth of 87%, reflecting a solid premium.&quot;
+                  &quot;[STEP 3] Access delivered. Your allocation of confirmed partner
+                  commissions now covers {"{license.price}"}, with no upfront payment.&quot;
                 </span>
                 <span className="text-[#757575]">)</span>
               </CodeLine>
 
               <CodeLine indent={1}>
                 <span className="text-[#999]">
-                  # Technical Agent Analysis
+                  # Payoff and cashback
                 </span>
               </CodeLine>
 
@@ -408,31 +408,31 @@ export function ChallengesSection() {
               >
                 <CodeLine indent={1}>
                   <span className="text-[#9c9c9c]">
-                    print(&quot;[INFO] Analyzing technical data...&quot;)
+                    print(&quot;[STEP 4] Developer allocation is capped at the agreed price&quot;)
                   </span>
                 </CodeLine>
 
                 <CodeLine indent={1}>
                   <span className="text-[#9c9c9c]">
-                    RSI = 72&nbsp;&nbsp;&nbsp;# RSI value
+                    share = pool / active_licenses&nbsp;&nbsp;&nbsp;# pool = 50% of confirmed commission
                   </span>
                 </CodeLine>
 
                 <CodeLine indent={1}>
                   <span className="text-[#9c9c9c]">
-                    resistance = 950&nbsp;&nbsp;&nbsp;# Resistance level
+                    credited = min(credited + share, license.price)
                   </span>
                 </CodeLine>
 
                 <CodeLine indent={1}>
                   <span className="text-[#9c9c9c]">
-                    support = 890&nbsp;&nbsp;&nbsp;# Support level
+                    paid_off = credited == license.price&nbsp;&nbsp;&nbsp;# no fixed date
                   </span>
                 </CodeLine>
 
                 <CodeLine indent={1}>
                   <span className="text-[#9c9c9c]">
-                    if RSI &gt; 70:
+                    if paid_off: route_share_to(client.cashback)
                   </span>
                 </CodeLine>
               </div>

@@ -1,50 +1,55 @@
+// Frequently asked questions, answered on the card itself.
 const learningCards = [
   {
-    title: "Video Tutorials",
+    title: "No Upfront Price",
     description: (
       <>
-        How-to videos on AI tools, features,
+        The license is never paid in advance.
         <br />
-        and smarter investing.
+        Partner commissions cover it over time.
       </>
     ),
-    cta: "Start Learning",
+    cta: "How It Works",
+    href: "#how-it-works",
     variant: "video",
   },
   {
-    title: "Academy",
+    title: "Account Binding",
     description: (
       <>
-        Learning center with tutorials, glossary,
+        One advisor on one broker account is
         <br />
-        help docs, and expert tips.
+        one license, tied to ForexLAB.
       </>
     ),
-    cta: "Start Learning",
+    cta: "Our Brokers",
+    href: "#brokers",
     variant: "academy",
   },
   {
-    title: "Market Lens",
+    title: "After Payoff",
     description: (
       <>
-        Actionable ideas and insights across
+        Same support and updates as a regular
         <br />
-        stocks, ETFs, crypto, and forex.
+        buyer, under the developer&rsquo;s terms.
       </>
     ),
-    cta: "Start Learning",
+    cta: "The Mechanism",
+    href: "#mechanism",
     variant: "lens",
   },
   {
-    title: "Smart Investing",
+    title: "Costs & Risk",
     description: (
       <>
-        Explore AI-driven tools and insights for
+        Spreads, commissions and trading risk
         <br />
-        more confident investing decisions.
+        stay yours. Profit is never promised.
       </>
     ),
-    cta: "Start Learning",
+    cta: "Risk Disclosure",
+    href: "#risk",
     variant: "smart",
   },
 ];
@@ -52,6 +57,7 @@ const learningCards = [
 export function LearningSection() {
   return (
     <section
+      id="faq"
       data-px="learning"
       className="
         learning
@@ -128,7 +134,7 @@ export function LearningSection() {
               lg:text-[calc(var(--u)*13)]
             "
           >
-            Insights &amp; Learning
+            FAQ
           </span>
         </div>
 
@@ -168,9 +174,9 @@ export function LearningSection() {
               lg:leading-[calc(var(--u)*51)]
             "
           >
-            Expert Insights, AI Tools,
+            Questions, Answered
             <br />
-            Smarter Investing.
+            Plainly.
           </h2>
 
           <p
@@ -188,9 +194,9 @@ export function LearningSection() {
               lg:leading-[calc(var(--u)*19)]
             "
           >
-            Discover expert analysis, AI-driven guidance, and practical resources
+            No upfront payment and no hidden debt. Here is what Access does, and{" "}
             <br className="hidden lg:block" />
-            designed to help you invest smarter and grow confidently.
+            what it does not change about your trading.
           </p>
         </div>
 
@@ -311,7 +317,7 @@ export function LearningSection() {
 
                 <a
                   data-px={`learning.card.${index + 1}.cta`}
-                  href="#"
+                  href={card.href}
                   className="
                     absolute bottom-[34px] left-[33px]
                     z-20

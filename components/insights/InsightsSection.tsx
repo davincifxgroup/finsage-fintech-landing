@@ -1,30 +1,35 @@
+import { activeBrokers } from "@/content/brokers";
+
+// What every evaluation documents. Labels only: no metrics are shown.
 const tabs = [
-  "Signals",
-  "Charts",
-  "Valuation",
-  "Sentiment",
-  "Opportunities",
+  "Backtests",
+  "Tick Data",
+  "Trading Costs",
+  "Out-of-Sample",
+  "Forward",
 ];
 
-const integrations = ["API", "Dashboard", "Excel", "Mobile"];
+// Generated from active Rebate Broker records (see content/brokers.ts).
+const integrations = activeBrokers.map((broker) => broker.name);
 
+// Illustrative evaluation stages, not the status of any real advisor.
 const pipeline = [
   {
-    title: "Market Data",
-    status: "Complete",
-    description: "Live price feeds, volume & order book",
+    title: "Submission",
+    status: "Step 1",
+    description: "The developer submits the EA and terms",
     active: true,
   },
   {
-    title: "AI Analysis",
-    status: "Processing",
-    description: "Live price feeds, volume & order book",
+    title: "Evaluation",
+    status: "Step 2",
+    description: "Backtests, out-of-sample and forward",
     active: true,
   },
   {
-    title: "Trade Signals",
-    status: "Waiting",
-    description: "Generate buy/sell recommendations",
+    title: "Listing",
+    status: "Step 3",
+    description: "Published only with approved evidence",
     active: false,
   },
 ];
@@ -32,6 +37,7 @@ const pipeline = [
 export function InsightsSection() {
   return (
     <section
+      id="testing"
       data-px="insights"
       className="
         insights relative isolate
@@ -141,11 +147,11 @@ export function InsightsSection() {
             "
           >
             <span className="block whitespace-nowrap">
-              24/7 AI-Driven Market
+              Independent Evaluation,
             </span>
 
             <span className="block whitespace-nowrap">
-              Insights Team.
+              Before Any Listing.
             </span>
           </h2>
 
@@ -167,13 +173,12 @@ export function InsightsSection() {
               lg:leading-[calc(var(--u)*18)]
             "
           >
-            Institutional agents analyzing stocks, crypto, forex, and ETFs for
-            insights.
+            Every Expert Advisor is tested by ForexLAB before it can reach the catalog.
           </p>
 
           <nav
             data-px="insights.tabs"
-            aria-label="Market insight categories"
+            aria-label="What each evaluation documents"
             className="
               mt-8 flex max-w-full
               flex-wrap items-center justify-center gap-[2px]
@@ -286,7 +291,7 @@ export function InsightsSection() {
                   lg:text-[calc(var(--u)*12)]
                 "
               >
-                Signals
+                Methodology
               </span>
             </div>
 
@@ -310,11 +315,11 @@ export function InsightsSection() {
                 lg:leading-[calc(var(--u)*30)]
               "
             >
-              Real-Time Trade
+              Reproducible Tests,
               <br />
-              Signals for Smarter
+              Real Broker Conditions,
               <br />
-              Investment Decisions.
+              Dated Verification.
             </h3>
 
             {/* Description */}
@@ -337,15 +342,14 @@ export function InsightsSection() {
                 lg:leading-[calc(var(--u)*21)]
               "
             >
-              Receive immediate buy/sell recommendations
-              <br className="hidden lg:block" />
-              powered by live market data and AI-driven algorithms.
+              Every result states its test period, tick data, spread and slippage
+              model, out-of-sample and forward checks, and known limitations.
             </p>
 
             {/* Execute */}
             <a
               data-px="insights.execute"
-              href="#"
+              href="#how-it-works"
               className="
                 mt-10 inline-flex w-fit items-center
                 text-[12px] font-bold leading-none text-black
@@ -357,7 +361,7 @@ export function InsightsSection() {
                 lg:text-[calc(var(--u)*12)]
               "
             >
-              Execute
+              How It Works
 
               <span
                 aria-hidden="true"
@@ -376,6 +380,7 @@ export function InsightsSection() {
 
             {/* Integrations */}
             <div
+              id="brokers"
               data-px="insights.integrations"
               className="
                 mt-12
@@ -395,7 +400,7 @@ export function InsightsSection() {
                   lg:text-[calc(var(--u)*12)]
                 "
               >
-                Integrations
+                Broker partnerships · compatibility confirmed per advisor
               </p>
 
               <div
@@ -404,7 +409,7 @@ export function InsightsSection() {
                   flex flex-wrap gap-[4px]
 
                   lg:mt-[calc(var(--u)*11)]
-                  lg:flex-nowrap
+                  lg:w-[calc(var(--u)*350)]
                   lg:gap-[calc(var(--u)*4)]
                 "
               >
