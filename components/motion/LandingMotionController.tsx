@@ -4,6 +4,7 @@ import { useLayoutEffect } from "react";
 
 import { getGsap } from "@/lib/motion/gsap";
 import { readMotionMode } from "@/lib/motion/motion-mode";
+import { asset } from "@/lib/site";
 
 const select = <T extends Element>(selector: string) =>
   document.querySelector<T>(selector);
@@ -76,7 +77,7 @@ function setupOpeningSequence(
   gsap.set(loaderWord, { x: -5 });
 
   const loaderRect = loaderLogo.getBoundingClientRect();
-  const brandRect = brand.getBoundingClientRect();
+  const brandRect = (brand.querySelector("img") ?? brand).getBoundingClientRect();
   const logoScale = brandRect.height / loaderRect.height;
   const logoX = brandRect.left - loaderRect.left;
   const logoY = brandRect.top - loaderRect.top;
@@ -225,13 +226,13 @@ function setupStoryRail(
   }
 
   const chapters = [
-    ["[data-px='hero']", "Opening"],
-    ["[data-px='insights']", "Signal Engine"],
-    ["[data-px='challenges']", "AI Terminal"],
-    ["[data-px='roles']", "Market Roles"],
-    ["[data-px='learning']", "Knowledge Rail"],
-    ["[data-px='final-cta']", "Decision Point"],
-    ["[data-px='footer']", "FinSage"],
+    ["[data-px='hero']", "Welcome"],
+    ["[data-px='insights']", "Our Testing"],
+    ["[data-px='challenges']", "How It Works"],
+    ["[data-px='roles']", "No Upfront Price"],
+    ["[data-px='learning']", "FAQ"],
+    ["[data-px='final-cta']", "Get Access"],
+    ["[data-px='footer']", "ForexLAB Access"],
   ] as const;
 
   const setChapter = (chapter: number) => {
@@ -492,6 +493,10 @@ function setupTerminalReveal(
   }
 
   gsap.set(lines.slice(2), { autoAlpha: 0.08, y: 3 });
+  // Dimmed only when motion runs; readable by default (reduced motion, no JS).
+  if (mutedGroup) {
+    gsap.set(mutedGroup, { opacity: 0.16 });
+  }
 
   matchMedia.add("(min-width: 1024px)", () => {
     const timeline = gsap.timeline({
@@ -755,15 +760,15 @@ function setupLearningScrollytelling(
         },
         0.12,
       )
-      .to(track, { x: () => -travel(), duration: 0.58 }, 0.38)
+      .to(track, { x: () => -travel(), duration: 0.5 }, 0.44)
       .to(
         figures,
         {
           rotation: (figureIndex) => (figureIndex % 2 === 0 ? -4 : 4),
           transformOrigin: "50% 50%",
-          duration: 0.58,
+          duration: 0.5,
         },
-        0.38,
+        0.44,
       )
       .to(figures, { rotation: 0, duration: 0.08 }, 0.94);
   });
@@ -795,7 +800,7 @@ function setupGlobalControlHovers(
     );
     const tabs = selectAll<HTMLElement>(
       "[data-px^='insights.tab.'], [data-px^='challenges.tab.']",
-    );
+    ).filter((element) => element.matches("a, button"));
     const claimed = new Set<HTMLElement>([...featured, ...tabs]);
     const quietControls = selectAll<HTMLElement>("a, button").filter(
       (element) =>
@@ -1572,6 +1577,132 @@ function setupFooterReveal(
     );
 }
 
+
+/* ============================================================
+   SECTION NAVIGATION THAT LANDS ON REVEALED CONTENT
+
+   Normal scrolling keeps every scrubbed / pinned reveal. A click on an
+   in-page link (header, footer, CTAs, cards), a direct hash URL, or
+   back/forward between hashes instead jumps to the scroll position where
+   the destination section is already fully revealed, then finishes every
+   scrub catch-up tween at once. Nothing is disabled; the page is simply
+   placed at the end of the destination's reveal.
+============================================================ */
+
+// How far into a pinned section's timeline its content is fully revealed.
+// The FAQ rail continues with horizontal travel after its cards appear, so
+// it lands where every card has appeared and the rail has not moved yet.
+const PINNED_REVEAL_PROGRESS: Record<string, number> = {
+  insights: 1,
+  challenges: 1,
+  learning: 0.44,
+  "final-cta": 1,
+};
+
+function setupSectionNavigation(
+  ScrollTrigger: ReturnType<typeof getGsap>["ScrollTrigger"],
+) {
+  const sectionOf = (element: HTMLElement) =>
+    element.closest<HTMLElement>("section[data-px], footer[data-px]") ?? element;
+
+  const destinationFor = (element: HTMLElement) => {
+    if (element.id === "top") {
+      return 0;
+    }
+
+    const section = sectionOf(element);
+    const pinned = ScrollTrigger.getAll().find(
+      (trigger) =>
+        Boolean(trigger.pin) &&
+        trigger.trigger instanceof HTMLElement &&
+        (trigger.trigger === section || trigger.trigger.contains(element)),
+    );
+
+    if (pinned) {
+      const progress = PINNED_REVEAL_PROGRESS[section.dataset.px ?? ""] ?? 1;
+      const position = pinned.start + (pinned.end - pinned.start) * progress;
+      // Stay one pixel inside the pin so the section is still pinned in view.
+      return Math.max(pinned.start, Math.round(position) - 1);
+    }
+
+    return Math.max(0, Math.round(element.getBoundingClientRect().top + window.scrollY));
+  };
+
+  const settleAnimations = () => {
+    ScrollTrigger.update();
+    ScrollTrigger.getAll().forEach((trigger) => {
+      // Scrubbed timelines: skip the smoothing lag and land on the scroll position.
+      const scrubTween = trigger.getTween?.();
+      if (scrubTween) {
+        scrubTween.progress(1);
+        return;
+      }
+      // Play-on-enter animations (smaller screens): finish them if already entered.
+      if (!trigger.vars.scrub && trigger.animation && trigger.progress > 0) {
+        trigger.animation.progress(1);
+      }
+    });
+  };
+
+  const goTo = (hash: string, options: { updateHistory: boolean }) => {
+    const id = decodeURIComponent(hash.replace(/^#/, ""));
+    const element = id ? document.getElementById(id) : null;
+    if (!element) {
+      return false;
+    }
+
+    window.scrollTo({ top: destinationFor(element), behavior: "instant" });
+    settleAnimations();
+    // A second pass after layout settles (pins and spacers can shift by a frame).
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: destinationFor(element), behavior: "instant" });
+      settleAnimations();
+    });
+
+    if (options.updateHistory && window.location.hash !== `#${id}`) {
+      history.pushState(null, "", `#${id}`);
+    }
+
+    // Move focus for keyboard and screen-reader users without scrolling again.
+    if (!element.hasAttribute("tabindex")) {
+      element.setAttribute("tabindex", "-1");
+    }
+    element.focus({ preventScroll: true });
+    return true;
+  };
+
+  const onClick = (event: MouseEvent) => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+      return;
+    }
+    const link = (event.target as Element | null)?.closest?.("a[href^='#']");
+    const href = link?.getAttribute("href");
+    if (!href || href.length < 2) {
+      return;
+    }
+    if (goTo(href, { updateHistory: true })) {
+      event.preventDefault();
+    }
+  };
+
+  const onPopState = () => {
+    if (window.location.hash) {
+      goTo(window.location.hash, { updateHistory: false });
+    }
+  };
+
+  document.addEventListener("click", onClick);
+  window.addEventListener("popstate", onPopState);
+
+  return {
+    goTo,
+    cleanup: () => {
+      document.removeEventListener("click", onClick);
+      window.removeEventListener("popstate", onPopState);
+    },
+  };
+}
+
 export function LandingMotionController() {
   useLayoutEffect(() => {
     const mode = readMotionMode();
@@ -1606,9 +1737,21 @@ export function LandingMotionController() {
       }
     };
 
+    // A direct link to a section skips the intro so the visitor lands on it at once.
+    const initialHash = window.location.hash.length > 1 ? window.location.hash : "";
+    const startsAtSection =
+      initialHash !== "" && initialHash !== "#top" && document.getElementById(initialHash.slice(1)) !== null;
+
     const matchMedia = gsap.matchMedia();
     const context = gsap.context(() => {
-      setupOpeningSequence(gsap, releaseScroll);
+      if (startsAtSection) {
+        if (loader) {
+          loader.style.display = "none";
+        }
+        releaseScroll();
+      } else {
+        setupOpeningSequence(gsap, releaseScroll);
+      }
       setupHeroDeparture(gsap, matchMedia);
       setupInsightsProgress(gsap, matchMedia);
       setupTerminalReveal(gsap, matchMedia);
@@ -1622,15 +1765,21 @@ export function LandingMotionController() {
       setupStoryRail(gsap, ScrollTrigger);
     }, document.body);
 
+    const navigation = setupSectionNavigation(ScrollTrigger);
+
     let active = true;
     void document.fonts.ready.then(() => {
       if (active) {
         ScrollTrigger.refresh();
+        if (startsAtSection) {
+          navigation.goTo(initialHash, { updateHistory: false });
+        }
       }
     });
 
     return () => {
       active = false;
+      navigation.cleanup();
       releaseScroll();
       matchMedia.revert();
       context.revert();
@@ -1649,7 +1798,7 @@ export function LandingMotionController() {
           data-motion-story-label
           className="whitespace-nowrap text-[9px] font-bold uppercase tracking-[0.18em]"
         >
-          Opening
+          Welcome
         </span>
         <span
           data-motion-story-index
@@ -1670,31 +1819,37 @@ export function LandingMotionController() {
         aria-hidden="true"
         className="fixed inset-0 z-[100] flex items-center justify-center bg-white [font-family:Lato,Arial,sans-serif]"
       >
-        <div data-motion-loader-logo className="flex items-center">
+        {/*
+          Approved ForexLAB Access logo, rebuilt from the mark and the header
+          artwork (56px tall: header scale 0.875) so the same opening motion
+          applies: the mark grows in, then the wordmark is revealed.
+        */}
+        <div data-motion-loader-logo className="flex h-[56px] items-center">
           <span
             data-motion-loader-mark
-            className="relative block h-[22px] w-[34px] shrink-0"
+            className="relative block h-[56px] w-[49px] shrink-0"
           >
-            <span
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               data-motion-loader-filled
-              className="absolute left-0 top-1/2 block h-[22px] w-[22px] -translate-y-1/2 rounded-full bg-black"
+              src={asset("/brand/forexlab-access-mark-light.svg")}
+              alt=""
+              className="absolute left-[8.59px] top-[12.09px] block h-[31.82px] w-[31.82px]"
             />
-            <span
-              data-motion-loader-outline
-              className="absolute left-[12px] top-1/2 block h-[22px] w-[22px] -translate-y-1/2 rounded-full border border-black bg-white"
-            />
+            <span data-motion-loader-outline className="absolute left-0 top-0 block h-0 w-0" />
           </span>
 
           <span
             data-motion-loader-word-mask
-            className="ml-[7px] block overflow-hidden"
+            className="block h-[56px] w-[241.5px] overflow-hidden"
           >
-            <span
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               data-motion-loader-word
-              className="block whitespace-nowrap text-[22px] font-normal leading-none text-black"
-            >
-              FinSage
-            </span>
+              src={asset("/brand/forexlab-access-header-light.svg")}
+              alt=""
+              className="-ml-[49px] block h-[56px] w-[290.5px] max-w-none"
+            />
           </span>
         </div>
       </div>

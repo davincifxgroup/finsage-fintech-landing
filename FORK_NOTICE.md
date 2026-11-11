@@ -25,11 +25,21 @@ confirmed for commercial use.
 ## What was changed for ForexLAB Access
 
 - Branding: approved ForexLAB Access V2 logo and mark (`public/brand/`) replace the
-  FinSage mark and wordmarks; favicon and metadata (`noindex`).
+  FinSage mark and wordmarks in the header, footer and opening loader animation;
+  favicon and metadata (`noindex`); chapter labels renamed for Access.
 - Copy, navigation and section content replaced with ForexLAB Access product
   content. No advisor names, prices, performance figures or testimonials are invented.
-- Brokers: `content/brokers.json`, exported from active Rebate `Broker` records
-  (a snapshot from a disposable local database, to be wired to Rebate at integration).
+  No revenue split or allocation percentages are shown publicly; the benefit is
+  explained in plain English.
+- How It Works shows five customer-facing steps inside the original terminal frame.
+  Tab-looking chips are non-interactive labels (a list, no hover affordance).
+- Separate "Client Log In" and "Vendor Login" entries. Both use the existing Rebate
+  authentication; Vendor Login points at the Rebate login page until a vendor area
+  exists (planned: `/vendor/` on the Rebate host; override NEXT_PUBLIC_VENDOR_LOGIN_URL).
+- Brokers: `content/brokers.json`, exported from active Rebate `Broker` records with
+  `content/export_active_brokers.py` (refuses any roster other than the approved six:
+  IC Markets, Tickmill, RoboForex, IC Trading, Fusion Markets, FP Markets). Snapshot
+  taken from a disposable Rebate database prepared with migrate + seed_demo.
 - Links: authentication and accounts stay in ForexLAB Rebate (`lib/site.ts`,
   `NEXT_PUBLIC_REBATE_URL`, `NEXT_PUBLIC_MAIN_SITE_URL`).
 - Layout, typography, gradients, spacing and GSAP motion are kept from upstream.
@@ -41,3 +51,14 @@ confirmed for commercial use.
   - **Orbital artwork:** circle offsets re-expressed against their own container,
     with identical rendering on desktop.
   - **Line breaks:** desktop-only breaks now keep word spacing on mobile.
+  - **Top strip:** customer-facing facts at a readable size, wrapping on phones.
+  - **In-page navigation** (`setupSectionNavigation` in
+    `components/motion/LandingMotionController.tsx`): clicks on in-page links,
+    direct hash URLs and back/forward land at the scroll position where the
+    destination is fully revealed (the end of a pinned reveal timeline, or the
+    section top), and finish any scrub smoothing at once. Normal scrolling keeps
+    every original animation. A direct hash URL skips the opening intro.
+  - **FAQ rail:** the horizontal travel starts once every card has appeared (0.44
+    instead of 0.38 of the pinned timeline), giving a clean landing point.
+  - **Risk note:** the How It Works note is dimmed only while motion runs, so it
+    stays readable with reduced motion.

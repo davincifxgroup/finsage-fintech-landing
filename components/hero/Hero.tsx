@@ -3,16 +3,14 @@ import "@fontsource/lato/900.css";
 
 import type { CSSProperties } from "react";
 
-import { asset, primaryNav } from "@/lib/site";
+import { asset, links, sectionNav } from "@/lib/site";
 
-// Program facts only: no market prices, returns or performance figures.
-const tickerItems = [
-  { name: "Upfront license price", value: "None" },
-  { name: "ForexLAB share", value: "50%" },
-  { name: "Distributable pool", value: "50%" },
-  { name: "Active licenses / account", value: "Up to 3" },
-  { name: "Platforms", value: "MT4 / MT5" },
-  { name: "After payoff", value: "Cashback" },
+// Customer-facing facts for the top strip. No allocation figures, prices or returns.
+const stripFacts = [
+  "No upfront license payment",
+  "MT4 / MT5 Expert Advisors",
+  "Independently evaluated",
+  "Cashback once the license is covered",
 ];
 
 /* ============================================================
@@ -98,38 +96,32 @@ const heroBackgroundStyle: CSSProperties = {
 
 export function Hero() {
   return (
-    <section id="top" data-px="hero" className="hero relative min-h-screen overflow-hidden">
+    <section
+      id="top"
+      data-px="hero"
+      className="hero relative min-h-screen overflow-hidden [--strip-h:52px] md:[--strip-h:40px]"
+    >
       {/* =====================================================
           1. MARKET TICKER
       ====================================================== */}
-      <div data-px="hero.ticker" className="hero-ticker relative z-30 h-7 w-full overflow-hidden bg-black text-white">
-        {/* Fewer columns on narrow screens so labels never overlap. */}
-        <div className="hero-ticker-track grid h-full w-full grid-cols-2 items-center md:grid-cols-3 lg:grid-cols-6">
-          {tickerItems.map((item, index) => (
-            <div
-              key={item.name}
-              className={`
-                hero-ticker-item
-                ${index >= 3 ? "hidden lg:flex" : index >= 2 ? "hidden md:flex" : "flex"}
-                h-full
-                min-w-0
-                items-center
-                justify-between
-                px-5
-                text-[11px]
-                leading-none
-              `}
+      <div
+        data-px="hero.ticker"
+        className="hero-ticker relative z-30 flex h-[var(--strip-h)] w-full items-center justify-center overflow-hidden bg-black px-4 text-white"
+      >
+        {/* Readable facts with separators; wraps to two lines on phones. */}
+        <ul className="hero-ticker-track flex flex-wrap items-center justify-center gap-x-5 gap-y-[3px] text-[12px] leading-[16px] md:gap-x-0 md:text-[13px] md:leading-none">
+          {stripFacts.map((fact, index) => (
+            <li
+              key={fact}
+              className={`hero-ticker-item flex items-center whitespace-nowrap ${index === 3 ? "hidden lg:flex" : ""}`}
             >
-              <span className="hero-ticker-name whitespace-nowrap">
-                {item.name}
-              </span>
-
-              <span className="hero-ticker-value whitespace-nowrap">
-                {item.value}
-              </span>
-            </div>
+              {index > 0 ? (
+                <span aria-hidden="true" className="mx-6 hidden h-[4px] w-[4px] rounded-full bg-white/45 md:block" />
+              ) : null}
+              {fact}
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
 
       {/* =====================================================
@@ -151,7 +143,7 @@ export function Hero() {
           hero-body
           relative
           isolate
-          h-[calc(100svh-28px)]
+          h-[calc(100svh-var(--strip-h))]
           min-h-[620px]
           w-full
           overflow-hidden
@@ -201,7 +193,7 @@ export function Hero() {
             top-0
             z-0
             aspect-[1024/657]
-            w-[max(100vw,calc((100svh-28px)*1.5586))]
+            w-[max(100vw,calc((100svh-var(--strip-h))*1.5586))]
             -translate-x-1/2
           "
         />
@@ -230,9 +222,11 @@ export function Hero() {
           className="
             hero-header
             absolute
-            left-[9.5vw]
-            right-[9.5vw]
-            top-[calc(var(--u)*28)]
+            left-5
+            right-5
+            top-[max(calc(var(--u)*24),14px)]
+            md:left-[9.5vw]
+            md:right-[9.5vw]
             z-20
             flex
             items-start
@@ -253,10 +247,10 @@ export function Hero() {
               className="
                 hero-brand-logo
                 block
-                h-[max(calc(var(--u)*34),28px)]
+                h-[max(calc(var(--u)*58),44px)]
                 w-auto
-                -ml-[calc(var(--u)*6)]
-                -mt-[calc(var(--u)*8)]
+                -ml-[calc(var(--u)*10)]
+                -mt-[calc(var(--u)*12)]
               "
             />
           </a>
@@ -280,7 +274,7 @@ export function Hero() {
             "
             aria-label="Main"
           >
-            {primaryNav.map((item) => (
+            {sectionNav.map((item) => (
               <a
                 key={item.label}
                 href={item.href}
@@ -296,6 +290,48 @@ export function Hero() {
                 {item.label}
               </a>
             ))}
+
+            {/* Two separate entries into the same Rebate authentication. */}
+            <div className="mt-[max(calc(var(--u)*10),8px)] flex flex-col items-end gap-[max(calc(var(--u)*6),6px)]">
+              <a
+                href={links.login}
+                data-px="hero.nav.login"
+                className="
+                  inline-flex
+                  h-[max(calc(var(--u)*24),30px)]
+                  items-center
+                  whitespace-nowrap
+                  rounded-full
+                  bg-black
+                  px-[max(calc(var(--u)*12),14px)]
+                  font-bold
+                  leading-none
+                  text-white
+                "
+              >
+                Client Log In
+              </a>
+              <a
+                href={links.vendorLogin}
+                data-px="hero.nav.vendor"
+                className="
+                  inline-flex
+                  h-[max(calc(var(--u)*24),30px)]
+                  items-center
+                  whitespace-nowrap
+                  rounded-full
+                  border
+                  border-black
+                  bg-white/60
+                  px-[max(calc(var(--u)*12),14px)]
+                  font-bold
+                  leading-none
+                  text-black
+                "
+              >
+                Vendor Login
+              </a>
+            </div>
           </nav>
         </header>
 
@@ -321,12 +357,12 @@ export function Hero() {
             top-1/2
             z-10
             aspect-[1024/657]
-            w-[min(100vw,calc((100svh-28px)*1.5586))]
+            w-[min(100vw,calc((100svh-var(--strip-h))*1.5586))]
             -translate-x-1/2
             -translate-y-1/2
             [container-type:inline-size]
 
-            max-md:top-[calc(50%+44px)]
+            max-md:top-[calc(50%+64px)]
             max-md:flex
             max-md:aspect-auto
             max-md:w-[calc(100vw-40px)]
@@ -558,9 +594,9 @@ export function Hero() {
                 max-md:leading-[19px]
               "
             >
-              Your allocation of confirmed broker partner commissions covers the agreed
-              license price, so there is no upfront payment. Access requires a verified
-              broker account and license approval.{" "}
+              Eligible broker partner commissions from your trading cover the agreed
+              license price over time, so there is no upfront payment. Access requires a
+              verified broker account and license approval.{" "}
               <a href="#how-it-works" className="whitespace-nowrap underline underline-offset-2">
                 How It Works →
               </a>

@@ -1,7 +1,9 @@
 import { activeBrokers } from "@/content/brokers";
 
 // What every evaluation documents. Labels only: no metrics are shown.
+// Non-interactive labels. The first (black) chip is a caption, not a selected tab.
 const tabs = [
+  "Every evaluation documents",
   "Backtests",
   "Tick Data",
   "Trading Costs",
@@ -176,7 +178,7 @@ export function InsightsSection() {
             Every Expert Advisor is tested by ForexLAB before it can reach the catalog.
           </p>
 
-          <nav
+          <ul
             data-px="insights.tabs"
             aria-label="What each evaluation documents"
             className="
@@ -193,11 +195,11 @@ export function InsightsSection() {
             "
           >
             {tabs.map((tab, index) => (
-              <button
+              <li
                 key={tab}
                 data-px={`insights.tab.${index + 1}`}
-                type="button"
                 className={`
+                  inline-flex items-center whitespace-nowrap
                   h-[27px]
                   rounded-[5px]
                   px-[12.5px]
@@ -218,9 +220,9 @@ export function InsightsSection() {
                 `}
               >
                 {tab}
-              </button>
+              </li>
             ))}
-          </nav>
+          </ul>
         </div>
 
         {/* ====================================================== */}

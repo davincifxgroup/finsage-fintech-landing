@@ -13,6 +13,14 @@ export const MAIN_SITE_URL = process.env.NEXT_PUBLIC_MAIN_SITE_URL ?? "https://e
 
 export const links = {
   login: `${REBATE_URL}/login`,
+  /**
+   * Vendor entry. Vendors sign in through the same Rebate authentication (no
+   * separate user database). There is no vendor portal yet, so this points at
+   * the existing Rebate login page. Planned destination once the vendor area
+   * exists: `${REBATE_URL}/vendor/` (see docs/access_audit/INTEGRATION_DESIGN.md §9
+   * in the Rebate repository). Override with NEXT_PUBLIC_VENDOR_LOGIN_URL.
+   */
+  vendorLogin: process.env.NEXT_PUBLIC_VENDOR_LOGIN_URL ?? `${REBATE_URL}/login`,
   register: `${REBATE_URL}/register`,
   dashboard: `${REBATE_URL}/dashboard`,
   rebate: `${REBATE_URL}/`,
@@ -25,11 +33,11 @@ export const asset = (path: string) => `${basePath}${path}`;
 
 export type NavLink = { label: string; href: string };
 
-export const primaryNav: NavLink[] = [
+/** In-page sections, in page order. */
+export const sectionNav: NavLink[] = [
   { label: "Advisors", href: "#advisors" },
   { label: "How It Works", href: "#how-it-works" },
   { label: "Our Testing", href: "#testing" },
   { label: "Brokers", href: "#brokers" },
   { label: "FAQ", href: "#faq" },
-  { label: "Log In", href: links.login },
 ];

@@ -1,40 +1,40 @@
 import { asset, links } from "@/lib/site";
 
-// How a confirmed partner commission is divided under Access.
+// The customer benefit in plain English. No allocation figures are published.
 const roles = [
   {
-    title: "ForexLAB · 50%",
+    title: "No Upfront Payment",
     description: (
       <>
-        Retains half of each confirmed
+        You receive approved access without
         <br />
-        partner commission for selection,
+        paying the license price in advance.
         <br />
-        verification and support.
+        Your trading conditions stay the same.
       </>
     ),
     icon: "chart",
   },
   {
-    title: "Distributable Pool · 50%",
+    title: "Commissions Cover the Price",
     description: (
       <>
-        Split equally among the active
+        Eligible broker partner commissions
         <br />
-        licenses on your account, each capped
+        from your trading cover the agreed
         <br />
-        at its agreed license price.
+        license price over time.
       </>
     ),
     icon: "card",
   },
   {
-    title: "After Payoff · You",
+    title: "Cashback After That",
     description: (
       <>
-        Once a license price is covered,
+        Once the price is covered, the
         <br />
-        its share goes to your standard
+        corresponding share becomes your
         <br />
         ForexLAB Rebate cashback.
       </>
@@ -117,7 +117,7 @@ export function RolesSection() {
               lg:text-[calc(var(--u)*13)]
             "
           >
-            The Mechanism
+            Why No Upfront Price
           </span>
         </div>
 
@@ -165,9 +165,9 @@ export function RolesSection() {
               lg:leading-[calc(var(--u)*19)]
             "
           >
-            Brokers pay ForexLAB a partner commission on your trading. There is no{" "}
+            Trading risk always stays with you. Returns are never guaranteed, and{" "}
             <br className="hidden lg:block" />
-            fixed payoff date, and no trading means no debt or extra payment.
+            there is no fixed date by which a license price is covered.
           </p>
         </div>
 

@@ -1,5 +1,10 @@
 [
   {
+    "name": "IC Markets",
+    "accountType": "Raw Spread",
+    "instruments": "FX, Metals"
+  },
+  {
     "name": "Tickmill",
     "accountType": "Raw",
     "instruments": "FX, Metals"

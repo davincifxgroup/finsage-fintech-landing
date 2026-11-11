@@ -1,4 +1,33 @@
-const tabs = ["Advisor", "Broker Account", "License", "Cashback"];
+// Non-interactive labels. The first (black) chip is a caption, not a selected tab.
+const tabs = ["Your path", "Advisor", "Broker account", "Approval", "Payoff", "Cashback"];
+
+const steps = [
+  {
+    number: "01",
+    title: "Choose an advisor",
+    description: "Review its evaluation, broker compatibility and license terms.",
+  },
+  {
+    number: "02",
+    title: "Verify your broker account",
+    description: "Link an eligible account in the ForexLAB partner program.",
+  },
+  {
+    number: "03",
+    title: "Receive approved access",
+    description: "After ForexLAB approves the license, the advisor is delivered for that account.",
+  },
+  {
+    number: "04",
+    title: "Commissions cover the price",
+    description: "Eligible partner commissions from your trading cover the agreed license price over time.",
+  },
+  {
+    number: "05",
+    title: "Cashback after that",
+    description: "Once the price is covered, the corresponding share becomes your ForexLAB Rebate cashback.",
+  },
+];
 
 export function ChallengesSection() {
   return (
@@ -176,7 +205,7 @@ export function ChallengesSection() {
         {/* FILTER TABS                                          */}
         {/* ==================================================== */}
 
-        <nav
+        <ul
           data-px="challenges.tabs"
           aria-label="Access steps"
           className="
@@ -191,11 +220,11 @@ export function ChallengesSection() {
           "
         >
           {tabs.map((tab, index) => (
-            <button
+            <li
               key={tab}
               data-px={`challenges.tab.${index + 1}`}
-              type="button"
               className={`
+                inline-flex items-center whitespace-nowrap
                 h-[27px]
                 rounded-[5px]
                 px-[14px]
@@ -216,9 +245,9 @@ export function ChallengesSection() {
               `}
             >
               {tab}
-            </button>
+            </li>
           ))}
-        </nav>
+        </ul>
 
         {/* ==================================================== */}
         {/* TERMINAL / ANALYSIS WINDOW                           */}
@@ -261,7 +290,7 @@ export function ChallengesSection() {
                 lg:text-[calc(var(--u)*16)]
               "
             >
-              How is my advisor license covered?
+              How Access works for you
             </h3>
 
             <div
@@ -308,7 +337,7 @@ export function ChallengesSection() {
           <div
             data-px="challenges.terminal.body"
             className="
-              relative h-[410px]
+              relative h-auto
               overflow-hidden bg-black
               px-6 py-7
 
@@ -317,133 +346,84 @@ export function ChallengesSection() {
               lg:py-[calc(var(--u)*27)]
             "
           >
-            <div
+            <ol
               data-px="challenges.code"
+              aria-label="How Access works"
               className="
-                font-mono
-                text-[12px]
-                leading-[24px]
+                flex flex-col gap-[18px]
 
-                lg:text-[calc(var(--u)*12)]
-                lg:leading-[calc(var(--u)*24)]
+                lg:gap-[calc(var(--u)*24)]
               "
             >
-              <CodeLine>
-                <span className="text-[#a6a6a6]">
-                  def activate_access(client):
-                </span>
-              </CodeLine>
+              {steps.map((step) => (
+                <li
+                  key={step.number}
+                  data-motion="challenge-code-line"
+                  className="
+                    grid grid-cols-[34px_1fr] gap-x-3
 
-              <CodeLine indent={1}>
-                <span className="text-[#ffbe00]">print</span>
-                <span className="text-[#d0d0d0]">(</span>
-                <span className="text-[#009e8e]">
-                  &quot;[STEP 1] Choose an advisor and review its evaluation and terms&quot;
-                </span>
-                <span className="text-[#d0d0d0]">)</span>
-              </CodeLine>
+                    lg:grid-cols-[calc(var(--u)*46)_calc(var(--u)*250)_1fr]
+                    lg:items-baseline
+                    lg:gap-x-[calc(var(--u)*18)]
+                  "
+                >
+                  <span
+                    className="
+                      font-mono text-[12px] leading-[20px] text-[#ffbe00]
 
-              <CodeSpacer />
+                      lg:text-[calc(var(--u)*13)]
+                      lg:leading-[calc(var(--u)*22)]
+                    "
+                  >
+                    {step.number}
+                  </span>
+                  <span
+                    className="
+                      text-[15px] font-bold leading-[20px] text-white
 
-              <CodeLine indent={1}>
-                <span className="text-[#9c9c9c]">
-                  # Broker account verification
-                </span>
-              </CodeLine>
+                      lg:text-[calc(var(--u)*16)]
+                      lg:leading-[calc(var(--u)*22)]
+                    "
+                  >
+                    {step.title}
+                  </span>
+                  <span
+                    className="
+                      col-start-2 mt-1 text-[13px] leading-[19px] text-[#a6a6a6]
 
-              <CodeLine indent={1}>
-                <span className="text-[#ffbe00]">print</span>
-                <span className="text-[#d0d0d0]">(</span>
-                <span className="text-[#009e8e]">
-                  &quot;[STEP 2] Verify a broker account in the ForexLAB partner program&quot;
-                </span>
-                <span className="text-[#d0d0d0]">)</span>
-              </CodeLine>
+                      lg:col-start-3 lg:mt-0
+                      lg:text-[calc(var(--u)*13)]
+                      lg:leading-[calc(var(--u)*22)]
+                    "
+                  >
+                    {step.description}
+                  </span>
+                </li>
+              ))}
 
-              <CodeLine indent={1}>
-                <span className="text-[#d8d8d8]">
-                  license = request_license(advisor, broker_account)
-                </span>
-                <span className="text-[#8d8d8d]">
-                  &nbsp;&nbsp;&nbsp;# one advisor + one account
-                </span>
-              </CodeLine>
-
-              <CodeLine indent={1}>
-                <span className="text-[#d8d8d8]">
-                  status = review(license)
-                </span>
-                <span className="text-[#8d8d8d]">
-                  &nbsp;&nbsp;&nbsp;# ForexLAB approval required
-                </span>
-              </CodeLine>
-
-              <CodeLine indent={1}>
-                <span className="text-[#6ec5ff]">if</span>
-                <span className="text-[#d8d8d8]">
-                  {" "}
-                  status == &quot;approved&quot;:
-                </span>
-              </CodeLine>
-
-              <CodeLine indent={2}>
-                <span className="text-[#a7a7a7]">print</span>
-                <span className="text-[#757575]">(f</span>
-                <span className="text-[#009e8e]">
-                  &quot;[STEP 3] Access delivered. Your allocation of confirmed partner
-                  commissions now covers {"{license.price}"}, with no upfront payment.&quot;
-                </span>
-                <span className="text-[#757575]">)</span>
-              </CodeLine>
-
-              <CodeLine indent={1}>
-                <span className="text-[#999]">
-                  # Payoff and cashback
-                </span>
-              </CodeLine>
-
-              <div
+              <li
                 data-motion="challenge-code-muted"
-                className="opacity-[0.16]"
+                className="
+                  mt-2 border-t border-white/10 pt-4
+                  text-[12px] leading-[18px] text-[#8d8d8d]
+
+                  lg:mt-[calc(var(--u)*4)]
+                  lg:pt-[calc(var(--u)*14)]
+                  lg:text-[calc(var(--u)*12)]
+                  lg:leading-[calc(var(--u)*18)]
+                "
               >
-                <CodeLine indent={1}>
-                  <span className="text-[#9c9c9c]">
-                    print(&quot;[STEP 4] Developer allocation is capped at the agreed price&quot;)
-                  </span>
-                </CodeLine>
-
-                <CodeLine indent={1}>
-                  <span className="text-[#9c9c9c]">
-                    share = pool / active_licenses&nbsp;&nbsp;&nbsp;# pool = 50% of confirmed commission
-                  </span>
-                </CodeLine>
-
-                <CodeLine indent={1}>
-                  <span className="text-[#9c9c9c]">
-                    credited = min(credited + share, license.price)
-                  </span>
-                </CodeLine>
-
-                <CodeLine indent={1}>
-                  <span className="text-[#9c9c9c]">
-                    paid_off = credited == license.price&nbsp;&nbsp;&nbsp;# no fixed date
-                  </span>
-                </CodeLine>
-
-                <CodeLine indent={1}>
-                  <span className="text-[#9c9c9c]">
-                    if paid_off: route_share_to(client.cashback)
-                  </span>
-                </CodeLine>
-              </div>
-            </div>
+                Trading risk stays with you. Returns are never guaranteed, and there is no
+                fixed date by which a license price is covered.
+              </li>
+            </ol>
 
             {/* Lower fade */}
             <div
               aria-hidden="true"
               className="
                 pointer-events-none absolute
-                inset-x-0 bottom-0 h-[125px]
+                inset-x-0 bottom-0 h-[36px]
                 bg-gradient-to-b
                 from-transparent
                 via-black/70
@@ -457,26 +437,3 @@ export function ChallengesSection() {
   );
 }
 
-function CodeLine({
-  children,
-  indent = 0,
-}: {
-  children: React.ReactNode;
-  indent?: number;
-}) {
-  return (
-    <div
-      data-motion="challenge-code-line"
-      className="whitespace-nowrap"
-      style={{
-        paddingLeft: `calc(var(--code-indent, 20px) * ${indent})`,
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
-function CodeSpacer() {
-  return <div className="h-[12px] lg:h-[calc(var(--u)*12)]" />;
-}

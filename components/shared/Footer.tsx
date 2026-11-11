@@ -9,7 +9,8 @@ const navigationLinks: NavLink[] = [
 ];
 
 const toolLinks: NavLink[] = [
-  { label: "Log In", href: links.login },
+  { label: "Client Log In", href: links.login },
+  { label: "Vendor Login", href: links.vendorLogin },
   { label: "Create Account", href: links.register },
   { label: "Dashboard", href: links.dashboard },
 ];

@@ -3,6 +3,7 @@ import { links } from "@/lib/site";
 export function FinalCTA() {
   return (
     <section
+      id="risk"
       data-px="final-cta"
       className="
         final-cta
@@ -194,7 +195,6 @@ export function FinalCTA() {
             {/* ================================================= */}
 
             <p
-              id="risk"
               data-px="final-cta.description"
               className="
                 mt-7
