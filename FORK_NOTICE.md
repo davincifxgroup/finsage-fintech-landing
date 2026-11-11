@@ -46,7 +46,6 @@ confirmed for commercial use.
   Deliberate deviations:
   - **Hero, mobile:** a readable stacked layout below 768px. Upstream scales the
     desktop frame down, which makes its text unreadably small.
-  - **Ticker:** fewer columns on narrow screens so the labels don't overlap.
   - **Nav text:** a minimum size on mobile.
   - **Orbital artwork:** circle offsets re-expressed against their own container,
     with identical rendering on desktop.
