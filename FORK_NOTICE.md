@@ -55,7 +55,17 @@ confirmed for commercial use.
   - **Orbital artwork:** circle offsets re-expressed against their own container,
     with identical rendering on desktop.
   - **Line breaks:** desktop-only breaks now keep word spacing on mobile.
-  - **Top strip:** customer-facing facts at a readable size, wrapping on phones.
+  - **Top strip:** a short group of customer-facing facts on the left and the Client Log In
+    (primary) / Vendor Login (secondary) buttons on the right. Phones show two facts and a
+    full-width row of 44px buttons; the hero navigation keeps only the section links.
+  - **Benefit icons:** one family of inline SVGs (license key, coins with payment progress,
+    wallet) in tinted rounded tiles instead of small glyphs in black circles.
+  - **Footer wordmark:** in normal flow below the proportional top region (no fixed aspect
+    ratio), so the whole word is visible in its final animated state at every width.
+  - **Layout width:** ScrollTrigger is refreshed whenever documentElement.clientWidth changes
+    (scrollbar returning after the intro, resize), and the desktop hero departure clears its
+    recorded inline styles when it stops matching, so resizing below 768px cannot leave the
+    heading offset or clipped.
   - **In-page navigation** (`setupSectionNavigation` in
     `components/motion/LandingMotionController.tsx`): clicks on in-page links,
     direct hash URLs and back/forward land at the scroll position where the

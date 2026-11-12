@@ -38,8 +38,6 @@ export function Footer({ anchorBase = "" }: { anchorBase?: string } = {}) {
         relative isolate w-full overflow-hidden
         bg-white text-black
         [font-family:Lato,Arial,sans-serif]
-
-        lg:aspect-[1199/480]
       "
     >
       {/* ====================================================== */}
@@ -57,7 +55,9 @@ export function Footer({ anchorBase = "" }: { anchorBase?: string } = {}) {
       />
 
       {/* ====================================================== */}
-      {/* CANONICAL 1199 × 480 FRAME                             */}
+      {/* FRAME: proportional top region (1199-unit grid) with   */}
+      {/* the wordmark below it in normal flow, so the footer is */}
+      {/* always tall enough for the complete word.              */}
       {/* ====================================================== */}
 
       <div
@@ -65,13 +65,12 @@ export function Footer({ anchorBase = "" }: { anchorBase?: string } = {}) {
         className="
           relative z-10
           mx-auto w-full
-          px-5 pb-0 pt-14
+          px-5 pb-10 pt-14
 
           sm:px-8
 
-          lg:absolute
-          lg:inset-0
           lg:p-0
+          lg:pb-[calc(var(--u)*64)]
 
           lg:[container-type:inline-size]
           lg:[--u:0.0834028357cqw]
@@ -122,9 +121,9 @@ export function Footer({ anchorBase = "" }: { anchorBase?: string } = {}) {
           className="
             hidden
 
-            lg:absolute
-            lg:inset-0
+            lg:relative
             lg:block
+            lg:h-[calc(var(--u)*300)]
           "
         >
           {/* ================================================== */}
@@ -253,26 +252,27 @@ export function Footer({ anchorBase = "" }: { anchorBase?: string } = {}) {
         {/* GIANT WORDMARK                                       */}
         {/* ==================================================== */}
 
+        {/* Line height 0.9 keeps the whole glyph box (cap height and round */}
+        {/* overshoots) inside the element, so nothing is cut by the footer. */}
         <div
           data-px="footer.wordmark"
           aria-hidden="true"
           className="
-            mt-20
+            mt-16
             select-none
             whitespace-nowrap
 
-            text-[105px]
+            text-[min(27vw,105px)]
             font-black
-            leading-[0.78]
+            leading-[0.9]
             tracking-[-0.07em]
 
-            lg:absolute
-            lg:left-[calc(var(--u)*106)]
-            lg:top-[calc(var(--u)*328)]
+            sm:text-[105px]
+
+            lg:ml-[calc(var(--u)*106)]
             lg:mt-0
 
-            lg:text-[calc(var(--u)*310)]
-            lg:leading-[0.77]
+            lg:text-[calc(var(--u)*290)]
             lg:tracking-[-0.07em]
           "
         >

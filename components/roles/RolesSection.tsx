@@ -18,7 +18,7 @@ const roles = [
         Your trading conditions stay the same.
       </>
     ),
-    icon: "chart",
+    icon: "license",
   },
   {
     title: "Commissions Cover the Price",
@@ -31,7 +31,7 @@ const roles = [
         license price over time.
       </>
     ),
-    icon: "card",
+    icon: "coins",
   },
   {
     title: "Cashback After That",
@@ -44,7 +44,7 @@ const roles = [
         ForexLAB Rebate cashback.
       </>
     ),
-    icon: "folder",
+    icon: "wallet",
   },
 ];
 
@@ -224,12 +224,16 @@ export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
                 <div
                   data-px={`roles.card.${index + 1}.icon`}
                   className="
-                    flex h-[40px] w-[40px]
+                    flex h-[46px] w-[46px]
                     shrink-0 items-center justify-center
-                    rounded-full bg-black text-white
+                    rounded-[12px]
+                    border border-[#c9d7f8]
+                    bg-gradient-to-br from-[#f1f5ff] to-[#e3ebfd]
+                    text-[#1d4fd7]
 
-                    lg:h-[calc(var(--u)*40)]
-                    lg:w-[calc(var(--u)*40)]
+                    lg:h-[max(calc(var(--u)*46),40px)]
+                    lg:w-[max(calc(var(--u)*46),40px)]
+                    lg:rounded-[max(calc(var(--u)*12),10px)]
                   "
                 >
                   <RoleIcon type={role.icon} />
@@ -594,69 +598,52 @@ export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
   );
 }
 
+/**
+ * Benefit icons: one family (24px grid, 1.6px round strokes, no fills) shown in 46px
+ * tinted tiles. license = key, coins = payment progress, wallet = cashback.
+ */
 function RoleIcon({ type }: { type: string }) {
-  if (type === "chart") {
+  const common = {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.6,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    className: "h-[24px] w-[24px] lg:h-[max(calc(var(--u)*24),21px)] lg:w-[max(calc(var(--u)*24),21px)]",
+    "aria-hidden": true,
+  };
+
+  if (type === "license") {
     return (
-      <svg
-        viewBox="0 0 24 24"
-        className="h-[18px] w-[18px]"
-        fill="none"
-        aria-hidden="true"
-      >
-        <rect x="4" y="11" width="3" height="8" fill="currentColor" />
-        <rect x="10" y="6" width="3" height="13" fill="currentColor" />
-        <rect x="16" y="9" width="3" height="10" fill="currentColor" />
+      <svg {...common}>
+        <circle cx="7.75" cy="16.25" r="4.6" />
+        <path d="M11 13 20.75 3.25" />
+        <path d="M17.25 6.75 19.75 9.25" />
+        <path d="M14.5 9.5 16.5 11.5" />
+        <circle cx="7.75" cy="16.25" r="1" fill="currentColor" stroke="none" />
       </svg>
     );
   }
 
-  if (type === "card") {
+  if (type === "coins") {
     return (
-      <svg
-        viewBox="0 0 24 24"
-        className="h-[18px] w-[18px]"
-        fill="none"
-        aria-hidden="true"
-      >
-        <rect
-          x="4"
-          y="6"
-          width="16"
-          height="12"
-          rx="1.5"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        />
-
-        <circle cx="9" cy="12" r="2" fill="currentColor" />
-
-        <path
-          d="M14 10H18M14 14H18"
-          stroke="currentColor"
-          strokeWidth="1.4"
-        />
+      <svg {...common}>
+        <ellipse cx="9.5" cy="5.75" rx="6" ry="2.5" />
+        <path d="M3.5 5.75v4.5c0 1.38 2.69 2.5 6 2.5s6-1.12 6-2.5v-4.5" />
+        <path d="M3.5 10.25v4.5c0 1.38 2.69 2.5 6 2.5" />
+        <circle cx="17.25" cy="16.75" r="4.25" strokeOpacity="0.35" />
+        <path d="M17.25 12.5a4.25 4.25 0 1 1-4.25 4.25" />
       </svg>
     );
   }
 
   return (
-    <svg
-      viewBox="0 0 24 24"
-      className="h-[18px] w-[18px]"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="M4.5 8.5H10L11.6 10H19.5V18H4.5V8.5Z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-
-      <path
-        d="M7 8.5V6.5H13L14.5 8.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
+    <svg {...common}>
+      <path d="M5.5 7.25V6.4c0-.87.8-1.52 1.65-1.34l9.6 2.19" />
+      <rect x="3.5" y="7.25" width="17" height="12" rx="2.5" />
+      <path d="M20.5 11.25h-3.25a2 2 0 0 0 0 4h3.25" />
+      <circle cx="17.4" cy="13.25" r="0.85" fill="currentColor" stroke="none" />
     </svg>
   );
 }

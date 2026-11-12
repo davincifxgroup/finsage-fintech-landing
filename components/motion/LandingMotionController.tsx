@@ -325,6 +325,17 @@ function setupHeroDeparture(
       .to(eyebrow, { x: 24, autoAlpha: 0 }, 0.08)
       .to(title, { y: -70, autoAlpha: 0.08, scale: 0.96 }, 0.04)
       .to(prompt, { y: 92, autoAlpha: 0 }, 0.08);
+
+    // This timeline is created while the opening sequence still has its temporary
+    // inline styles on these elements (hidden, offset, translate(-50%) from the Tailwind
+    // centring). When the query stops matching (resizing or rotating below 768px),
+    // GSAP restores the styles it recorded then, which would leave the mobile hero
+    // shifted or hidden (the clipped heading). Clear them so the stylesheet layout applies.
+    return () => {
+      gsap.set([background, header, artwork, ...rings, eyebrow, title, prompt], {
+        clearProps: "transform,opacity,visibility",
+      });
+    };
   });
 }
 
@@ -628,8 +639,8 @@ function setupRolesNarrative(
       .from(
         icons,
         {
-          rotation: -120,
-          scale: 0,
+          autoAlpha: 0,
+          scale: 0.6,
           stagger: 0.08,
           duration: 0.22,
         },
@@ -1793,12 +1804,35 @@ export function LandingMotionController() {
     const previousOverflow = document.body.style.overflow;
     let scrollReleased = false;
 
+    // Pinned sections and scrub ranges are measured in pixels. The intro locks scrolling
+    // with overflow:hidden, which also removes a classic scrollbar, so everything set up
+    // during the intro is measured at the full window width. When the lock is released
+    // the scrollbar returns and narrows the layout (e.g. 1440 -> 1425) without a window
+    // resize event, so ScrollTrigger would keep the old widths and the page would scroll
+    // sideways. Re-measure whenever the real layout width (documentElement.clientWidth)
+    // changes: after the release, when a scrollbar appears/disappears, and on resize.
+    let measuredWidth = root.clientWidth;
+    let widthFrame = 0;
+    const refreshIfWidthChanged = () => {
+      cancelAnimationFrame(widthFrame);
+      widthFrame = requestAnimationFrame(() => {
+        const width = root.clientWidth;
+        if (width !== measuredWidth) {
+          measuredWidth = width;
+          ScrollTrigger.refresh();
+        }
+      });
+    };
+    const widthObserver = new ResizeObserver(refreshIfWidthChanged);
+    widthObserver.observe(root);
+
     document.body.style.overflow = "hidden";
 
     const releaseScroll = () => {
       if (!scrollReleased) {
         document.body.style.overflow = previousOverflow;
         scrollReleased = true;
+        refreshIfWidthChanged();
       }
     };
 
@@ -1835,6 +1869,7 @@ export function LandingMotionController() {
     let active = true;
     void document.fonts.ready.then(() => {
       if (active) {
+        measuredWidth = root.clientWidth;
         ScrollTrigger.refresh();
         if (startsAtSection) {
           navigation.goTo(initialHash, { updateHistory: false });
@@ -1844,6 +1879,8 @@ export function LandingMotionController() {
 
     return () => {
       active = false;
+      widthObserver.disconnect();
+      cancelAnimationFrame(widthFrame);
       navigation.cleanup();
       releaseScroll();
       matchMedia.revert();

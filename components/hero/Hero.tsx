@@ -6,12 +6,21 @@ import type { CSSProperties } from "react";
 import { asset, links, sectionNav } from "@/lib/site";
 
 // Customer-facing facts for the top strip. No allocation figures, prices or returns.
-const stripFacts = [
-  "No upfront license payment",
-  "MT4 / MT5 Expert Advisors",
-  "Independently evaluated",
-  "Cashback once the license is covered",
+// `from` is the breakpoint at which a fact is shown, so narrower screens keep a short,
+// readable group instead of shrinking the text.
+const stripFacts: { text: string; from: "base" | "md" | "lg" | "xl" }[] = [
+  { text: "No upfront license payment", from: "base" },
+  { text: "MT4 / MT5 Expert Advisors", from: "base" },
+  { text: "Independently evaluated", from: "lg" },
+  { text: "Cashback once the license is covered", from: "xl" },
 ];
+
+const factVisibility = {
+  base: "flex",
+  md: "hidden md:flex",
+  lg: "hidden lg:flex",
+  xl: "hidden xl:flex",
+};
 
 /* ============================================================
    FITTED BACKGROUND MODEL
@@ -99,29 +108,115 @@ export function Hero() {
     <section
       id="top"
       data-px="hero"
-      className="hero relative min-h-screen overflow-hidden [--strip-h:52px] md:[--strip-h:40px]"
+      className="hero relative min-h-screen overflow-hidden [--strip-h:96px] md:[--strip-h:48px]"
     >
       {/* =====================================================
           1. MARKET TICKER
       ====================================================== */}
       <div
         data-px="hero.ticker"
-        className="hero-ticker relative z-30 flex h-[var(--strip-h)] w-full items-center justify-center overflow-hidden bg-black px-4 text-white"
+        className="
+          hero-ticker
+          relative
+          z-30
+          flex
+          h-[var(--strip-h)]
+          w-full
+          flex-col
+          justify-center
+          gap-[10px]
+          bg-black
+          px-4
+          text-white
+          md:flex-row
+          md:items-center
+          md:justify-between
+          md:gap-6
+          md:px-[max(20px,calc(9.5vw-10px))]
+        "
       >
-        {/* Readable facts with separators; wraps to two lines on phones. */}
-        <ul className="hero-ticker-track flex flex-wrap items-center justify-center gap-x-5 gap-y-[3px] text-[12px] leading-[16px] md:gap-x-0 md:text-[13px] md:leading-none">
+        {/* Short group of facts (left). Phones keep two facts on one line. */}
+        <ul className="hero-ticker-track flex min-w-0 items-center justify-center gap-x-4 text-[12px] leading-[16px] text-white/85 md:justify-start md:gap-x-0 md:text-[13px] md:leading-none">
           {stripFacts.map((fact, index) => (
             <li
-              key={fact}
-              className={`hero-ticker-item flex items-center whitespace-nowrap ${index === 3 ? "hidden lg:flex" : ""}`}
+              key={fact.text}
+              className={`hero-ticker-item items-center whitespace-nowrap ${factVisibility[fact.from]}`}
             >
               {index > 0 ? (
-                <span aria-hidden="true" className="mx-6 hidden h-[4px] w-[4px] rounded-full bg-white/45 md:block" />
+                <span aria-hidden="true" className="mx-5 hidden h-[4px] w-[4px] rounded-full bg-white/40 md:block" />
               ) : null}
-              {fact}
+              {fact.text}
             </li>
           ))}
         </ul>
+
+        {/* Two separate entries into the same Rebate authentication (right). */}
+        <div data-px="hero.auth" className="hero-auth flex shrink-0 gap-2 md:gap-[10px]">
+          <a
+            href={links.login}
+            data-px="hero.auth.login"
+            className="
+              inline-flex
+              h-[44px]
+              flex-1
+              items-center
+              justify-center
+              whitespace-nowrap
+              rounded-full
+              bg-white
+              px-5
+              text-[14px]
+              font-bold
+              leading-none
+              text-black
+              transition-colors
+              hover:bg-white/85
+              focus-visible:outline
+              focus-visible:outline-2
+              focus-visible:outline-offset-2
+              focus-visible:outline-white
+              md:h-[32px]
+              md:flex-none
+              md:px-4
+              md:text-[13px]
+            "
+          >
+            Client Log In
+          </a>
+          <a
+            href={links.vendorLogin}
+            data-px="hero.auth.vendor"
+            className="
+              inline-flex
+              h-[44px]
+              flex-1
+              items-center
+              justify-center
+              whitespace-nowrap
+              rounded-full
+              border
+              border-white/55
+              px-5
+              text-[14px]
+              font-bold
+              leading-none
+              text-white
+              transition-colors
+              hover:border-white
+              hover:bg-white/10
+              focus-visible:outline
+              focus-visible:outline-2
+              focus-visible:outline-offset-2
+              focus-visible:outline-white
+              md:h-[32px]
+              md:flex-none
+              md:px-4
+              md:text-[13px]
+            "
+          >
+            Vendor Login
+          </a>
+        </div>
       </div>
 
       {/* =====================================================
@@ -290,48 +385,6 @@ export function Hero() {
                 {item.label}
               </a>
             ))}
-
-            {/* Two separate entries into the same Rebate authentication. */}
-            <div className="mt-[max(calc(var(--u)*10),8px)] flex flex-col items-end gap-[max(calc(var(--u)*6),6px)]">
-              <a
-                href={links.login}
-                data-px="hero.nav.login"
-                className="
-                  inline-flex
-                  h-[max(calc(var(--u)*24),30px)]
-                  items-center
-                  whitespace-nowrap
-                  rounded-full
-                  bg-black
-                  px-[max(calc(var(--u)*12),14px)]
-                  font-bold
-                  leading-none
-                  text-white
-                "
-              >
-                Client Log In
-              </a>
-              <a
-                href={links.vendorLogin}
-                data-px="hero.nav.vendor"
-                className="
-                  inline-flex
-                  h-[max(calc(var(--u)*24),30px)]
-                  items-center
-                  whitespace-nowrap
-                  rounded-full
-                  border
-                  border-black
-                  bg-white/60
-                  px-[max(calc(var(--u)*12),14px)]
-                  font-bold
-                  leading-none
-                  text-black
-                "
-              >
-                Vendor Login
-              </a>
-            </div>
           </nav>
         </header>
 
