@@ -8,7 +8,10 @@
  *   GET {ACCESS_CATALOG_API_URL}/advisors/          -> { version, generatedAt, advisors: AdvisorCard[] }
  *   GET {ACCESS_CATALOG_API_URL}/advisors/{slug}/   -> { version, advisor: AdvisorDetail }  (404 if not public)
  *
- * ACCESS_CATALOG_API_URL defaults to `${REBATE_URL}/api/access/catalog`.
+ * ACCESS_CATALOG_API_URL must be set explicitly (for example
+ * https://rebate.ea-forexlab.com/api/access/catalog in production, or a local Django
+ * URL for review). There is deliberately no default host: an unset variable must never
+ * send requests to a real environment. Unset = catalog unavailable = empty state.
  * ACCESS_CATALOG_REVALIDATE_SECONDS (default 60; 0 = no caching, for local review).
  *
  * If the API cannot be reached the page shows the honest empty state; nothing is
@@ -17,8 +20,6 @@
  * Import only from server components (pages/layouts): the API URL is server config.
  */
 import { unstable_rethrow } from "next/navigation";
-
-import { REBATE_URL } from "@/lib/site";
 
 export const CATALOG_API_VERSION = 1;
 
@@ -57,8 +58,20 @@ export type AdvisorDetail = AdvisorCard & {
   updatedAt: string;
 };
 
-const apiBase = () =>
-  (process.env.ACCESS_CATALOG_API_URL ?? `${REBATE_URL}/api/access/catalog`).replace(/\/$/, "");
+let warnedMissingUrl = false;
+
+/** Configured API base, or null when ACCESS_CATALOG_API_URL is not set. */
+const apiBase = (): string | null => {
+  const value = process.env.ACCESS_CATALOG_API_URL?.trim();
+  if (!value) {
+    if (!warnedMissingUrl) {
+      console.error("[access-catalog] ACCESS_CATALOG_API_URL is not set; showing the empty catalog.");
+      warnedMissingUrl = true;
+    }
+    return null;
+  }
+  return value.replace(/\/$/, "");
+};
 
 const revalidateSeconds = () => {
   const raw = Number(process.env.ACCESS_CATALOG_REVALIDATE_SECONDS ?? "60");
@@ -73,8 +86,12 @@ const fetchOptions = (): RequestInit & { next?: { revalidate: number } } => {
 const isSlug = (value: string) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
 
 export async function getPublishedAdvisors(): Promise<AdvisorCard[]> {
+  const base = apiBase();
+  if (!base) {
+    return [];
+  }
   try {
-    const response = await fetch(`${apiBase()}/advisors/`, fetchOptions());
+    const response = await fetch(`${base}/advisors/`, fetchOptions());
     if (!response.ok) {
       console.error(`[access-catalog] advisor list returned HTTP ${response.status}`);
       return [];
@@ -95,11 +112,12 @@ export async function getPublishedAdvisors(): Promise<AdvisorCard[]> {
 
 /** null when the advisor is not public (404) or the API is unavailable. */
 export async function getPublishedAdvisor(slug: string): Promise<AdvisorDetail | null> {
-  if (!isSlug(slug)) {
+  const base = apiBase();
+  if (!isSlug(slug) || !base) {
     return null;
   }
   try {
-    const response = await fetch(`${apiBase()}/advisors/${slug}/`, fetchOptions());
+    const response = await fetch(`${base}/advisors/${slug}/`, fetchOptions());
     if (response.status === 404) {
       return null;
     }

@@ -33,10 +33,10 @@ Authentication links go to Rebate (`lib/site.ts`). No activation flow is implied
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `ACCESS_CATALOG_API_URL` | `${NEXT_PUBLIC_REBATE_URL}/api/access/catalog` | API base (server side only) |
+| `ACCESS_CATALOG_API_URL` | none, must be set | API base (server side only). No default host, so an unset variable never contacts a real environment; unset means the empty state. |
 | `ACCESS_CATALOG_REVALIDATE_SECONDS` | `60` | Incremental revalidation. `0` = always fresh, for local review. |
 
-If the API is unreachable, the pages show the empty state and log
+If the variable is unset or the API is unreachable, the pages show the empty state and log
 `[access-catalog] … unavailable`. Nothing is invented or cached locally.
 
 ## Local startup

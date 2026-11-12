@@ -4,14 +4,17 @@ import { notFound } from "next/navigation";
 
 import { DotLabel, SubpageBackdrop, SubpageHeader } from "@/components/catalog/SubpageHeader";
 import { Footer } from "@/components/shared/Footer";
-import { formatDate, formatPrice, getPublishedAdvisor, getPublishedAdvisors } from "@/lib/catalog";
+import { formatDate, formatPrice, getPublishedAdvisor } from "@/lib/catalog";
 import { links } from "@/lib/site";
 
 type Params = { slug: string };
 
-export async function generateStaticParams(): Promise<Params[]> {
-  return (await getPublishedAdvisors()).map((advisor) => ({ slug: advisor.slug }));
-}
+/*
+  No generateStaticParams: that would register this route for static generation with
+  on-demand fallback, which conflicts with uncached (revalidate 0) catalog fetches and
+  fails at runtime with DYNAMIC_SERVER_USAGE. Pages render on request; the catalog
+  fetch itself is cached for ACCESS_CATALOG_REVALIDATE_SECONDS (default 60).
+*/
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const advisor = await getPublishedAdvisor((await params).slug);
