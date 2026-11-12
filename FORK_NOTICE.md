@@ -34,8 +34,9 @@ confirmed for commercial use.
 - How It Works shows five customer-facing steps inside the original terminal frame.
   Tab-looking chips are non-interactive labels (a list, no hover affordance).
 - Separate "Client Log In" and "Vendor Login" entries. Both use the existing Rebate
-  authentication; Vendor Login points at the Rebate login page until a vendor area
-  exists (planned: `/vendor/` on the Rebate host; override NEXT_PUBLIC_VENDOR_LOGIN_URL).
+  authentication. Vendor Login opens the protected vendor portal at `/vendor/` on the
+  Rebate host (branch `access-vendor-portal`); anonymous visitors sign in first and
+  return there. Override with NEXT_PUBLIC_VENDOR_LOGIN_URL.
 - Brokers: `content/brokers.json`, exported from active Rebate `Broker` records with
   `content/export_active_brokers.py` (refuses any roster other than the approved six:
   IC Markets, Tickmill, RoboForex, IC Trading, Fusion Markets, FP Markets). Snapshot
