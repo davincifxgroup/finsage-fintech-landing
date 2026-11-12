@@ -83,6 +83,9 @@ const fetchOptions = (): RequestInit & { next?: { revalidate: number } } => {
   return seconds === 0 ? { cache: "no-store" } : { next: { revalidate: seconds } };
 };
 
+// Shared public slug policy: Django refuses any other slug before publication
+// (PUBLIC_SLUG_PATTERN in apps/access_catalog/models.py), so this never hides a
+// published advisor. Keep the two patterns identical.
 const isSlug = (value: string) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
 
 export async function getPublishedAdvisors(): Promise<AdvisorCard[]> {

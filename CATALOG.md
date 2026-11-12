@@ -12,6 +12,10 @@ the server. It never reads Django's database and keeps no copy of the catalog.
 | `GET {API}/advisors/` | `{ version: 1, generatedAt, advisors: AdvisorCard[] }` |
 | `GET {API}/advisors/{slug}/` | `{ version: 1, advisor: AdvisorDetail }`, or 404 if not public |
 
+Slugs follow the shared public slug policy `^[a-z0-9]+(?:-[a-z0-9]+)*$` (lowercase letters,
+digits, single hyphens), enforced by Django before publication and by `isSlug` here, so
+every advisor the API lists has a working detail URL.
+
 Types are in `lib/catalog.ts`. Prices are Decimal strings in USD (for example
 `"1250.00"`) and are only formatted for display, never calculated. Only published,
 complete advisors of active vendors are returned; vendor data is the public display
