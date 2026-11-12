@@ -28,7 +28,8 @@ name only.
 - **`/advisors`**: all published advisors, or the same honest empty state.
 - **`/advisors/{slug}`**: description, dated evaluation evidence, known limitations,
   approved broker compatibility, current license price, license and support terms. It
-  states that license applications are not open yet. Unknown, draft and unpublished
+  links "Get This Advisor" to the selection step in the Rebate client dashboard
+  (`/dashboard/advisors/select/{slug}/`, sign-in first). Unknown, draft and unpublished
   slugs give 404.
 
 Authentication links go to Rebate (`lib/site.ts`). No activation flow is implied.

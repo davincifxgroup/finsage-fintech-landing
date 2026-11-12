@@ -28,6 +28,9 @@ export const links = {
   mainSite: MAIN_SITE_URL,
 };
 
+/** Advisor selection in the Rebate client dashboard (sign-in first if needed). */
+export const selectAdvisorUrl = (slug: string) => `${REBATE_URL}/dashboard/advisors/select/${encodeURIComponent(slug)}/`;
+
 export const asset = (path: string) => `${basePath}${path}`;
 
 export type NavLink = { label: string; href: string };

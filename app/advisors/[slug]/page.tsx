@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { DotLabel, SubpageBackdrop, SubpageHeader } from "@/components/catalog/SubpageHeader";
 import { Footer } from "@/components/shared/Footer";
 import { formatDate, formatPrice, getPublishedAdvisor } from "@/lib/catalog";
-import { links } from "@/lib/site";
+import { links, selectAdvisorUrl } from "@/lib/site";
 
 type Params = { slug: string };
 
@@ -90,15 +90,15 @@ export default async function AdvisorPage({ params }: { params: Promise<Params> 
               After that, the corresponding share becomes your ForexLAB Rebate cashback.
             </p>
             <div className="mt-6 rounded-[5px] bg-white px-4 py-3 text-[12px] leading-[18px] text-[#555]">
-              License applications are not open yet. You can create a ForexLAB account and verify an eligible broker
-              account now.
+              Select this advisor in your ForexLAB dashboard, then choose the trading account. ForexLAB confirms the
+              account, and the developer issues a license bound to it. New here? Create an account first.
             </div>
             <div className="mt-6 flex flex-col gap-[3px]">
-              <a href={links.register} className="flex h-[42px] items-center justify-center rounded-[11px] bg-black text-[13px] font-bold text-white">
-                Create Account →
+              <a href={selectAdvisorUrl(advisor.slug)} className="flex h-[42px] items-center justify-center rounded-[11px] bg-black text-[13px] font-bold text-white">
+                Get This Advisor →
               </a>
-              <a href={links.login} className="flex h-[42px] items-center justify-center rounded-[11px] border border-black text-[13px] font-bold">
-                Client Log In
+              <a href={links.register} className="flex h-[42px] items-center justify-center rounded-[11px] border border-black text-[13px] font-bold">
+                Create Account
               </a>
             </div>
           </aside>
