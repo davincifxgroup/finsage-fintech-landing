@@ -83,3 +83,41 @@
     right: calc(var(--u) * 24);
   }
 }
+
+/* ==============================================================
+   RESEARCH TOOLS STRIP (ForexLAB Access)
+
+   Monochrome by default. On devices that can really hover (fine
+   pointer), a logo shows its original colours while hovered. Touch
+   devices keep the monochrome presentation. Reduced motion: the
+   change is immediate, without a transition.
+============================================================== */
+.research-tool-logo {
+  filter: grayscale(1) contrast(0.92);
+  opacity: 0.62;
+  transition:
+    filter 260ms ease,
+    opacity 260ms ease;
+}
+
+.research-tool-label {
+  transition: color 260ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .research-tool:hover .research-tool-logo {
+    filter: none;
+    opacity: 1;
+  }
+
+  .research-tool:hover .research-tool-label {
+    color: #1f2633;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .research-tool-logo,
+  .research-tool-label {
+    transition: none;
+  }
+}

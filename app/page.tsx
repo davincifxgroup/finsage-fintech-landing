@@ -7,6 +7,7 @@ import { RolesSection } from "@/components/roles/RolesSection";
 import { BrandTransition } from "@/components/shared/BrandTransition";
 import { FinalCTA } from "@/components/shared/FinalCTA";
 import { Footer } from "@/components/shared/Footer";
+import { ResearchToolsStrip } from "@/components/tools/ResearchToolsStrip";
 import { getPublishedAdvisors } from "@/lib/catalog";
 
 export default async function Home() {
@@ -16,6 +17,7 @@ export default async function Home() {
     <main>
       <LandingMotionController />
       <Hero />
+      <ResearchToolsStrip />
       <InsightsSection />
       <ChallengesSection />
       <RolesSection advisors={advisors} />
