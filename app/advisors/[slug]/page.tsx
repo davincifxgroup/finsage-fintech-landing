@@ -86,7 +86,7 @@ export default async function AdvisorPage({ params }: { params: Promise<Params> 
               {advisor.currentPrice.currency} · in effect since {formatDate(advisor.currentPrice.effectiveFrom)}
             </p>
             <p className="mt-6 text-[13px] leading-[20px] text-[#333]">
-              No upfront payment. Eligible broker partner commissions from your trading cover this price over time.
+              Nothing to pay upfront. Part of the commission your broker pays us on your trading covers this price over time.
               After that, the corresponding share becomes your ForexLAB Rebate cashback.
             </p>
             <div className="mt-6 rounded-[5px] bg-white px-4 py-3 text-[12px] leading-[18px] text-[#555]">

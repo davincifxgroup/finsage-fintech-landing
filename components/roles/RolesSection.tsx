@@ -24,11 +24,11 @@ const roles = [
     title: "Commissions Cover the Price",
     description: (
       <>
-        Eligible broker partner commissions
+        Part of the commission your broker
         <br />
-        from your trading cover the agreed
+        pays us on your trading covers the
         <br />
-        license price over time.
+        agreed license price over time.
       </>
     ),
     icon: "coins",
@@ -480,6 +480,7 @@ export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
               </h3>
 
               {hasAdvisors ? (
+                <>
                 <ul
                   data-px="roles.investgpt.advisors"
                   aria-label="Published advisors"
@@ -539,6 +540,21 @@ export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
                     </li>
                   ))}
                 </ul>
+                <p
+                  data-px="roles.investgpt.price-note"
+                  className="
+                    mt-3 max-w-[460px] text-[12px] leading-[17px] text-white/85
+
+                    lg:mt-[calc(var(--u)*10)]
+                    lg:w-[calc(var(--u)*430)]
+                    lg:max-w-none
+                    lg:text-[calc(var(--u)*12)]
+                    lg:leading-[calc(var(--u)*17)]
+                  "
+                >
+                  Prices are license prices, not paid upfront: commissions from your trading cover them over time.
+                </p>
+                </>
               ) : (
                 <p
                   data-px="roles.investgpt.description"

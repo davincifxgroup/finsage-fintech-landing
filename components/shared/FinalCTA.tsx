@@ -213,7 +213,7 @@ export function FinalCTA() {
                 lg:tracking-[0.005em]
               "
             >
-              Create your account, link an eligible broker account and apply once listings open.{" "}
+              Create your account, link an eligible broker account and choose an advisor.{" "}
               <br className="hidden lg:block" />
               Access does not change spreads or commissions. Trading involves risk of capital{" "}
               <br className="hidden lg:block" />

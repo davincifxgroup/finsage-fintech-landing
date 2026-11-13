@@ -14,13 +14,13 @@ const steps = [
   },
   {
     number: "03",
-    title: "Receive approved access",
-    description: "After ForexLAB approves the license, the advisor is delivered for that account.",
+    title: "Receive your license",
+    description: "Once ForexLAB confirms your account, the developer issues the license and delivers the advisor for it.",
   },
   {
     number: "04",
     title: "Commissions cover the price",
-    description: "Eligible partner commissions from your trading cover the agreed license price over time.",
+    description: "Part of the commission your broker pays us on your trading covers the agreed license price over time.",
   },
   {
     number: "05",

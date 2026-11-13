@@ -647,9 +647,9 @@ export function Hero() {
                 max-md:leading-[19px]
               "
             >
-              Eligible broker partner commissions from your trading cover the agreed
-              license price over time, so there is no upfront payment. Access requires a
-              verified broker account and license approval.{" "}
+              Nothing to pay upfront: part of the commission your broker pays us on your
+              trading covers the license price over time. You get the advisor once we
+              confirm your account and the developer issues your license.{" "}
               <a href="#how-it-works" className="whitespace-nowrap underline underline-offset-2">
                 How It Works →
               </a>
