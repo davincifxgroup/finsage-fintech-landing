@@ -1,5 +1,7 @@
 import { activeBrokers } from "@/content/brokers";
 
+import { ResearchEvidence } from "./ResearchEvidence";
+
 // What every evaluation documents. Labels only: no metrics are shown.
 // Non-interactive labels. The first (black) chip is a caption, not a selected tab.
 const tabs = [
@@ -44,7 +46,6 @@ export function InsightsSection() {
       className="
         insights relative isolate
         min-h-[100svh] w-full overflow-hidden bg-white
-        lg:h-[100svh]
         [font-family:Lato,Arial,sans-serif]
       "
     >
@@ -96,6 +97,11 @@ export function InsightsSection() {
         dimension, spacing and font scales by exactly the same factor.
         ============================================================
       */}
+      {/*
+        The design frame keeps one viewport on desktop (the pinned reveal shows exactly
+        this). The research examples follow below it, inside the same section.
+      */}
+      <div data-px="insights.frame" className="relative lg:h-[100svh]">
       <div
         className="
           relative z-10 mx-auto w-full
@@ -651,6 +657,9 @@ export function InsightsSection() {
           </div>
         </div>
       </div>
+      </div>
+
+      <ResearchEvidence />
     </section>
   );
 }
