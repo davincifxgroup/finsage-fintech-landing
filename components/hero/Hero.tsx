@@ -8,15 +8,16 @@ import { asset, links, sectionNav } from "@/lib/site";
 // Customer-facing facts for the top strip. No allocation figures, prices or returns.
 // `from` is the breakpoint at which a fact is shown, so narrower screens keep a short,
 // readable group instead of shrinking the text.
-const stripFacts: { text: string; from: "base" | "md" | "lg" | "xl" }[] = [
+const stripFacts: { text: string; from: "base" | "sm" | "md" | "lg" | "xl" }[] = [
   { text: "No upfront license payment", from: "base" },
-  { text: "MT4 / MT5 Expert Advisors", from: "base" },
+  { text: "MT4 / MT5 Expert Advisors", from: "sm" },
   { text: "Independently evaluated", from: "lg" },
   { text: "Cashback once the license is covered", from: "xl" },
 ];
 
 const factVisibility = {
   base: "flex",
+  sm: "hidden sm:flex",
   md: "hidden md:flex",
   lg: "hidden lg:flex",
   xl: "hidden xl:flex",
@@ -108,7 +109,7 @@ export function Hero() {
     <section
       id="top"
       data-px="hero"
-      className="hero relative min-h-screen overflow-hidden [--strip-h:96px] md:[--strip-h:48px]"
+      className="hero relative min-h-screen overflow-hidden [--strip-h:44px] md:[--strip-h:48px]"
     >
       {/* =====================================================
           1. MARKET TICKER
@@ -122,21 +123,18 @@ export function Hero() {
           flex
           h-[var(--strip-h)]
           w-full
-          flex-col
-          justify-center
-          gap-[10px]
+          items-center
+          justify-between
+          gap-4
           bg-black
           px-4
           text-white
-          md:flex-row
-          md:items-center
-          md:justify-between
           md:gap-6
           md:px-[max(20px,calc(9.5vw-10px))]
         "
       >
-        {/* Short group of facts (left). Phones keep two facts on one line. */}
-        <ul className="hero-ticker-track flex min-w-0 items-center justify-center gap-x-4 text-[12px] leading-[16px] text-white/85 md:justify-start md:gap-x-0 md:text-[13px] md:leading-none">
+        {/* Short group of facts (left). Phones keep one fact beside the Log in link. */}
+        <ul className="hero-ticker-track flex min-w-0 items-center justify-start gap-x-4 text-[12px] leading-[16px] text-white/85 md:justify-start md:gap-x-0 md:text-[13px] md:leading-none">
           {stripFacts.map((fact, index) => (
             <li
               key={fact.text}
@@ -150,73 +148,42 @@ export function Hero() {
           ))}
         </ul>
 
-        {/* Two separate entries into the same Rebate authentication (right). */}
-        <div data-px="hero.auth" className="hero-auth flex shrink-0 gap-2 md:gap-[10px]">
-          <a
-            href={links.login}
-            data-px="hero.auth.login"
-            className="
-              inline-flex
-              h-[44px]
-              flex-1
-              items-center
-              justify-center
-              whitespace-nowrap
-              rounded-full
-              bg-white
-              px-5
-              text-[14px]
-              font-bold
-              leading-none
-              text-black
-              transition-colors
-              hover:bg-white/85
-              focus-visible:outline
-              focus-visible:outline-2
-              focus-visible:outline-offset-2
-              focus-visible:outline-white
-              md:h-[32px]
-              md:flex-none
-              md:px-4
-              md:text-[13px]
-            "
-          >
-            Client Log In
-          </a>
-          <a
-            href={links.vendorLogin}
-            data-px="hero.auth.vendor"
-            className="
-              inline-flex
-              h-[44px]
-              flex-1
-              items-center
-              justify-center
-              whitespace-nowrap
-              rounded-full
-              border
-              border-white/55
-              px-5
-              text-[14px]
-              font-bold
-              leading-none
-              text-white
-              transition-colors
-              hover:border-white
-              hover:bg-white/10
-              focus-visible:outline
-              focus-visible:outline-2
-              focus-visible:outline-offset-2
-              focus-visible:outline-white
-              md:h-[32px]
-              md:flex-none
-              md:px-4
-              md:text-[13px]
-            "
-          >
-            Vendor Login
-          </a>
-        </div>
+        {/*
+          One understated sign-in link (right) into the Rebate authentication. Vendors use
+          the same sign-in; their portal link stays in the footer ("Vendor Login").
+        */}
+        <a
+          href={links.login}
+          data-px="hero.auth.login"
+          className="
+            hero-auth
+            -mr-2
+            inline-flex
+            h-[44px]
+            shrink-0
+            items-center
+            gap-[6px]
+            whitespace-nowrap
+            rounded-full
+            px-2
+            text-[13px]
+            font-bold
+            leading-none
+            text-white/90
+            underline-offset-4
+            transition-colors
+            hover:text-white
+            hover:underline
+            focus-visible:outline
+            focus-visible:outline-2
+            focus-visible:outline-offset-0
+            focus-visible:outline-white
+            md:h-[32px]
+          "
+        >
+          Log in
+          <span aria-hidden="true" className="text-[14px] font-normal leading-none">→</span>
+        </a>
       </div>
 
       {/* =====================================================
