@@ -21,6 +21,8 @@
  */
 import { unstable_rethrow } from "next/navigation";
 
+import { MAIN_SITE_URL } from "@/lib/site";
+
 export const CATALOG_API_VERSION = 1;
 
 export type Price = { amount: string; currency: "USD"; effectiveFrom: string };
@@ -56,6 +58,8 @@ export type AdvisorDetail = AdvisorCard & {
   licenseTerms: string;
   supportTerms: string;
   updatedAt: string;
+  /** Optional ForexLAB-managed article on the EA ForexLab main site; null when absent. */
+  analysisUrl?: string | null;
 };
 
 let warnedMissingUrl = false;
@@ -138,6 +142,33 @@ export async function getPublishedAdvisor(slug: string): Promise<AdvisorDetail |
     // Let Next.js control-flow signals (dynamic rendering, notFound, redirect) through.
     unstable_rethrow(error);
     console.error(`[access-catalog] advisor ${slug} unavailable:`, (error as Error).message);
+    return null;
+  }
+}
+
+/**
+ * The analysis link only if it is an article on the configured EA ForexLab main site
+ * (same scheme and host, "www." accepted, no credentials or port). Django validates it
+ * too; this keeps the page from ever linking elsewhere if the API returned something odd.
+ */
+export function safeAnalysisUrl(value: string | null | undefined): string | null {
+  if (!value) {
+    return null;
+  }
+  try {
+    const url = new URL(value);
+    const main = new URL(MAIN_SITE_URL);
+    const host = main.hostname.toLowerCase().replace(/^www\./, "");
+    const allowed = [host, `www.${host}`];
+    const ok =
+      url.protocol === main.protocol &&
+      allowed.includes(url.hostname.toLowerCase()) &&
+      url.port === main.port &&
+      !url.username &&
+      !url.password &&
+      url.pathname.length > 1;
+    return ok ? url.toString() : null;
+  } catch {
     return null;
   }
 }

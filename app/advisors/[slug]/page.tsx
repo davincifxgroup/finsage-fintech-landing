@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 import { DotLabel, SubpageBackdrop, SubpageHeader } from "@/components/catalog/SubpageHeader";
 import { Footer } from "@/components/shared/Footer";
-import { formatDate, formatPrice, getPublishedAdvisor } from "@/lib/catalog";
+import { formatDate, formatPrice, getPublishedAdvisor, safeAnalysisUrl } from "@/lib/catalog";
 import { links, selectAdvisorUrl } from "@/lib/site";
 
 type Params = { slug: string };
@@ -41,6 +41,7 @@ export default async function AdvisorPage({ params }: { params: Promise<Params> 
   if (!advisor) {
     notFound();
   }
+  const analysisUrl = safeAnalysisUrl(advisor.analysisUrl);
 
   return (
     <main className="relative isolate min-h-screen overflow-hidden bg-white [font-family:Lato,Arial,sans-serif]">
@@ -111,6 +112,19 @@ export default async function AdvisorPage({ params }: { params: Promise<Params> 
 
           <Block label="Evaluation" id="evaluation">
             <Prose text={advisor.evaluationSummary} />
+            {analysisUrl ? (
+              <p className="mt-4">
+                <a
+                  href={analysisUrl}
+                  target="_blank"
+                  rel="noopener"
+                  className="inline-flex min-h-[44px] items-center gap-1 text-[14px] font-bold underline underline-offset-4"
+                >
+                  Read full analysis on EA ForexLab <span aria-hidden="true">↗</span>
+                  <span className="sr-only"> (opens in a new tab)</span>
+                </a>
+              </p>
+            ) : null}
             <ol className="mt-8 grid gap-3" aria-label="Dated evaluation evidence">
               {advisor.evidence.map((item, index) => (
                 <li key={`${item.title}-${index}`} className="rounded-[6px] bg-[#f4f4f6] p-5 sm:p-6">

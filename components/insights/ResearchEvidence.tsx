@@ -92,12 +92,12 @@ const shadowFront =
   "shadow-[0_1px_2px_rgba(15,23,42,0.05),0_14px_32px_-12px_rgba(15,23,42,0.18),0_28px_56px_-26px_rgba(15,23,42,0.22)]";
 const shadowBack = "shadow-[0_1px_2px_rgba(15,23,42,0.04),0_10px_24px_-14px_rgba(15,23,42,0.16)]";
 const header =
-  "flex h-[30px] w-full items-center border-b border-black/[0.06] bg-[#fafafb] lg:h-[calc(var(--u)*30)]";
+  "flex h-[44px] w-full items-center border-b border-black/[0.06] bg-[#fafafb] lg:h-[calc(var(--u)*30)]";
 const headerMain =
   "flex h-full min-w-0 flex-1 items-center justify-between gap-3 px-3 text-left lg:gap-[calc(var(--u)*12)] lg:px-[calc(var(--u)*12)]";
-const headerTitle = "truncate text-[11px] font-bold leading-none text-black lg:text-[calc(var(--u)*11)]";
+const headerTitle = "truncate text-[13px] font-bold leading-none text-black lg:text-[calc(var(--u)*11)]";
 const headerKind =
-  "shrink-0 rounded-full bg-[#f0f0f3] px-2 py-[3px] text-[9px] font-medium leading-none text-[#5f6470] lg:px-[calc(var(--u)*8)] lg:py-[calc(var(--u)*3)] lg:text-[calc(var(--u)*9)]";
+  "shrink-0 rounded-full bg-[#f0f0f3] px-2 py-[4px] text-[11px] font-medium leading-none text-[#5f6470] lg:px-[calc(var(--u)*8)] lg:py-[calc(var(--u)*3)] lg:text-[calc(var(--u)*9)]";
 const focusRing =
   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black";
 
@@ -116,9 +116,10 @@ function EnlargeButton({ label, onClick }: { label: string; onClick: () => void 
       type="button"
       onClick={onClick}
       aria-label={label}
-      className={`mr-1 inline-flex min-h-[26px] shrink-0 items-center gap-1 rounded-full border border-black/10 bg-white px-[10px] py-[4px] lg:min-h-0 text-[9px] font-bold leading-none text-black hover:border-black/30 lg:mr-[calc(var(--u)*8)] lg:gap-[calc(var(--u)*4)] lg:px-[calc(var(--u)*8)] lg:py-[calc(var(--u)*4)] lg:text-[calc(var(--u)*9)] ${focusRing}`}
+      /* Visual pill 32px (desktop: scaled); touch target 44px tall via the ::before overlay. */
+      className={`relative mr-[6px] inline-flex h-[32px] shrink-0 items-center gap-[5px] rounded-full border border-black/10 bg-white px-3 text-[12px] font-bold leading-none text-black before:absolute before:inset-x-0 before:-inset-y-[6px] before:content-[''] hover:border-black/30 lg:mr-[calc(var(--u)*8)] lg:h-auto lg:gap-[calc(var(--u)*4)] lg:px-[calc(var(--u)*8)] lg:py-[calc(var(--u)*4)] lg:text-[calc(var(--u)*9)] ${focusRing}`}
     >
-      <svg viewBox="0 0 12 12" aria-hidden="true" className="h-[9px] w-[9px] lg:h-[calc(var(--u)*9)] lg:w-[calc(var(--u)*9)]" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
+      <svg viewBox="0 0 12 12" aria-hidden="true" className="h-[11px] w-[11px] lg:h-[calc(var(--u)*9)] lg:w-[calc(var(--u)*9)]" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
         <path d="M7 1.5h3.5V5M5 10.5H1.5V7M10.5 1.5 7 5M1.5 10.5 5 7" />
       </svg>
       Enlarge
@@ -135,10 +136,17 @@ export function ResearchEvidence() {
   const others = reports.map((_, i) => i).filter((i) => i !== front);
   const depthOf = (i: number) => (i === front ? 0 : others.indexOf(i) + 1);
 
-  const enlarge = (shot: Shot) => setOpen(shot);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const [zoomed, setZoomed] = useState(false);
+  const [zoomWidth, setZoomWidth] = useState(0);
 
-  // Open the native modal once its content is rendered (focus moves to Close; Escape and
-  // the backdrop close it and focus returns to the button that opened it).
+  const enlarge = (shot: Shot) => {
+    setZoomed(false);
+    setOpen(shot);
+  };
+
+  // Open the native modal once its content is rendered (focus moves to Close; Escape, Close
+  // and the backdrop close it and focus returns to the button that opened it).
   useEffect(() => {
     const dialog = dialogRef.current;
     if (open && dialog && !dialog.open) {
@@ -146,6 +154,120 @@ export function ResearchEvidence() {
       closeRef.current?.focus();
     }
   }, [open]);
+
+  /*
+    Background scroll lock while the dialog is open. It deliberately changes no page styles
+    (no overflow/position on html or body), so the intro lock, ScrollTrigger and the
+    scrollbar-width measurements in LandingMotionController are untouched:
+    - wheel, touch and keyboard scrolling are blocked unless they scroll the image viewport
+      inside the dialog (which has overscroll-behavior: contain);
+    - any scroll that still reaches the page (e.g. dragging the scrollbar) is put back;
+    - the saved position is restored on every closing path and on unmount.
+  */
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    const dialog = dialogRef.current;
+    const savedX = window.scrollX;
+    const savedY = window.scrollY;
+    let touchX = 0;
+    let touchY = 0;
+
+    const scrollsInside = (target: EventTarget | null, dx: number, dy: number) => {
+      const viewport = viewportRef.current;
+      if (!viewport || !(target instanceof Node) || !viewport.contains(target)) {
+        return false;
+      }
+      const canX = dx < 0
+        ? viewport.scrollLeft > 0
+        : dx > 0 && viewport.scrollLeft + viewport.clientWidth < viewport.scrollWidth - 1;
+      const canY = dy < 0
+        ? viewport.scrollTop > 0
+        : dy > 0 && viewport.scrollTop + viewport.clientHeight < viewport.scrollHeight - 1;
+      return canX || canY;
+    };
+    const onWheel = (event: WheelEvent) => {
+      if (!scrollsInside(event.target, event.deltaX, event.deltaY)) {
+        event.preventDefault();
+      }
+    };
+    const onTouchStart = (event: TouchEvent) => {
+      touchX = event.touches[0]?.clientX ?? 0;
+      touchY = event.touches[0]?.clientY ?? 0;
+    };
+    const onTouchMove = (event: TouchEvent) => {
+      const touch = event.touches[0];
+      if (!touch || event.touches.length > 1) {
+        return; // pinch-zoom stays with the browser
+      }
+      const dx = touchX - touch.clientX;
+      const dy = touchY - touch.clientY;
+      touchX = touch.clientX;
+      touchY = touch.clientY;
+      if (!scrollsInside(event.target, dx, dy)) {
+        event.preventDefault();
+      }
+    };
+    const scrollKeys = new Set([" ", "PageUp", "PageDown", "Home", "End", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"]);
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (!scrollKeys.has(event.key) || target?.closest("button, a, input, select, textarea")) {
+        return; // Space and Enter still activate buttons and links
+      }
+      if (!(target && viewportRef.current?.contains(target))) {
+        event.preventDefault();
+      }
+    };
+    const onScroll = () => {
+      if (window.scrollX !== savedX || window.scrollY !== savedY) {
+        window.scrollTo(savedX, savedY);
+      }
+    };
+
+    document.addEventListener("wheel", onWheel, { passive: false, capture: true });
+    document.addEventListener("touchstart", onTouchStart, { passive: true, capture: true });
+    document.addEventListener("touchmove", onTouchMove, { passive: false, capture: true });
+    document.addEventListener("keydown", onKeyDown, { capture: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      document.removeEventListener("wheel", onWheel, { capture: true });
+      document.removeEventListener("touchstart", onTouchStart, { capture: true });
+      document.removeEventListener("touchmove", onTouchMove, { capture: true });
+      document.removeEventListener("keydown", onKeyDown, { capture: true });
+      window.removeEventListener("scroll", onScroll);
+      if (window.scrollX !== savedX || window.scrollY !== savedY) {
+        window.scrollTo(savedX, savedY);
+      }
+      if (dialog?.open) {
+        dialog.close(); // unmounted while open: never leave a modal or listeners behind
+      }
+    };
+  }, [open]);
+
+  // Magnified view: the original at its full pixel size (at least twice the fitted width on
+  // wide screens), panned by scrolling or dragging inside the image viewport.
+  const toggleZoom = (anchor?: { x: number; y: number }) => {
+    const viewport = viewportRef.current;
+    if (!viewport || !open) {
+      return;
+    }
+    if (zoomed) {
+      setZoomed(false);
+      viewport.scrollTo(0, 0);
+      return;
+    }
+    const fitWidth = Math.max(viewport.clientWidth - 24, 1);
+    const width = Math.min(open.width * 2, Math.max(open.width, fitWidth * 2));
+    setZoomWidth(width);
+    setZoomed(true);
+    requestAnimationFrame(() => {
+      const ratio = width / fitWidth;
+      const x = anchor ? anchor.x * ratio - viewport.clientWidth / 2 : 0;
+      const y = anchor ? anchor.y * ratio - viewport.clientHeight / 2 : 0;
+      viewport.scrollTo(Math.max(0, x), Math.max(0, y));
+    });
+  };
 
   return (
     <div
@@ -189,7 +311,7 @@ export function ResearchEvidence() {
               aria-label="Backtest and robustness examples"
               className="
                 relative mt-4 grid
-                [--peek:24px]
+                [--peek:40px]
                 pt-[calc(var(--peek)*3)]
                 lg:mt-[calc(var(--u)*16)]
                 lg:[--peek:calc(var(--u)*22)]
@@ -284,32 +406,44 @@ export function ResearchEvidence() {
       <dialog
         ref={dialogRef}
         aria-label={open ? `${open.title}, original image` : "Original image"}
-        onClose={() => setOpen(null)}
+        onClose={() => {
+          setOpen(null);
+          setZoomed(false);
+        }}
         onClick={(event) => {
           if (event.target === event.currentTarget) {
-            event.currentTarget.close();
+            event.currentTarget.close(); // backdrop click
           }
         }}
         className="
-          m-auto max-h-[92svh] w-[min(1320px,94vw)] max-w-none overflow-auto
+          m-auto max-h-[92svh] w-[min(1320px,94vw)] max-w-none overflow-hidden
           rounded-[10px] border border-black/10 bg-white p-0
           shadow-[0_40px_120px_-30px_rgba(15,23,42,0.45)]
           backdrop:bg-black/55
+          open:flex open:flex-col
           [font-family:Lato,Arial,sans-serif]
         "
       >
         {open ? (
-          <figure className="flex flex-col">
-            <figcaption className="sticky top-0 flex items-center justify-between gap-4 border-b border-black/[0.06] bg-white px-4 py-3">
-              <span className="text-[13px] font-bold text-black">
+          <>
+            <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-black/[0.06] bg-white px-4 py-2">
+              <p className="min-w-0 py-1 text-[14px] font-bold text-black">
                 {open.title} <span className="font-normal text-[#707070]">· {open.kind}</span>
-              </span>
-              <span className="flex items-center gap-2">
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  aria-pressed={zoomed}
+                  onClick={() => toggleZoom()}
+                  className={`inline-flex h-[44px] items-center rounded-full border border-black/15 px-4 text-[13px] font-bold text-black sm:h-[36px] ${focusRing}`}
+                >
+                  {zoomed ? "Fit to screen" : "Zoom in"}
+                </button>
                 <a
                   href={asset(open.original)}
                   target="_blank"
                   rel="noopener"
-                  className={`rounded-full border border-black/15 px-3 py-[6px] text-[12px] font-bold text-black ${focusRing}`}
+                  className={`inline-flex h-[44px] items-center rounded-full border border-black/15 px-4 text-[13px] font-bold text-black sm:h-[36px] ${focusRing}`}
                 >
                   Open original
                 </a>
@@ -317,23 +451,38 @@ export function ResearchEvidence() {
                   ref={closeRef}
                   type="button"
                   onClick={() => dialogRef.current?.close()}
-                  className={`rounded-full bg-black px-3 py-[6px] text-[12px] font-bold text-white ${focusRing}`}
+                  className={`inline-flex h-[44px] items-center rounded-full bg-black px-4 text-[13px] font-bold text-white sm:h-[36px] ${focusRing}`}
                 >
                   Close
                 </button>
-              </span>
-            </figcaption>
-            <div className="p-3 sm:p-4">
+              </div>
+            </div>
+            <div
+              ref={viewportRef}
+              tabIndex={zoomed ? 0 : -1}
+              role={zoomed ? "region" : undefined}
+              aria-label={zoomed ? "Magnified image, scroll to pan" : undefined}
+              className={`min-h-0 flex-1 overflow-auto overscroll-contain p-3 sm:p-4 ${focusRing} focus-visible:outline-offset-[-3px]`}
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={asset(open.original)}
                 alt={open.alt}
                 width={open.width}
                 height={open.height}
-                className="mx-auto block h-auto max-w-full"
+                onClick={(event) => {
+                  const rect = event.currentTarget.getBoundingClientRect();
+                  toggleZoom({ x: event.clientX - rect.left, y: event.clientY - rect.top });
+                }}
+                className={
+                  zoomed
+                    ? "block h-auto max-w-none cursor-zoom-out"
+                    : "mx-auto block h-auto max-h-[calc(92svh-150px)] w-auto max-w-full cursor-zoom-in object-contain"
+                }
+                style={zoomed ? { width: zoomWidth } : undefined}
               />
             </div>
-          </figure>
+          </>
         ) : null}
       </dialog>
     </div>
