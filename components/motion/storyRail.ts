@@ -96,8 +96,11 @@ export function setupStoryRail(gsap: Gsap, ScrollTrigger: ScrollTriggerStatic): 
     return active;
   };
 
+  // sync() runs synchronously (initial call, ScrollTrigger refresh) and never touches
+  // `frame`; only the animation-frame callback clears it. Otherwise a refresh between a
+  // scroll and its frame would clear `frame` while that frame is still pending, and the
+  // cleanup could no longer cancel it.
   const sync = () => {
-    frame = 0;
     if (disposed) {
       return;
     }
@@ -108,9 +111,14 @@ export function setupStoryRail(gsap: Gsap, ScrollTrigger: ScrollTriggerStatic): 
     }
   };
 
+  const onFrame = () => {
+    frame = 0;
+    sync();
+  };
+
   const queueSync = () => {
     if (!frame && !disposed) {
-      frame = requestAnimationFrame(sync);
+      frame = requestAnimationFrame(onFrame);
     }
   };
 

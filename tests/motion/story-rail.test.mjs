@@ -112,6 +112,23 @@ test('a callback already queued before cleanup does not update detached elements
   assert.deepEqual(env.counts(), BASELINE);
 });
 
+test('scroll, then a ScrollTrigger refresh, then cleanup leaves no listeners and no pending frame', () => {
+  const cleanup = setupStoryRail(env.gsap, env.ScrollTrigger);
+  const index = env.nodes['[data-motion-story-index]'];
+  env.scrollTo(3000);
+  env.fire(env.listeners.window, 'scroll'); // schedules a frame
+  assert.equal(env.counts().frames, 1);
+  env.fire(env.listeners.scrollTrigger, 'refresh'); // synchronous sync() while that frame is pending
+  assert.equal(index.textContent, '04 / 07');
+  assert.equal(env.counts().frames, 1, 'refresh must not forget the pending frame');
+  env.fire(env.listeners.window, 'scroll'); // still coalesced into the same frame
+  assert.equal(env.counts().frames, 1);
+  cleanup();
+  assert.deepEqual(env.counts(), BASELINE);
+  cleanup();
+  assert.deepEqual(env.counts(), BASELINE);
+});
+
 test('chapter follows the layout while mounted (scroll frame and refresh)', () => {
   const cleanup = setupStoryRail(env.gsap, env.ScrollTrigger);
   const index = env.nodes['[data-motion-story-index]'];
