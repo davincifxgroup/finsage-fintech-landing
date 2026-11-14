@@ -257,20 +257,58 @@ function setupStoryRail(
     },
   });
 
-  chapters.forEach(([selector], chapter) => {
-    const element = select<HTMLElement>(selector);
-    if (!element) {
-      return;
-    }
+  /*
+    The active chapter is computed from the current layout and scroll position, not from
+    onEnter/onEnterBack callbacks or stored trigger positions. Below 1024px the pinned
+    sections' desktop triggers are reverted (no pin spacing) and gsap.matchMedia recreates
+    them when the viewport widens again, so positions remembered or callbacks fired around
+    those refreshes went stale ("07 / 07" at #advisors after a 1280 -> 380 -> 1280 resize).
 
-    ScrollTrigger.create({
-      trigger: element,
-      start: "top center",
-      end: "bottom center",
-      onEnter: () => setChapter(chapter),
-      onEnterBack: () => setChapter(chapter),
+    A chapter is active once its top has passed the viewport centre (the former
+    "top center" start). A pinned section is measured by its pin-spacer, which covers the
+    whole pinned scroll distance. sync() runs once per frame while scrolling, after every
+    ScrollTrigger refresh (resize, breakpoint change, FAQ static layout, section
+    navigation) and on resize, and only updates the text when the chapter changes.
+  */
+  const sections = chapters.map(([selector]) => select<HTMLElement>(selector));
+  let current = -1;
+  let frame = 0;
+
+  const layoutBox = (element: HTMLElement) => {
+    const parent = element.parentElement;
+    return parent?.classList.contains("pin-spacer") ? parent : element;
+  };
+
+  const activeChapter = () => {
+    const centre = window.innerHeight / 2;
+    let active = 0;
+    sections.forEach((element, chapter) => {
+      if (element && layoutBox(element).getBoundingClientRect().top <= centre) {
+        active = chapter;
+      }
     });
-  });
+    return active;
+  };
+
+  const sync = () => {
+    frame = 0;
+    const chapter = activeChapter();
+    if (chapter !== current) {
+      current = chapter;
+      setChapter(chapter);
+    }
+  };
+
+  const queueSync = () => {
+    if (!frame) {
+      frame = requestAnimationFrame(sync);
+    }
+  };
+
+  window.addEventListener("scroll", queueSync, { passive: true });
+  window.addEventListener("resize", queueSync);
+  ScrollTrigger.addEventListener("refresh", sync);
+  sync();
 }
 
 function setupHeroDeparture(
