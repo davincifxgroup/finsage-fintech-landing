@@ -667,6 +667,17 @@ function setupRolesNarrative(
         { clipPath: "inset(0 0 0 100%)", x: 54, duration: 0.6 },
         0.08,
       );
+
+    // The label and header are centred with Tailwind's lg:-translate-x-1/2 (the CSS
+    // `translate` property). GSAP folds that into an inline transform (translate(-50%))
+    // with `translate: none`, and reverting this context below 1024px left them there,
+    // so the mobile eyebrow and heading were shifted left and clipped until a reload.
+    // Clear what this context animated so the stylesheet layout applies again.
+    return () => {
+      gsap.set([label, header, ...cards, ...icons, visual, panel], {
+        clearProps: "transform,translate,opacity,visibility,clipPath",
+      });
+    };
   });
 
   matchMedia.add("(max-width: 1023px)", () => {
