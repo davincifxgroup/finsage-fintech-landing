@@ -12,7 +12,8 @@
     "build:pages": "STATIC_EXPORT=true NEXT_PUBLIC_BASE_PATH=/finsage-fintech-landing next build",
     "deploy:pages": "bash deployment/deploy-pages.sh",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test:motion": "node --experimental-strip-types --no-warnings --test tests/motion/story-rail.test.mjs"
   },
   "dependencies": {
     "@fontsource/lato": "^5.3.0",

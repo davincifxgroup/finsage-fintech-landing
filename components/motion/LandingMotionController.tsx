@@ -6,6 +6,8 @@ import { getGsap } from "@/lib/motion/gsap";
 import { readMotionMode } from "@/lib/motion/motion-mode";
 import { asset } from "@/lib/site";
 
+import { setupStoryRail } from "./storyRail";
+
 const select = <T extends Element>(selector: string) =>
   document.querySelector<T>(selector);
 
@@ -210,105 +212,6 @@ function setupOpeningSequence(
       { autoAlpha: 1, y: 0, duration: 0.26, ease: "power3.out" },
       "-=0.18",
     );
-}
-
-function setupStoryRail(
-  gsap: ReturnType<typeof getGsap>["gsap"],
-  ScrollTrigger: ReturnType<typeof getGsap>["ScrollTrigger"],
-) {
-  const rail = select<HTMLElement>("[data-motion-story-progress]");
-  const fill = select<HTMLElement>("[data-motion-story-progress-fill]");
-  const index = select<HTMLElement>("[data-motion-story-index]");
-  const label = select<HTMLElement>("[data-motion-story-label]");
-
-  if (!rail || !fill || !index || !label) {
-    return;
-  }
-
-  const chapters = [
-    ["[data-px='hero']", "Welcome"],
-    ["[data-px='insights']", "Our Testing"],
-    ["[data-px='challenges']", "How It Works"],
-    ["[data-px='roles']", "No Upfront Price"],
-    ["[data-px='learning']", "FAQ"],
-    ["[data-px='final-cta']", "Get Access"],
-    ["[data-px='footer']", "ForexLAB Access"],
-  ] as const;
-
-  const setChapter = (chapter: number) => {
-    index.textContent = `${String(chapter + 1).padStart(2, "0")} / 07`;
-    label.textContent = chapters[chapter][1];
-    gsap.fromTo(
-      [index, label],
-      { autoAlpha: 0, x: 8 },
-      { autoAlpha: 1, x: 0, duration: 0.28, ease: "power3.out" },
-    );
-  };
-
-  gsap.to(rail, { autoAlpha: 1, duration: 0.5, delay: 2.25 });
-  gsap.set(fill, { scaleY: 0, transformOrigin: "top center" });
-  gsap.to(fill, {
-    scaleY: 1,
-    ease: "none",
-    scrollTrigger: {
-      start: 0,
-      end: "max",
-      scrub: 0.3,
-    },
-  });
-
-  /*
-    The active chapter is computed from the current layout and scroll position, not from
-    onEnter/onEnterBack callbacks or stored trigger positions. Below 1024px the pinned
-    sections' desktop triggers are reverted (no pin spacing) and gsap.matchMedia recreates
-    them when the viewport widens again, so positions remembered or callbacks fired around
-    those refreshes went stale ("07 / 07" at #advisors after a 1280 -> 380 -> 1280 resize).
-
-    A chapter is active once its top has passed the viewport centre (the former
-    "top center" start). A pinned section is measured by its pin-spacer, which covers the
-    whole pinned scroll distance. sync() runs once per frame while scrolling, after every
-    ScrollTrigger refresh (resize, breakpoint change, FAQ static layout, section
-    navigation) and on resize, and only updates the text when the chapter changes.
-  */
-  const sections = chapters.map(([selector]) => select<HTMLElement>(selector));
-  let current = -1;
-  let frame = 0;
-
-  const layoutBox = (element: HTMLElement) => {
-    const parent = element.parentElement;
-    return parent?.classList.contains("pin-spacer") ? parent : element;
-  };
-
-  const activeChapter = () => {
-    const centre = window.innerHeight / 2;
-    let active = 0;
-    sections.forEach((element, chapter) => {
-      if (element && layoutBox(element).getBoundingClientRect().top <= centre) {
-        active = chapter;
-      }
-    });
-    return active;
-  };
-
-  const sync = () => {
-    frame = 0;
-    const chapter = activeChapter();
-    if (chapter !== current) {
-      current = chapter;
-      setChapter(chapter);
-    }
-  };
-
-  const queueSync = () => {
-    if (!frame) {
-      frame = requestAnimationFrame(sync);
-    }
-  };
-
-  window.addEventListener("scroll", queueSync, { passive: true });
-  window.addEventListener("resize", queueSync);
-  ScrollTrigger.addEventListener("refresh", sync);
-  sync();
 }
 
 function setupHeroDeparture(
@@ -1891,6 +1794,9 @@ export function LandingMotionController() {
       initialHash !== "" && initialHash !== "#top" && document.getElementById(initialHash.slice(1)) !== null;
 
     const matchMedia = gsap.matchMedia();
+    // setupStoryRail registers window and ScrollTrigger listeners and may queue a frame;
+    // context.revert() does not remove those, so its own cleanup is kept and called below.
+    let cleanupStoryRail = () => {};
     const context = gsap.context(() => {
       if (startsAtSection) {
         if (loader) {
@@ -1910,7 +1816,7 @@ export function LandingMotionController() {
       setupLearningInteractions(gsap, matchMedia);
       setupFinalCtaScrollytelling(gsap, matchMedia);
       setupFooterReveal(gsap);
-      setupStoryRail(gsap, ScrollTrigger);
+      cleanupStoryRail = setupStoryRail(gsap, ScrollTrigger);
     }, document.body);
 
     const navigation = setupSectionNavigation(ScrollTrigger);
@@ -1931,6 +1837,7 @@ export function LandingMotionController() {
       widthObserver.disconnect();
       cancelAnimationFrame(widthFrame);
       navigation.cleanup();
+      cleanupStoryRail();
       releaseScroll();
       matchMedia.revert();
       context.revert();
