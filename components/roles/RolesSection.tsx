@@ -60,7 +60,6 @@ export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
 
         min-h-screen
         lg:min-h-0
-        lg:aspect-[1198/1087]
       "
     >
       {/* BACKGROUND */}
@@ -87,7 +86,7 @@ export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
           px-5 py-14
           sm:px-8
 
-          lg:absolute lg:inset-0
+          lg:relative
           lg:p-0
           lg:[container-type:inline-size]
           lg:[--u:0.083472454cqw]
@@ -285,11 +284,10 @@ export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
             mt-20 grid overflow-hidden
             grid-cols-1 bg-black
 
-            lg:absolute
-            lg:left-[calc(var(--u)*117)]
-            lg:top-[calc(var(--u)*583)]
-            lg:mt-0
-            lg:h-[calc(var(--u)*460)]
+            lg:mb-[calc(var(--u)*44)]
+            lg:ml-[calc(var(--u)*117)]
+            lg:mt-[calc(var(--u)*583)]
+            lg:min-h-[calc(var(--u)*460)]
             lg:w-[calc(var(--u)*969)]
             lg:grid-cols-[calc(var(--u)*417)_calc(var(--u)*552)]
           "
@@ -302,7 +300,7 @@ export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
               overflow-hidden bg-black
 
               lg:aspect-auto
-              lg:h-[calc(var(--u)*460)]
+              lg:min-h-[calc(var(--u)*460)]
               lg:w-[calc(var(--u)*417)]
             "
           >
@@ -383,17 +381,19 @@ export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
           <div
             data-px="roles.investgpt.panel"
             className="
-              relative overflow-hidden
+              relative
               bg-[#4e82f3]
               px-7 py-12
               text-white
 
-              lg:h-[calc(var(--u)*460)]
+              lg:min-h-[calc(var(--u)*460)]
               lg:w-[calc(var(--u)*552)]
               lg:px-0
               lg:py-0
             "
           >
+            {/* DECORATION (clipped on its own; the content below is never clipped) */}
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
             {/* LIGHT FIELD */}
             <div
               aria-hidden="true"
@@ -424,6 +424,7 @@ export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
                 bg-black/80
               "
             />
+            </div>
 
             {/* CONTENT */}
             <div
@@ -431,9 +432,10 @@ export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
               className="
                 relative z-10
 
-                lg:absolute
-                lg:left-[calc(var(--u)*52)]
-                lg:top-[calc(var(--u)*85)]
+                lg:pb-[calc(var(--u)*52)]
+                lg:pl-[calc(var(--u)*52)]
+                lg:pr-[calc(var(--u)*40)]
+                lg:pt-[calc(var(--u)*64)]
               "
             >
               <div
