@@ -18,7 +18,12 @@ import { asset } from "@/lib/site";
  *
  * Interaction: the exposed header of a report brings it to the front; the front image
  * (and the monitoring image) opens the original in a modal dialog. Buttons only, no
- * hover-only controls, no autoplay. Transitions are dropped for reduced motion.
+ * hover-only controls.
+ *
+ * Auto-rotation: the next report comes to the front every 2 seconds while the stack is on
+ * screen. It pauses while the mouse is over the stack, while keyboard focus is inside it,
+ * while an enlarged image is open and while the tab is hidden; a manual selection restarts
+ * the 2-second wait. There is no rotation (and no transition) for reduced motion.
  */
 
 type Shot = {
@@ -78,13 +83,16 @@ const reports: Shot[] = [
 const monitoring: Shot = {
   id: "monitoring",
   title: "Monitoring",
-  kind: "Apr 2023 snapshot",
+  kind: "", // no badge; the date stays in the alt text and in the screenshot itself
   src: "/research-evidence/monitoring-apr-2023.webp",
   original: "/research-evidence/monitoring-apr-2023-original.png",
   width: 1216,
   height: 463,
   alt: "Historical account monitoring snapshot, last updated 3 April 2023: growth chart and account statistics. Not current performance.",
 };
+
+// Time each report stays in front; the change itself takes ~0.95s (see .research-card).
+const ROTATE_MS = 3500;
 
 const card =
   "overflow-hidden rounded-[8px] border border-black/[0.08] bg-white lg:rounded-[calc(var(--u)*8)]";
@@ -101,23 +109,35 @@ const headerKind =
 const focusRing =
   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black";
 
-function Label({ children }: { children: React.ReactNode }) {
+function ColumnHeading({ title, description }: { title: string; description: string }) {
   return (
-    <p className="flex items-center gap-2 text-[12px] font-medium leading-none text-black lg:gap-[calc(var(--u)*8)] lg:text-[calc(var(--u)*12)]">
-      <span aria-hidden="true" className="h-[7px] w-[7px] shrink-0 rounded-full bg-black lg:h-[calc(var(--u)*7)] lg:w-[calc(var(--u)*7)]" />
-      {children}
-    </p>
+    <div>
+      <h4 className="text-[18px] font-black leading-[22px] tracking-[-0.02em] text-black lg:text-[calc(var(--u)*18)] lg:leading-[calc(var(--u)*22)]">
+        {title}
+      </h4>
+      <p className="mt-[6px] text-[13.5px] leading-[20px] text-[#5f5f5f] lg:mt-[calc(var(--u)*6)] lg:text-[max(11.5px,calc(var(--u)*13))] lg:leading-[calc(var(--u)*19)]">
+        {description}
+      </p>
+    </div>
   );
 }
 
-function EnlargeButton({ label, onClick }: { label: string; onClick: () => void }) {
+function EnlargeButton({
+  label,
+  onClick,
+  fadeIn = false,
+}: {
+  label: string;
+  onClick: () => void;
+  fadeIn?: boolean;
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={label}
       /* Visual pill 32px (desktop: scaled); touch target 44px tall via the ::before overlay. */
-      className={`relative mr-[6px] inline-flex h-[32px] shrink-0 items-center gap-[5px] rounded-full border border-black/10 bg-white px-3 text-[12px] font-bold leading-none text-black before:absolute before:inset-x-0 before:-inset-y-[6px] before:content-[''] hover:border-black/30 lg:mr-[calc(var(--u)*8)] lg:h-auto lg:gap-[calc(var(--u)*4)] lg:px-[calc(var(--u)*8)] lg:py-[calc(var(--u)*4)] lg:text-[calc(var(--u)*9)] ${focusRing}`}
+      className={`relative mr-[6px] inline-flex h-[32px] shrink-0 items-center gap-[5px] rounded-full border border-black/10 bg-white px-3 text-[12px] font-bold leading-none text-black before:absolute before:inset-x-0 before:-inset-y-[6px] before:content-[''] hover:border-black/30 lg:mr-[calc(var(--u)*8)] lg:h-auto lg:gap-[calc(var(--u)*4)] lg:px-[calc(var(--u)*8)] lg:py-[calc(var(--u)*4)] lg:text-[calc(var(--u)*9)] ${fadeIn ? "research-fade-in" : ""} ${focusRing}`}
     >
       <svg viewBox="0 0 12 12" aria-hidden="true" className="h-[11px] w-[11px] lg:h-[calc(var(--u)*9)] lg:w-[calc(var(--u)*9)]" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
         <path d="M7 1.5h3.5V5M5 10.5H1.5V7M10.5 1.5 7 5M1.5 10.5 5 7" />
@@ -129,12 +149,23 @@ function EnlargeButton({ label, onClick }: { label: string; onClick: () => void 
 
 export function ResearchEvidence() {
   const [front, setFront] = useState(0);
+  // The report that just left the front: it fades out on its way to the back.
+  const [receding, setReceding] = useState<number | null>(null);
+  const bringToFront = (index: number) => {
+    if (index === front) {
+      return;
+    }
+    setReceding(front);
+    setFront(index);
+  };
   const [open, setOpen] = useState<Shot | null>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
-  const others = reports.map((_, i) => i).filter((i) => i !== front);
-  const depthOf = (i: number) => (i === front ? 0 : others.indexOf(i) + 1);
+  // Deck order: the report right behind the front is the next one. On each step every card
+  // moves forward one place and the former front goes to the back, so no card passes
+  // through another.
+  const depthOf = (i: number) => (i - front + reports.length) % reports.length;
 
   const viewportRef = useRef<HTMLDivElement>(null);
   const [zoomed, setZoomed] = useState(false);
@@ -144,6 +175,60 @@ export function ResearchEvidence() {
     setZoomed(false);
     setOpen(shot);
   };
+
+  /*
+    Auto-rotation. A timeout (not an interval) is scheduled after every change of the front
+    report, so a manual selection always restarts the full 2-second wait. Every condition
+    below pauses it; the timer and all listeners are cleared on change and on unmount.
+  */
+  const stackRef = useRef<HTMLDivElement>(null);
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [inView, setInView] = useState(false);
+  const [pageVisible, setPageVisible] = useState(true);
+  const [reducedMotion, setReducedMotion] = useState(true); // until measured on the client
+
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReducedMotion(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    const update = () => setPageVisible(document.visibilityState === "visible");
+    update();
+    document.addEventListener("visibilitychange", update);
+    return () => document.removeEventListener("visibilitychange", update);
+  }, []);
+
+  useEffect(() => {
+    const stack = stackRef.current;
+    if (!stack) {
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(Boolean(entry?.isIntersecting)),
+      { threshold: 0.35 },
+    );
+    observer.observe(stack);
+    return () => observer.disconnect();
+  }, []);
+
+  const rotating =
+    !reducedMotion && inView && pageVisible && !hovered && !focused && open === null;
+
+  useEffect(() => {
+    if (!rotating) {
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      setReceding(front);
+      setFront((front + 1) % reports.length);
+    }, ROTATE_MS);
+    return () => window.clearTimeout(timer);
+  }, [rotating, front]);
 
   // Open the native modal once its content is rendered (focus moves to Close; Escape, Close
   // and the backdrop close it and focus returns to the button that opened it).
@@ -284,36 +369,59 @@ export function ResearchEvidence() {
         lg:[--u:0.0831946755cqw]
       "
     >
-      <div className="mx-auto w-full max-w-[969px] lg:w-[calc(var(--u)*969)] lg:max-w-none">
-        <div className="flex flex-col items-center gap-2 text-center lg:gap-[calc(var(--u)*8)]">
-          <p className="text-[11px] font-bold uppercase leading-none tracking-[0.14em] text-[#7b8494] lg:text-[calc(var(--u)*11)]">
-            Examples of ForexLAB research
-          </p>
-          <p className="text-[11px] leading-[16px] text-[#8a8a8a] lg:text-[calc(var(--u)*11)] lg:leading-[calc(var(--u)*16)]">
-            Different systems · simulations and a historical snapshot, not live results
+      <div className="mx-auto w-full max-w-[969px] lg:w-[calc(var(--u)*1040)] lg:max-w-none">
+        <div className="flex flex-col items-center text-center">
+          <h3 className="text-balance text-[30px] font-black leading-[1.08] tracking-[-0.045em] text-black sm:text-[34px] lg:text-[calc(var(--u)*36)] lg:leading-[calc(var(--u)*40)]">
+            Beyond Backtests. Real Evidence.
+          </h3>
+          <p className="mt-4 max-w-[620px] text-[14px] leading-[21px] text-[#5f5f5f] lg:mt-[calc(var(--u)*14)] lg:max-w-[calc(var(--u)*660)] lg:text-[max(12px,calc(var(--u)*14))] lg:leading-[calc(var(--u)*21)]">
+            We use advanced robustness testing tools to challenge trading strategies, assess
+            their risks, and cross-check backtest results against real trading account
+            records.
           </p>
         </div>
 
         <div
           className="
-            mt-8 grid grid-cols-1 gap-12
-            lg:mt-[calc(var(--u)*30)]
-            lg:grid-cols-[calc(var(--u)*548)_calc(var(--u)*380)]
+            mt-10 grid grid-cols-1 gap-12
+            lg:mt-[calc(var(--u)*34)]
+            lg:grid-cols-[calc(var(--u)*506)_calc(var(--u)*506)]
             lg:justify-between
             lg:gap-0
           "
         >
-          {/* Backtests & robustness: layered stack */}
+          {/* Advanced robustness testing: layered stack */}
           <div className="mx-auto w-full max-w-[560px] lg:mx-0 lg:max-w-none">
-            <Label>Backtests &amp; robustness</Label>
+            <ColumnHeading
+              title="Advanced Robustness Testing"
+              description="Monte Carlo simulations, stress testing, and statistical validation."
+            />
             <div
+              ref={stackRef}
               role="group"
+              aria-roledescription="carousel"
               aria-label="Backtest and robustness examples"
+              onPointerEnter={(event) => {
+                if (event.pointerType === "mouse") setHovered(true);
+              }}
+              onPointerLeave={(event) => {
+                if (event.pointerType === "mouse") setHovered(false);
+              }}
+              onFocus={(event) => {
+                // Keyboard focus only: a mouse click focuses the header button too, and
+                // rotation must resume once the cursor leaves.
+                if (event.target.matches(":focus-visible")) setFocused(true);
+              }}
+              onBlur={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                  setFocused(false);
+                }
+              }}
               className="
-                relative mt-4 grid
+                relative mt-5 grid
                 [--peek:40px]
                 pt-[calc(var(--peek)*3)]
-                lg:mt-[calc(var(--u)*16)]
+                lg:mt-[calc(var(--u)*18)]
                 lg:[--peek:calc(var(--u)*22)]
               "
             >
@@ -323,12 +431,15 @@ export function ResearchEvidence() {
                 return (
                   <div
                     key={shot.id}
+                    onAnimationEnd={(event) => {
+                      if (event.animationName === "research-recede") setReceding(null);
+                    }}
                     className={`
                       ${card} ${isFront ? shadowFront : shadowBack}
+                      research-card
+                      ${receding === i && !isFront ? "research-card--receding" : ""}
                       [grid-area:1/1]
                       origin-top
-                      transition-[transform,box-shadow] duration-300 ease-out
-                      motion-reduce:transition-none
                     `}
                     style={{
                       transform: `translateY(calc(var(--peek) * ${-depth})) scale(${1 - depth * 0.045})`,
@@ -340,13 +451,13 @@ export function ResearchEvidence() {
                         type="button"
                         aria-pressed={isFront}
                         aria-label={isFront ? `${shot.title} (${shot.kind}), shown` : `Show ${shot.title} (${shot.kind})`}
-                        onClick={() => setFront(i)}
+                        onClick={() => bringToFront(i)}
                         className={`${headerMain} ${focusRing} focus-visible:outline-offset-[-2px] ${isFront ? "cursor-default" : "cursor-pointer hover:bg-[#f3f3f5]"}`}
                       >
-                        <span className={`${headerTitle} ${isFront ? "" : "text-[#4b4f58]"}`}>{shot.title}</span>
+                        <span className={`${headerTitle} transition-colors duration-700 ${isFront ? "" : "text-[#4b4f58]"}`}>{shot.title}</span>
                         <span className={headerKind}>{shot.kind}</span>
                       </button>
-                      {isFront ? <EnlargeButton label={`Enlarge ${shot.title}`} onClick={() => enlarge(shot)} /> : null}
+                      {isFront ? <EnlargeButton label={`Enlarge ${shot.title}`} onClick={() => enlarge(shot)} fadeIn /> : null}
                     </div>
                     <div inert={!isFront} className="relative aspect-[2.6/1] bg-white">
                       {/* Pointer shortcut; the keyboard path is the Enlarge button in the header. */}
@@ -372,16 +483,19 @@ export function ResearchEvidence() {
             </div>
           </div>
 
-          {/* Monitoring: single elevated frame */}
-          {/* Top padding = the stack's three peeks, so both front frames start level. */}
-          <div className="mx-auto w-full max-w-[560px] lg:mx-0 lg:max-w-none lg:pt-[calc(var(--u)*66)]">
-            <Label>Monitoring</Label>
-            <div className="mt-4 lg:mt-[calc(var(--u)*16)]">
+          {/* Real account verification: single frame, same width as the stack */}
+          <div className="mx-auto flex w-full max-w-[560px] flex-col lg:mx-0 lg:max-w-none">
+            <ColumnHeading
+              title="Real Account Verification"
+              description="Comparing simulated results with actual trading performance."
+            />
+            {/* Desktop: the column is as tall as the left one, so the frame sits centred
+                against the whole stack (its peeking headers included). */}
+            <div className="mt-5 lg:mt-[calc(var(--u)*18)] lg:flex lg:flex-1 lg:items-center">
               <figure className={`${card} ${shadowFront} w-full`}>
                 <figcaption className={header}>
                   <span className={headerMain}>
                     <span className={headerTitle}>Account monitoring</span>
-                    <span className={headerKind}>{monitoring.kind}</span>
                   </span>
                   <EnlargeButton label="Enlarge monitoring snapshot (April 2023)" onClick={() => enlarge(monitoring)} />
                 </figcaption>
@@ -401,6 +515,10 @@ export function ResearchEvidence() {
             </div>
           </div>
         </div>
+
+        <p className="mt-10 text-center text-[12px] leading-[18px] text-[#8a8a8a] lg:mt-[calc(var(--u)*28)] lg:text-[max(10.5px,calc(var(--u)*11.5))] lg:leading-[calc(var(--u)*17)]">
+          Illustrative research examples from different trading systems.
+        </p>
       </div>
 
       <dialog
@@ -428,7 +546,8 @@ export function ResearchEvidence() {
           <>
             <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-black/[0.06] bg-white px-4 py-2">
               <p className="min-w-0 py-1 text-[14px] font-bold text-black">
-                {open.title} <span className="font-normal text-[#707070]">· {open.kind}</span>
+                {open.title}
+                {open.kind ? <span className="font-normal text-[#707070]"> · {open.kind}</span> : null}
               </p>
               <div className="flex flex-wrap items-center gap-2">
                 <button
