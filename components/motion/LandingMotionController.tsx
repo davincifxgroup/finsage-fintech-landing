@@ -296,24 +296,30 @@ function setupInsightsProgress(
   const rails = selectAll<HTMLElement>("[data-motion^='insights-rail-']");
   const nodes = selectAll<HTMLElement>("[data-motion^='insights-node-']");
 
+  // One rail between each pair of consecutive steps.
   if (
     !section ||
     !header ||
     !tabs ||
     !copy ||
     !process ||
-    rails.length !== 2 ||
-    nodes.length !== 3
+    nodes.length < 2 ||
+    rails.length !== nodes.length - 1
   ) {
     return;
   }
+
+  const lit = { backgroundColor: "#000000", borderColor: "#000000" };
+  // Rails are drawn one after another between these timeline positions.
+  const railStart = 0.36;
+  const railSpan = 0.56 / rails.length;
 
   gsap.set(rails, {
     autoAlpha: 1,
     scaleY: 0,
     transformOrigin: "top center",
   });
-  gsap.set(nodes[0], { backgroundColor: "#000000", borderColor: "#000000" });
+  gsap.set(nodes[0], lit);
   gsap.set(nodes.slice(1), {
     backgroundColor: "#e8e8e8",
     borderColor: "#dedede",
@@ -352,67 +358,36 @@ function setupInsightsProgress(
       )
       .from(
         cards,
-        { autoAlpha: 0.14, x: 44, stagger: 0.04, duration: 0.18 },
+        { autoAlpha: 0.14, x: 44, stagger: 0.03, duration: 0.18 },
         0.25,
-      )
-      .to(rails[0], { scaleY: 1, duration: 0.22 }, 0.39)
-      .to(
-        nodes[1],
-        {
-          backgroundColor: "#000000",
-          borderColor: "#000000",
-          scale: 1.2,
-          duration: 0.08,
-        },
-        0.55,
-      )
-      .to(nodes[1], { scale: 1, duration: 0.06 }, 0.63)
-      .to(rails[1], { scaleY: 1, duration: 0.22 }, 0.65)
-      .to(
-        nodes[2],
-        {
-          backgroundColor: "#000000",
-          borderColor: "#000000",
-          scale: 1.2,
-          duration: 0.08,
-        },
-        0.82,
-      )
-      .to(nodes[2], { scale: 1, duration: 0.06 }, 0.9)
-      .to(process, { scale: 1.025, duration: 0.1 }, 0.89)
-      .to(process, { scale: 1, duration: 0.1 }, 0.99);
+      );
+
+    rails.forEach((rail, index) => {
+      const at = railStart + index * railSpan;
+      const node = nodes[index + 1];
+      timeline
+        .to(rail, { scaleY: 1, duration: railSpan * 0.75 }, at)
+        .to(node, { ...lit, scale: 1.2, duration: 0.05 }, at + railSpan * 0.7)
+        .to(node, { scale: 1, duration: 0.04 }, at + railSpan * 0.7 + 0.05);
+    });
   });
 
   matchMedia.add("(max-width: 1023px)", () => {
-    gsap
-      .timeline({
-        defaults: { ease: "power2.inOut" },
-        scrollTrigger: {
-          trigger: process,
-          start: "top 70%",
-          toggleActions: "play none none reverse",
-        },
-      })
-      .to(rails[0], { scaleY: 1, duration: 0.5 }, 0.15)
-      .to(
-        nodes[1],
-        {
-          backgroundColor: "#000000",
-          borderColor: "#000000",
-          duration: 0.18,
-        },
-        0.6,
-      )
-      .to(rails[1], { scaleY: 1, duration: 0.55 }, 0.9)
-      .to(
-        nodes[2],
-        {
-          backgroundColor: "#000000",
-          borderColor: "#000000",
-          duration: 0.2,
-        },
-        1.5,
-      );
+    const timeline = gsap.timeline({
+      defaults: { ease: "power2.inOut" },
+      scrollTrigger: {
+        trigger: process,
+        start: "top 70%",
+        toggleActions: "play none none reverse",
+      },
+    });
+
+    rails.forEach((rail, index) => {
+      const at = 0.15 + index * 0.45;
+      timeline
+        .to(rail, { scaleY: 1, duration: 0.4 }, at)
+        .to(nodes[index + 1], { ...lit, duration: 0.16 }, at + 0.38);
+    });
   });
 }
 

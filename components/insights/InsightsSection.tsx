@@ -2,39 +2,40 @@ import { activeBrokers } from "@/content/brokers";
 
 import { ResearchEvidence } from "./ResearchEvidence";
 
-// What every evaluation documents. Labels only: no metrics are shown.
-// Non-interactive labels. The first (black) chip is a caption, not a selected tab.
-const tabs = [
-  "Every evaluation documents",
-  "Backtests",
-  "Tick Data",
-  "Trading Costs",
-  "Out-of-Sample",
-  "Forward",
+// Evaluation methodology. Labels only: no metrics are shown. Non-interactive.
+const methodology = [
+  "Real-Tick Backtesting",
+  "Realistic Execution Costs",
+  "Out-of-Sample Validation",
+  "Risk & Robustness Analysis",
+  "Forward Performance Verification",
 ];
 
 // Generated from active Rebate Broker records (see content/brokers.ts).
-const integrations = activeBrokers.map((broker) => broker.name);
+// Compatibility is confirmed per advisor; brokers do not endorse listed advisors.
+const brokers = activeBrokers.map((broker) => broker.name);
 
-// Illustrative evaluation stages, not the status of any real advisor.
-const pipeline = [
+// ForexLAB's research and selection process (the same for every advisor).
+const steps = [
   {
-    title: "Submission",
-    status: "Step 1",
-    description: "The developer submits the EA and terms",
-    active: true,
+    title: "Discovery",
+    description: "AI-assisted research to identify promising trading algorithms.",
   },
   {
-    title: "Evaluation",
-    status: "Step 2",
-    description: "Backtests, out-of-sample and forward",
-    active: true,
+    title: "Testing",
+    description: "Real-tick backtests, trading costs, and out-of-sample testing.",
   },
   {
-    title: "Listing",
-    status: "Step 3",
-    description: "Published only with approved evidence",
-    active: false,
+    title: "Verification",
+    description: "Cross-checking backtests against verified trading records.",
+  },
+  {
+    title: "Due Diligence",
+    description: "User feedback, developer reputation, and strategy risks.",
+  },
+  {
+    title: "Selection",
+    description: "Only approved EAs with favorable licensing terms.",
   },
 ];
 
@@ -139,8 +140,8 @@ export function InsightsSection() {
           <h2
             data-px="insights.title"
             className="
-              text-center text-[36px] font-black
-              leading-[0.98] tracking-[-0.05em] text-black
+              text-center text-[34px] font-black
+              leading-[1.02] tracking-[-0.05em] text-black
               sm:text-[42px]
 
               lg:absolute
@@ -154,78 +155,76 @@ export function InsightsSection() {
               lg:tracking-[-0.05em]
             "
           >
-            <span className="block whitespace-nowrap">
-              Independent Evaluation,
+            <span className="block text-balance lg:whitespace-nowrap">
+              A Backtest Is Not Proof.
             </span>
 
-            <span className="block whitespace-nowrap">
-              Before Any Listing.
+            <span className="block text-balance lg:whitespace-nowrap">
+              Our Evaluation Goes Further.
             </span>
           </h2>
 
           <p
             data-px="insights.subtitle"
             className="
-              mt-6 text-center
-              text-[12px] font-normal leading-[18px]
-              text-[#696969]
-              sm:text-[13px]
+              mt-6 max-w-[560px] text-center
+              text-[14px] font-normal leading-[21px]
+              text-[#5f5f5f]
 
               lg:absolute
               lg:left-1/2
-              lg:top-[calc(var(--u)*178)]
+              lg:top-[calc(var(--u)*174)]
               lg:mt-0
               lg:w-max
+              lg:max-w-none
               lg:-translate-x-1/2
-              lg:text-[calc(var(--u)*13)]
-              lg:leading-[calc(var(--u)*18)]
+              lg:text-[calc(var(--u)*14)]
+              lg:leading-[calc(var(--u)*20)]
             "
           >
-            Every Expert Advisor is tested by ForexLAB before it can reach the catalog.
+            Every Expert Advisor must undergo independent technical evaluation before
+            it can be listed on ForexLAB Access.
           </p>
 
           <ul
             data-px="insights.tabs"
-            aria-label="What each evaluation documents"
+            aria-label="Evaluation methodology"
             className="
               mt-8 flex max-w-full
-              flex-wrap items-center justify-center gap-[2px]
+              flex-wrap items-center justify-center gap-[4px]
 
               lg:absolute
               lg:left-1/2
-              lg:top-[calc(var(--u)*228)]
+              lg:top-[calc(var(--u)*226)]
               lg:mt-0
+              lg:w-max
               lg:-translate-x-1/2
               lg:flex-nowrap
-              lg:gap-[calc(var(--u)*2)]
+              lg:gap-[calc(var(--u)*4)]
             "
           >
-            {tabs.map((tab, index) => (
+            {methodology.map((label, index) => (
               <li
-                key={tab}
+                key={label}
                 data-px={`insights.tab.${index + 1}`}
-                className={`
+                className="
                   inline-flex items-center whitespace-nowrap
-                  h-[27px]
+                  h-[28px]
                   rounded-[5px]
-                  px-[12.5px]
-                  text-[10px]
-                  font-normal
+                  bg-[#f3f3f5]
+                  px-[12px]
+                  text-[11px]
+                  font-medium
                   leading-none
+                  text-[#333]
 
-                  lg:h-[calc(var(--u)*29)]
+                  lg:h-[calc(var(--u)*30)]
                   lg:rounded-[calc(var(--u)*5)]
-                  lg:px-[calc(var(--u)*12.5)]
-                  lg:text-[calc(var(--u)*10)]
-
-                  ${
-                    index === 0
-                      ? "bg-black text-white"
-                      : "bg-[#f3f3f5] text-[#555]"
-                  }
-                `}
+                  lg:px-[calc(var(--u)*13)]
+                  lg:text-[max(10.5px,calc(var(--u)*11.5))]
+                "
               >
-                {tab}
+                {label}
               </li>
             ))}
           </ul>
@@ -249,24 +248,191 @@ export function InsightsSection() {
             lg:h-[calc(var(--u)*460)]
             lg:w-[calc(var(--u)*969)]
             lg:max-w-none
-            lg:grid-cols-[calc(var(--u)*350)_calc(var(--u)*475)]
+            lg:grid-cols-[calc(var(--u)*350)_calc(var(--u)*535)]
             lg:justify-between
             lg:gap-0
           "
         >
           {/* ==================================================== */}
-          {/* LEFT COPY                                            */}
+          {/* PROCESS PANEL (first on mobile, right on desktop)    */}
           {/* ==================================================== */}
 
           <div
+            data-px="insights.process"
+            className="
+              relative
+              overflow-hidden
+              rounded-[6px]
+              bg-[#f4f4f6]
+              px-4 py-8
+              sm:px-8
+
+              lg:order-2
+              lg:self-center
+              lg:w-[calc(var(--u)*535)]
+              lg:rounded-[calc(var(--u)*6)]
+              lg:py-[calc(var(--u)*34)]
+              lg:pl-[calc(var(--u)*58)]
+              lg:pr-[calc(var(--u)*34)]
+            "
+          >
+            <ol
+              data-px="insights.pipeline"
+              aria-label="Research and selection process"
+              className="
+                relative ml-[24px]
+                flex flex-col gap-[8px]
+
+                lg:ml-0
+                lg:gap-[calc(var(--u)*6)]
+              "
+            >
+              {steps.map((step, index) => {
+                const number = String(index + 1).padStart(2, "0");
+                const last = index === steps.length - 1;
+                return (
+                  <li
+                    key={step.title}
+                    data-px={`insights.pipeline.${index + 1}`}
+                    className="relative"
+                  >
+                    {!last ? (
+                      <>
+                        {/* Static track, then the rail drawn over it on scroll */}
+                        <span
+                          aria-hidden="true"
+                          className="
+                            absolute left-[-20px] top-[21px]
+                            h-[calc(100%+8px)] w-px bg-[#dedede]
+
+                            lg:left-[calc(var(--u)*-20)]
+                            lg:top-[calc(var(--u)*25)]
+                            lg:h-[calc(100%+var(--u)*6)]
+                            lg:w-[calc(var(--u)*1)]
+                          "
+                        />
+                        <span
+                          data-motion={`insights-rail-${index + 1}`}
+                          aria-hidden="true"
+                          className="
+                            absolute left-[-20px] top-[21px] z-10
+                            h-[calc(100%+8px)] w-px origin-top bg-black
+
+                            lg:left-[calc(var(--u)*-20)]
+                            lg:top-[calc(var(--u)*25)]
+                            lg:h-[calc(100%+var(--u)*6)]
+                            lg:w-[calc(var(--u)*1)]
+                          "
+                        />
+                      </>
+                    ) : null}
+
+                    {/* Timeline node */}
+                    <span
+                      data-motion={`insights-node-${index + 1}`}
+                      aria-hidden="true"
+                      className="
+                        absolute z-20
+                        left-[-23px] top-[17px]
+                        h-[8px] w-[8px]
+                        rounded-full border border-black bg-black
+
+                        lg:left-[calc(var(--u)*-23)]
+                        lg:top-[calc(var(--u)*21)]
+                        lg:h-[calc(var(--u)*8)]
+                        lg:w-[calc(var(--u)*8)]
+                      "
+                    />
+
+                    {/* Step */}
+                    <div
+                      data-px={`insights.pipeline.${index + 1}.card`}
+                      className="
+                        flex items-start gap-3
+                        rounded-[5px] bg-white
+                        px-[14px] py-[12px]
+
+                        lg:min-h-[calc(var(--u)*50)]
+                        lg:items-center
+                        lg:gap-[calc(var(--u)*12)]
+                        lg:rounded-[calc(var(--u)*5)]
+                        lg:px-[calc(var(--u)*14)]
+                        lg:py-[calc(var(--u)*8)]
+                      "
+                    >
+                      <span
+                        aria-hidden="true"
+                        data-px={`insights.pipeline.${index + 1}.number`}
+                        className="
+                          w-[26px] shrink-0
+                          text-[16px] font-black leading-[18px]
+                          tracking-[-0.02em] text-black tabular-nums
+
+                          lg:w-[calc(var(--u)*26)]
+                          lg:text-[calc(var(--u)*16)]
+                          lg:leading-[calc(var(--u)*18)]
+                        "
+                      >
+                        {number}
+                      </span>
+
+                      <div
+                        className="
+                          flex min-w-0 flex-1 flex-col gap-[4px]
+
+                          lg:flex-row lg:items-center
+                          lg:gap-[calc(var(--u)*12)]
+                        "
+                      >
+                        <h4
+                          data-px={`insights.pipeline.${index + 1}.title`}
+                          className="
+                            text-[14px] font-bold leading-[18px] text-black
+
+                            lg:w-[calc(var(--u)*100)]
+                            lg:shrink-0
+                            lg:whitespace-nowrap
+                            lg:text-[calc(var(--u)*14)]
+                            lg:leading-[calc(var(--u)*18)]
+                          "
+                        >
+                          <span className="sr-only">{`Step ${number}: `}</span>
+                          {step.title}
+                        </h4>
+
+                        <p
+                          data-px={`insights.pipeline.${index + 1}.description`}
+                          className="
+                            text-[12.5px] font-normal leading-[18px] text-[#666]
+
+                            lg:text-[max(11px,calc(var(--u)*12.5))]
+                            lg:leading-[calc(var(--u)*17)]
+                          "
+                        >
+                          {step.description}
+                        </p>
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+
+          {/* ==================================================== */}
+          {/* BROKER SELECTION (below on mobile, left on desktop)  */}
+          {/* ==================================================== */}
+
+          <div
+            id="brokers"
             data-px="insights.copy"
             className="
               flex flex-col
 
-              lg:relative
+              lg:order-1
               lg:h-[calc(var(--u)*460)]
               lg:w-[calc(var(--u)*350)]
-              lg:block
+              lg:justify-center
             "
           >
             {/* Label */}
@@ -274,10 +440,6 @@ export function InsightsSection() {
               data-px="insights.label"
               className="
                 flex items-center gap-[8px]
-
-                lg:absolute
-                lg:left-0
-                lg:top-[calc(var(--u)*53)]
                 lg:gap-[calc(var(--u)*8)]
               "
             >
@@ -299,73 +461,114 @@ export function InsightsSection() {
                   lg:text-[calc(var(--u)*12)]
                 "
               >
-                Methodology
+                Broker Selection
               </span>
             </div>
 
-            {/* Feature title */}
             <h3
               data-px="insights.feature-title"
               className="
-                mt-9 max-w-[330px]
-                text-[27px] font-black
-                leading-[30px]
+                mt-6 max-w-[330px]
+                text-[26px] font-black
+                leading-[29px]
                 tracking-[-0.035em]
                 text-black
 
-                lg:absolute
-                lg:left-[calc(var(--u)*3)]
-                lg:top-[calc(var(--u)*102)]
-                lg:mt-0
-                lg:w-[calc(var(--u)*330)]
+                lg:mt-[calc(var(--u)*22)]
                 lg:max-w-none
-                lg:text-[calc(var(--u)*27)]
-                lg:leading-[calc(var(--u)*30)]
+                lg:text-[calc(var(--u)*26)]
+                lg:leading-[calc(var(--u)*29)]
               "
             >
-              Reproducible Tests,
+              Selected for
               <br />
-              Real Broker Conditions,
-              <br />
-              Dated Verification.
+              Algorithmic Trading.
             </h3>
 
-            {/* Description */}
             <p
               data-px="insights.description"
               className="
-                mt-5 max-w-[350px]
-                text-[13px]
+                mt-4 max-w-[350px]
+                text-[13.5px]
                 font-normal
                 leading-[21px]
-                text-[#707070]
+                text-[#5f5f5f]
 
-                lg:absolute
-                lg:left-[calc(var(--u)*1)]
-                lg:top-[calc(var(--u)*211)]
-                lg:mt-0
-                lg:w-[calc(var(--u)*350)]
+                lg:mt-[calc(var(--u)*14)]
                 lg:max-w-none
-                lg:text-[calc(var(--u)*13)]
+                lg:text-[max(11.5px,calc(var(--u)*13.5))]
                 lg:leading-[calc(var(--u)*21)]
               "
             >
-              Every result states its test period, tick data, spread and slippage
-              model, out-of-sample and forward checks, and known limitations.
+              We partner with reputable brokers selected for their execution quality,
+              competitive trading costs, and suitability for automated strategies.
             </p>
 
-            {/* Execute */}
+            <ul
+              data-px="insights.integrations"
+              aria-label="Partner brokers"
+              className="
+                mt-5
+                flex flex-wrap gap-[4px]
+
+                lg:mt-[calc(var(--u)*18)]
+                lg:gap-[calc(var(--u)*4)]
+              "
+            >
+              {brokers.map((name, index) => (
+                <li
+                  key={name}
+                  data-px={`insights.integration.${index + 1}`}
+                  className="
+                    inline-flex
+                    h-[26px]
+                    items-center
+                    justify-center
+                    rounded-[4px]
+                    border border-[#e6e6ea]
+                    bg-white
+                    px-[11px]
+                    text-[11px]
+                    font-medium
+                    leading-none
+                    text-black
+
+                    lg:h-[calc(var(--u)*26)]
+                    lg:rounded-[calc(var(--u)*4)]
+                    lg:border-[length:calc(var(--u)*1)]
+                    lg:px-[calc(var(--u)*11)]
+                    lg:text-[max(10.5px,calc(var(--u)*11.5))]
+                  "
+                >
+                  {name}
+                </li>
+              ))}
+            </ul>
+
+            <p
+              data-px="insights.integrations-note"
+              className="
+                mt-3 max-w-[350px]
+                text-[11.5px] leading-[17px] text-[#808080]
+
+                lg:mt-[calc(var(--u)*11)]
+                lg:max-w-none
+                lg:text-[max(10.5px,calc(var(--u)*11.5))]
+                lg:leading-[calc(var(--u)*17)]
+              "
+            >
+              Compatibility is confirmed separately for each advisor. Brokers do not
+              endorse or certify the advisors listed on ForexLAB Access.
+            </p>
+
             <a
               data-px="insights.execute"
               href="#how-it-works"
               className="
-                mt-10 inline-flex w-fit items-center
+                mt-7 inline-flex w-fit items-center
                 text-[12px] font-bold leading-none text-black
 
-                lg:absolute
-                lg:left-[calc(var(--u)*1)]
-                lg:top-[calc(var(--u)*297)]
-                lg:mt-0
+                lg:mt-[calc(var(--u)*26)]
                 lg:text-[calc(var(--u)*12)]
               "
             >
@@ -385,275 +588,6 @@ export function InsightsSection() {
                 →
               </span>
             </a>
-
-            {/* Integrations */}
-            <div
-              id="brokers"
-              data-px="insights.integrations"
-              className="
-                mt-12
-
-                lg:absolute
-                lg:left-[calc(var(--u)*1)]
-                lg:top-[calc(var(--u)*365)]
-                lg:mt-0
-              "
-            >
-              <p
-                className="
-                  text-[12px]
-                  leading-none
-                  text-[#707070]
-
-                  lg:text-[calc(var(--u)*12)]
-                "
-              >
-                Broker partnerships · compatibility confirmed per advisor
-              </p>
-
-              <div
-                className="
-                  mt-[11px]
-                  flex flex-wrap gap-[4px]
-
-                  lg:mt-[calc(var(--u)*11)]
-                  lg:w-[calc(var(--u)*350)]
-                  lg:gap-[calc(var(--u)*4)]
-                "
-              >
-                {integrations.map((item, index) => (
-                  <span
-                    key={item}
-                    data-px={`insights.integration.${index + 1}`}
-                    className="
-                      inline-flex
-                      h-[24px]
-                      items-center
-                      justify-center
-                      rounded-[3px]
-                      bg-[#f5f5f7]
-                      px-[12px]
-                      text-[10px]
-                      font-medium
-                      leading-none
-                      text-black
-
-                      lg:h-[calc(var(--u)*24)]
-                      lg:rounded-[calc(var(--u)*3)]
-                      lg:px-[calc(var(--u)*12)]
-                      lg:text-[calc(var(--u)*10)]
-                    "
-                  >
-                    {item}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* ==================================================== */}
-          {/* RIGHT PROCESS PANEL                                  */}
-          {/* ==================================================== */}
-
-          <div
-            data-px="insights.process"
-            className="
-              relative
-              min-h-[460px]
-              overflow-hidden
-              rounded-[6px]
-              bg-[#f4f4f6]
-
-              lg:h-[calc(var(--u)*460)]
-              lg:min-h-0
-              lg:w-[calc(var(--u)*475)]
-              lg:rounded-[calc(var(--u)*6)]
-            "
-          >
-            <div
-              data-px="insights.pipeline"
-              className="
-                relative
-                mx-auto
-                flex w-[242px]
-                max-w-full
-                flex-col gap-[12px]
-                py-16
-
-                lg:absolute
-                lg:left-[calc(var(--u)*128)]
-                lg:top-[calc(var(--u)*101)]
-                lg:mx-0
-                lg:w-[calc(var(--u)*242)]
-                lg:max-w-none
-                lg:gap-[calc(var(--u)*12)]
-                lg:py-0
-              "
-            >
-              {/* Timeline */}
-              <div
-                aria-hidden="true"
-                className="
-                  absolute
-                  bottom-[54px]
-                  left-[-20px]
-                  top-[11px]
-                  w-px
-                  bg-[#dedede]
-
-                  lg:bottom-[calc(var(--u)*54)]
-                  lg:left-[calc(var(--u)*-20)]
-                  lg:top-[calc(var(--u)*11)]
-                  lg:w-[calc(var(--u)*1)]
-                "
-              />
-
-              {pipeline.map((item, index) => (
-                <div
-                  key={item.title}
-                  data-px={`insights.pipeline.${index + 1}`}
-                  className="relative"
-                >
-                  {index < pipeline.length - 1 ? (
-                    <span
-                      data-motion={`insights-rail-${index + 1}`}
-                      aria-hidden="true"
-                      className="
-                        absolute left-[-20px] top-[17px] z-10
-                        h-[calc(100%+12px)] w-px origin-top bg-black opacity-0
-
-                        lg:left-[calc(var(--u)*-20)]
-                        lg:top-[calc(var(--u)*17)]
-                        lg:h-[calc(100%+var(--u)*12)]
-                        lg:w-[calc(var(--u)*1)]
-                      "
-                    />
-                  ) : null}
-
-                  {/* Timeline node */}
-                  <span
-                    data-motion={`insights-node-${index + 1}`}
-                    aria-hidden="true"
-                    className={`
-                      absolute z-20
-                      left-[-23px]
-                      top-[9px]
-                      h-[8px]
-                      w-[8px]
-                      rounded-full
-
-                      lg:left-[calc(var(--u)*-23)]
-                      lg:top-[calc(var(--u)*9)]
-                      lg:h-[calc(var(--u)*8)]
-                      lg:w-[calc(var(--u)*8)]
-
-                      ${
-                        item.active
-                          ? "bg-black"
-                          : "border border-[#dedede] bg-[#e8e8e8]"
-                      }
-                    `}
-                  />
-
-                  {/* Card */}
-                  <div
-                    data-px={`insights.pipeline.${index + 1}.card`}
-                    className={`
-                      rounded-[5px]
-                      bg-white
-                      px-[16px]
-                      py-[17px]
-
-                      lg:rounded-[calc(var(--u)*5)]
-                      lg:px-[calc(var(--u)*16)]
-                      lg:py-[calc(var(--u)*17)]
-
-                      ${
-                        index === 2
-                          ? "ml-[11px] bg-white/80 lg:ml-[calc(var(--u)*11)]"
-                          : ""
-                      }
-                    `}
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <h4
-                        data-px={`insights.pipeline.${index + 1}.title`}
-                        className="
-                          whitespace-nowrap
-                          text-[13px]
-                          font-bold
-                          leading-none
-                          text-black
-
-                          lg:text-[calc(var(--u)*13)]
-                        "
-                      >
-                        {item.title}
-                      </h4>
-
-                      <span
-                        data-px={`insights.pipeline.${index + 1}.status`}
-                        className="
-                          shrink-0
-                          rounded-full
-                          bg-[#f7f7f7]
-                          px-[8px]
-                          py-[4px]
-                          text-[9px]
-                          font-medium
-                          leading-none
-                          text-black
-
-                          lg:rounded-[calc(var(--u)*999)]
-                          lg:px-[calc(var(--u)*8)]
-                          lg:py-[calc(var(--u)*4)]
-                          lg:text-[calc(var(--u)*9)]
-                        "
-                      >
-                        {item.status}
-                      </span>
-                    </div>
-
-                    <p
-                      data-px={`insights.pipeline.${index + 1}.description`}
-                      className="
-                        mt-[13px]
-                        whitespace-nowrap
-                        text-[11px]
-                        font-normal
-                        leading-none
-                        text-[#808080]
-
-                        lg:mt-[calc(var(--u)*13)]
-                        lg:text-[calc(var(--u)*11)]
-                      "
-                    >
-                      {item.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* right decorative mark */}
-            <div
-              aria-hidden="true"
-              className="
-                absolute
-                bottom-[67px]
-                right-[89px]
-                hidden
-                h-[68px]
-                w-px
-                bg-[#ebebeb]
-
-                lg:block
-                lg:bottom-[calc(var(--u)*67)]
-                lg:right-[calc(var(--u)*89)]
-                lg:h-[calc(var(--u)*68)]
-                lg:w-[calc(var(--u)*1)]
-              "
-            />
           </div>
         </div>
       </div>
