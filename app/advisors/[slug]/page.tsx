@@ -81,14 +81,15 @@ export default async function AdvisorPage({ params }: { params: Promise<Params> 
           </div>
 
           <aside aria-label="License price" className="rounded-[6px] bg-[#f4f4f6] p-7 lg:sticky lg:top-8">
-            <p className="text-[12px] text-[#707070]">Agreed license price</p>
+            <p className="text-[12px] text-[#707070]">License price · <span className="font-bold text-black">No upfront payment</span></p>
             <p className="mt-2 text-[44px] font-black leading-none tracking-[-0.04em]">{formatPrice(advisor.currentPrice)}</p>
             <p className="mt-2 text-[12px] text-[#707070]">
               {advisor.currentPrice.currency} · in effect since {formatDate(advisor.currentPrice.effectiveFrom)}
             </p>
             <p className="mt-6 text-[13px] leading-[20px] text-[#333]">
-              Nothing to pay upfront. Part of the commission your broker pays us on your trading covers this price over time.
-              After that, the corresponding share becomes your ForexLAB Rebate cashback.
+              No upfront payment: broker partner commission funds the service and this price is never invoiced. Covering it
+              does not grant ownership or permanent access; access continues while your account stays eligible. Access
+              accounts do not earn cashback.
             </p>
             <div className="mt-6 rounded-[5px] bg-white px-4 py-3 text-[12px] leading-[18px] text-[#555]">
               Select this advisor in your ForexLAB dashboard, then choose the trading account. ForexLAB confirms the

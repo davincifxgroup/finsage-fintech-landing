@@ -11,37 +11,37 @@ const roles = [
     title: "No Upfront Payment",
     description: (
       <>
-        You receive approved access without
+        The developer issues the license
         <br />
-        paying the license price in advance.
+        after we approve your account.
         <br />
-        Your trading conditions stay the same.
+        Nothing upfront, and never a debt.
       </>
     ),
     icon: "license",
   },
   {
-    title: "Commissions Cover the Price",
+    title: "Partner Commission",
     description: (
       <>
-        Part of the commission your broker
+        The broker’s partner commission
         <br />
-        pays us on your trading covers the
+        funds the service. Access accounts
         <br />
-        agreed license price over time.
+        do not earn cashback.
       </>
     ),
     icon: "coins",
   },
   {
-    title: "Cashback After That",
+    title: "Access While Eligible",
     description: (
       <>
-        Once the price is covered, the
+        Access continues while the account
         <br />
-        corresponding share becomes your
+        stays in the partner group. After
         <br />
-        ForexLAB Rebate cashback.
+        inactivity, restore it on request.
       </>
     ),
     icon: "wallet",
@@ -153,7 +153,7 @@ export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
               lg:leading-[calc(var(--u)*52)]
             "
           >
-            How the License Price Is Covered.
+            How Access Is Funded.
           </h2>
 
           <p
@@ -170,9 +170,9 @@ export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
               lg:leading-[calc(var(--u)*19)]
             "
           >
-            Trading risk always stays with you. Returns are never guaranteed, and{" "}
+            Trading risk stays with you and returns are never guaranteed.{" "}
             <br className="hidden lg:block" />
-            there is no fixed date by which a license price is covered.
+            Covering the price does not grant ownership or permanent access.
           </p>
         </div>
 
@@ -524,6 +524,7 @@ export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
                               lg:leading-[calc(var(--u)*20)]
                             "
                           >
+                            <span className="mr-[6px] text-[11px] font-normal text-white/80 lg:text-[calc(var(--u)*11)]">No upfront payment</span>
                             {formatPrice(advisor.currentPrice)}
                           </span>
                         </span>
@@ -554,7 +555,7 @@ export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
                     lg:leading-[calc(var(--u)*17)]
                   "
                 >
-                  Prices are license prices, not paid upfront: commissions from your trading cover them over time.
+                  License prices are not paid upfront. Covering a price does not grant ownership or permanent access.
                 </p>
                 </>
               ) : (
@@ -618,7 +619,7 @@ export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
 
 /**
  * Benefit icons: one family (24px grid, 1.6px round strokes, no fills) shown in 46px
- * tinted tiles. license = key, coins = payment progress, wallet = cashback.
+ * tinted tiles. license = key, coins = partner commission, wallet = continued access.
  */
 function RoleIcon({ type }: { type: string }) {
   const common = {

@@ -213,11 +213,11 @@ export function FinalCTA() {
                 lg:tracking-[0.005em]
               "
             >
-              Create your account, link an eligible broker account and choose an advisor.{" "}
+              Create your account, link an eligible partner account and choose an advisor.{" "}
               <br className="hidden lg:block" />
-              Access does not change spreads or commissions. Trading involves risk of capital{" "}
+              Spreads and commissions stay the same; Access accounts earn no cashback.{" "}
               <br className="hidden lg:block" />
-              loss, and past or simulated results never guarantee future performance.
+              Trading involves risk of loss; past or simulated results never guarantee returns.
             </p>
 
             {/* ================================================= */}

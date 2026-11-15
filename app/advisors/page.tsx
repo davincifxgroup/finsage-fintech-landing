@@ -26,7 +26,8 @@ export default async function AdvisorsPage() {
           </h1>
           <p className="mt-6 text-[15px] leading-[24px] text-[#555]">
             Every advisor is published with dated evaluation evidence, known limitations, approved broker
-            compatibility and its agreed license price. Trading risk always stays with you.
+            compatibility and its license price, with no upfront payment. Access continues while your partner
+            account stays eligible, and Access accounts do not earn cashback. Trading risk always stays with you.
           </p>
         </div>
 
@@ -48,7 +49,7 @@ export default async function AdvisorsPage() {
                   ) : null}
                   <span className="mt-auto flex items-end justify-between gap-4 pt-8">
                     <span>
-                      <span className="block text-[11px] text-[#707070]">License price</span>
+                      <span className="block text-[11px] text-[#707070]">License price · No upfront payment</span>
                       <span className="text-[22px] font-black leading-none">{formatPrice(advisor.currentPrice)}</span>
                     </span>
                     <span className="text-[13px] font-bold group-hover:underline">View details →</span>

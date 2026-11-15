@@ -12,7 +12,7 @@ const stripFacts: { text: string; from: "base" | "sm" | "md" | "lg" | "xl" }[] =
   { text: "No upfront license payment", from: "base" },
   { text: "MT4 / MT5 Expert Advisors", from: "sm" },
   { text: "Independently evaluated", from: "lg" },
-  { text: "Cashback once the license is covered", from: "xl" },
+  { text: "License issued after account approval", from: "xl" },
 ];
 
 const factVisibility = {
@@ -552,7 +552,7 @@ export function Hero() {
                 transformOrigin: "center center",
               }}
             >
-              Expert-Tested Trading Bots.
+              Tested Expert Advisors.
             </span>
 
             <span
@@ -563,7 +563,7 @@ export function Hero() {
                 transformOrigin: "center center",
               }}
             >
-              Without the Upfront Price.
+              No Upfront License Payment.
             </span>
           </h1>
 
@@ -614,9 +614,9 @@ export function Hero() {
                 max-md:leading-[19px]
               "
             >
-              Nothing to pay upfront: part of the commission your broker pays us on your
-              trading covers the license price over time. You get the advisor once we
-              confirm your account and the developer issues your license.{" "}
+              No upfront license payment: broker partner commission funds the service. The
+              developer issues your license once we approve your partner account, and access
+              continues while the account stays eligible.{" "}
               <a href="#how-it-works" className="whitespace-nowrap underline underline-offset-2">
                 How It Works →
               </a>

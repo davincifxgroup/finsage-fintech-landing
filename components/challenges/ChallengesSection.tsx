@@ -1,5 +1,5 @@
 // Non-interactive labels. The first (black) chip is a caption, not a selected tab.
-const tabs = ["Your path", "Advisor", "Broker account", "Approval", "Payoff", "Cashback"];
+const tabs = ["Your path", "Advisor", "Partner account", "Approval", "License", "Eligibility"];
 
 const steps = [
   {
@@ -9,8 +9,8 @@ const steps = [
   },
   {
     number: "02",
-    title: "Verify your broker account",
-    description: "Link an eligible account in the ForexLAB partner program.",
+    title: "Use an eligible partner account",
+    description: "Link an account in ForexLAB’s broker partner group. Compatibility depends on the advisor; existing accounts are checked individually.",
   },
   {
     number: "03",
@@ -19,13 +19,13 @@ const steps = [
   },
   {
     number: "04",
-    title: "Commissions cover the price",
-    description: "Part of the commission your broker pays us on your trading covers the agreed license price over time.",
+    title: "No upfront payment",
+    description: "Broker partner commission funds the service. Nothing is invoiced, and Access accounts do not earn cashback.",
   },
   {
     number: "05",
-    title: "Cashback after that",
-    description: "Once the price is covered, the corresponding share becomes your ForexLAB Rebate cashback.",
+    title: "Access while eligible",
+    description: "Access continues while the account stays in the partner group. A suspension for inactivity can be restored on request.",
   },
 ];
 
@@ -176,7 +176,7 @@ export function ChallengesSection() {
           >
             From Approval
             <br />
-            to Cashback.
+            to Access.
           </h2>
 
           <p
@@ -193,11 +193,11 @@ export function ChallengesSection() {
               lg:leading-[calc(var(--u)*20)]
             "
           >
-            Choose an advisor, verify your broker account and{" "}
+            Choose an advisor, verify your partner account and{" "}
             <br className="hidden lg:block" />
-            receive approved access. Commissions cover the{" "}
+            receive your license. Partner commission funds the{" "}
             <br className="hidden lg:block" />
-            license price, then your share returns as cashback.
+            service while your account stays eligible.
           </p>
         </div>
 
@@ -413,8 +413,8 @@ export function ChallengesSection() {
                   lg:leading-[calc(var(--u)*18)]
                 "
               >
-                Trading risk stays with you. Returns are never guaranteed, and there is no
-                fixed date by which a license price is covered.
+                Trading risk stays with you and returns are never guaranteed. Covering the
+                license price never grants ownership or permanent access.
               </li>
             </ol>
 

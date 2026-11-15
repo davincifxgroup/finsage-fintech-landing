@@ -1,12 +1,12 @@
 // Frequently asked questions, answered on the card itself.
 const learningCards = [
   {
-    title: "No Upfront Price",
+    title: "License & Payment",
     description: (
       <>
-        The license is never paid in advance.{" "}
+        Issued after your account is approved.{" "}
         <br />
-        Partner commissions cover it over time.
+        No upfront payment and never a debt.
       </>
     ),
     cta: "How It Works",
@@ -14,12 +14,12 @@ const learningCards = [
     variant: "video",
   },
   {
-    title: "Account Binding",
+    title: "Eligible Accounts",
     description: (
       <>
-        One advisor on one broker account is{" "}
+        Partner-group accounts only. Transfers{" "}
         <br />
-        one license, tied to ForexLAB.
+        need ForexLAB and developer approval.
       </>
     ),
     cta: "Our Brokers",
@@ -27,12 +27,12 @@ const learningCards = [
     variant: "academy",
   },
   {
-    title: "After Payoff",
+    title: "Staying Eligible",
     description: (
       <>
-        Same support and updates as a regular{" "}
+        No Access cashback. 3 inactive months{" "}
         <br />
-        buyer, under the developer&rsquo;s terms.
+        suspend it; leaving the group ends it.
       </>
     ),
     cta: "The Mechanism",
@@ -43,9 +43,9 @@ const learningCards = [
     title: "Costs & Risk",
     description: (
       <>
-        Spreads, commissions and trading risk{" "}
+        Trading losses stay yours. Support{" "}
         <br />
-        stay yours. Profit is never promised.
+        follows the developer&rsquo;s terms.
       </>
     ),
     cta: "Risk Disclosure",
@@ -194,7 +194,7 @@ export function LearningSection() {
               lg:leading-[calc(var(--u)*19)]
             "
           >
-            No upfront payment and no hidden debt. Here is what Access does, and{" "}
+            No upfront payment and no debt. Here is what Access requires, and{" "}
             <br className="hidden lg:block" />
             what it does not change about your trading.
           </p>
