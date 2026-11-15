@@ -25,7 +25,7 @@ const steps = [
   {
     number: "05",
     title: "Access while eligible",
-    description: "Access continues while the account stays in the partner group. A suspension for inactivity can be restored on request.",
+    description: "Access continues while the account stays in the partner group. Three inactive months bring a warning with 7 days to reply before any suspension, which can be restored on request.",
   },
 ];
 

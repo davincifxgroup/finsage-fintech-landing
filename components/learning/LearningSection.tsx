@@ -30,9 +30,9 @@ const learningCards = [
     title: "Staying Eligible",
     description: (
       <>
-        No Access cashback. 3 inactive months{" "}
+        No cashback. Inactivity: 7-day warning,{" "}
         <br />
-        suspend it; leaving the group ends it.
+        then suspension. Leaving ends access.
       </>
     ),
     cta: "The Mechanism",

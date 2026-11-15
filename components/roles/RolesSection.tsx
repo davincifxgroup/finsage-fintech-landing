@@ -39,9 +39,9 @@ const roles = [
       <>
         Access continues while the account
         <br />
-        stays in the partner group. After
+        stays in the partner group. Inactivity
         <br />
-        inactivity, restore it on request.
+        brings a 7-day warning first.
       </>
     ),
     icon: "wallet",
