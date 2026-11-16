@@ -170,9 +170,20 @@ export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
               lg:leading-[calc(var(--u)*19)]
             "
           >
-            Trading risk stays with you and returns are never guaranteed.{" "}
+            Broker partner commissions fund Access, so you can use{" "}
             <br className="hidden lg:block" />
-            Covering the price does not grant ownership or permanent access.
+            evaluated EAs without purchasing a license.
+            <span
+              className="
+                mt-2 block text-[12px] leading-[18px] text-[#555]
+
+                lg:mt-[calc(var(--u)*8)]
+                lg:text-[calc(var(--u)*12)]
+                lg:leading-[calc(var(--u)*18)]
+              "
+            >
+              Trading involves risk. Returns are never guaranteed.
+            </span>
           </p>
         </div>
 

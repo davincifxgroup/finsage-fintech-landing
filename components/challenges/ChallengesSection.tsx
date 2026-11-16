@@ -395,50 +395,6 @@ export function ChallengesSection() {
                   </span>
                 </li>
               ))}
-
-              <li
-                data-motion="challenge-code-muted"
-                className="
-                  mt-2 border-t border-white/10 pt-4
-
-                  lg:mt-[calc(var(--u)*4)]
-                  lg:pt-[calc(var(--u)*14)]
-                "
-              >
-                <h4
-                  className="
-                    text-[13px] font-bold leading-[19px] text-white
-
-                    lg:text-[calc(var(--u)*14)]
-                    lg:leading-[calc(var(--u)*20)]
-                  "
-                >
-                  How Is Access Funded?
-                </h4>
-                <p
-                  className="
-                    mt-1 text-[13px] leading-[19px] text-[#a6a6a6]
-
-                    lg:mt-[calc(var(--u)*4)]
-                    lg:text-[calc(var(--u)*13)]
-                    lg:leading-[calc(var(--u)*20)]
-                  "
-                >
-                  Broker partner commissions fund Access, so you can use evaluated EAs without
-                  purchasing a license.
-                </p>
-                <p
-                  className="
-                    mt-2 text-[12px] leading-[18px] text-[#8d8d8d]
-
-                    lg:mt-[calc(var(--u)*6)]
-                    lg:text-[calc(var(--u)*12)]
-                    lg:leading-[calc(var(--u)*18)]
-                  "
-                >
-                  Trading involves risk. Returns are never guaranteed.
-                </p>
-              </li>
             </ol>
 
             {/* Lower fade */}
