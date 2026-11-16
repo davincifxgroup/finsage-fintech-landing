@@ -8,27 +8,27 @@ const PANEL_LIMIT = 3;
 // The customer benefit in plain English. No allocation figures are published.
 const roles = [
   {
-    title: "No Upfront Payment",
+    title: "No Upfront License Fees",
     description: (
       <>
-        The developer issues the license
+        Access professionally evaluated
         <br />
-        after we approve your account.
+        Expert Advisors without purchasing
         <br />
-        Nothing upfront, and never a debt.
+        a license.
       </>
     ),
     icon: "license",
   },
   {
-    title: "Partner Commission",
+    title: "Commission-Funded Access",
     description: (
       <>
-        The broker’s partner commission
+        Broker partner commissions fund
         <br />
-        funds the service. Access accounts
+        the service. No additional license
         <br />
-        do not earn cashback.
+        payments or cashback.
       </>
     ),
     icon: "coins",
@@ -37,11 +37,11 @@ const roles = [
     title: "Access While Eligible",
     description: (
       <>
-        Access continues while the account
+        Keep using your Expert Advisor as
         <br />
-        stays in the partner group. Inactivity
+        long as your broker account meets
         <br />
-        brings a 7-day warning first.
+        the program requirements.
       </>
     ),
     icon: "wallet",

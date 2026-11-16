@@ -258,7 +258,7 @@ export function ChallengesSection() {
             lg:left-[calc(var(--u)*115)]
             lg:top-[calc(var(--u)*302)]
             lg:mt-0
-            lg:h-[calc(var(--u)*456)]
+            lg:h-[calc(var(--u)*348)]
             lg:w-[calc(var(--u)*968)]
             lg:rounded-[calc(var(--u)*7)]
           "
@@ -336,18 +336,18 @@ export function ChallengesSection() {
               overflow-hidden bg-black
               px-6 py-7
 
-              lg:h-[calc(var(--u)*398)]
+              lg:h-[calc(var(--u)*290)]
               lg:px-[calc(var(--u)*34)]
-              lg:py-[calc(var(--u)*27)]
+              lg:py-[calc(var(--u)*30)]
             "
           >
             <ol
               data-px="challenges.code"
               aria-label="How Access works"
               className="
-                flex flex-col gap-[18px]
+                flex flex-col gap-[20px]
 
-                lg:gap-[calc(var(--u)*24)]
+                lg:gap-[calc(var(--u)*30)]
               "
             >
               {steps.map((step) => (
@@ -357,38 +357,38 @@ export function ChallengesSection() {
                   className="
                     grid grid-cols-[34px_1fr] gap-x-3
 
-                    lg:grid-cols-[calc(var(--u)*46)_calc(var(--u)*250)_1fr]
+                    lg:grid-cols-[calc(var(--u)*56)_calc(var(--u)*300)_1fr]
                     lg:items-baseline
                     lg:gap-x-[calc(var(--u)*18)]
                   "
                 >
                   <span
                     className="
-                      font-mono text-[12px] leading-[20px] text-[#ffbe00]
+                      font-mono text-[13px] leading-[22px] text-[#ffbe00]
 
-                      lg:text-[calc(var(--u)*13)]
-                      lg:leading-[calc(var(--u)*22)]
+                      lg:text-[calc(var(--u)*16)]
+                      lg:leading-[calc(var(--u)*28)]
                     "
                   >
                     {step.number}
                   </span>
                   <span
                     className="
-                      text-[15px] font-bold leading-[20px] text-white
+                      text-[17px] font-bold leading-[22px] text-white
 
-                      lg:text-[calc(var(--u)*16)]
-                      lg:leading-[calc(var(--u)*22)]
+                      lg:text-[calc(var(--u)*21)]
+                      lg:leading-[calc(var(--u)*28)]
                     "
                   >
                     {step.title}
                   </span>
                   <span
                     className="
-                      col-start-2 mt-1 text-[13px] leading-[19px] text-[#a6a6a6]
+                      col-start-2 mt-1 text-[15px] leading-[21px] text-[#a6a6a6]
 
                       lg:col-start-3 lg:mt-0
-                      lg:text-[calc(var(--u)*13)]
-                      lg:leading-[calc(var(--u)*22)]
+                      lg:text-[calc(var(--u)*16)]
+                      lg:leading-[calc(var(--u)*28)]
                     "
                   >
                     {step.description}
