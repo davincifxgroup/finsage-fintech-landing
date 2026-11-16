@@ -906,6 +906,18 @@ const PINNED_REVEAL_PROGRESS: Record<string, number> = {
   "final-cta": 1,
 };
 
+// Space kept above an in-section anchor when navigation lands on it.
+const ANCHOR_TOP_MARGIN = 64;
+
+/**
+ * Rendered offset of `element` below the top of `ancestor`. Rendered boxes include the
+ * static centring transforms of the design frames; the reveal timelines move in-section
+ * anchors such as #brokers only horizontally, so the vertical offset is stable.
+ */
+function offsetWithin(element: HTMLElement, ancestor: HTMLElement) {
+  return element.getBoundingClientRect().top - ancestor.getBoundingClientRect().top;
+}
+
 function setupSectionNavigation(
   ScrollTrigger: ReturnType<typeof getGsap>["ScrollTrigger"],
 ) {
@@ -929,7 +941,15 @@ function setupSectionNavigation(
       const progress = PINNED_REVEAL_PROGRESS[section.dataset.px ?? ""] ?? 1;
       const position = pinned.start + (pinned.end - pinned.start) * progress;
       // Stay one pixel inside the pin so the section is still pinned in view.
-      return Math.max(pinned.start, Math.round(position) - 1);
+      const revealed = Math.max(pinned.start, Math.round(position) - 1);
+      if (element === section || progress < 1) {
+        return revealed;
+      }
+      // An anchor inside a pinned section that is taller than its first screen (such as
+      // #brokers inside Our Testing): let the pin finish fully revealed, then keep
+      // scrolling until the anchor itself sits near the top of the viewport.
+      const below = offsetWithin(element, section) - ANCHOR_TOP_MARGIN;
+      return below > 0 ? Math.round(pinned.end + below) : revealed;
     }
 
     return Math.max(0, Math.round(element.getBoundingClientRect().top + window.scrollY));
@@ -958,6 +978,13 @@ function setupSectionNavigation(
       return false;
     }
 
+    // Push the new entry BEFORE scrolling: the browser saves the scroll position of the entry
+    // being left when it is pushed, and restores it on back/forward. Pushing after the jump
+    // saved the destination's position for the previous entry, so Back returned there.
+    if (options.updateHistory && window.location.hash !== `#${id}`) {
+      history.pushState(null, "", `#${id}`);
+    }
+
     const land = () => {
       window.scrollTo({ top: destinationFor(element), behavior: "instant" });
       settleAnimations();
@@ -965,9 +992,11 @@ function setupSectionNavigation(
     land();
     // A second pass after layout settles (pins and spacers can shift by a frame).
     requestAnimationFrame(land);
-
-    if (options.updateHistory && window.location.hash !== `#${id}`) {
-      history.pushState(null, "", `#${id}`);
+    if (!options.updateHistory) {
+      // Back/forward: the browser restores the entry's saved scroll position after
+      // popstate; land again afterwards so a layout change since then (an expanded FAQ
+      // answer, a resize) cannot leave the page at a stale position.
+      window.setTimeout(land, 0);
     }
 
     // Move focus for keyboard and screen-reader users without scrolling again.

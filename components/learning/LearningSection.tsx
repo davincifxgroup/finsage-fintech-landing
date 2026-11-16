@@ -48,10 +48,8 @@ const faqItems: FaqItem[] = [
     question: "Can you set everything up for me?",
     answer: (
       <>
-        Yes. For beginners we offer an optional assisted setup for {assistedSetup.priceLabel}: we install and configure
-        the advisor and set up your VPS. This paid service is separate from the license, which still has no upfront
-        payment. It does not include a VPS subscription, a broker deposit or trading capital, and it is not ongoing
-        account management or a promise of results.{" "}
+        Yes. Optional assisted setup costs {assistedSetup.priceLabel} and includes advisor installation, configuration
+        and VPS setup. VPS hosting is not included.{" "}
         <a
           href={assistedSetup.requestUrl}
           className="
