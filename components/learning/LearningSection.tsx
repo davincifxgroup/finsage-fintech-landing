@@ -145,10 +145,10 @@ export function LearningSection() {
           <p className="mt-6 text-[12px] leading-[18px] text-[#8a8a8a] lg:mt-[calc(var(--u)*26)] lg:text-[calc(var(--u)*12)] lg:leading-[calc(var(--u)*18)]">
             Full conditions:{" "}
             <a
-              href={links.terms}
+              href={links.accessTerms}
               className="text-black underline decoration-black/25 underline-offset-[3px] hover:decoration-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2A4FD8]"
             >
-              Terms
+              Access Terms
             </a>
           </p>
         </div>

@@ -24,6 +24,8 @@ export const links = {
   dashboard: `${REBATE_URL}/dashboard`,
   rebate: `${REBATE_URL}/`,
   terms: `${REBATE_URL}/terms`,
+  /** ForexLAB Access Terms (current version, with links to earlier versions). */
+  accessTerms: `${REBATE_URL}/access/terms`,
   privacy: `${REBATE_URL}/privacy`,
   mainSite: MAIN_SITE_URL,
 };

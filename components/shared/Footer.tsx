@@ -246,6 +246,22 @@ export function Footer({ anchorBase = "" }: { anchorBase?: string } = {}) {
           >
             Terms of Service
           </a>
+
+          <a
+            data-px="footer.legal.access-terms"
+            href={links.accessTerms}
+            className="
+              whitespace-nowrap
+              text-[13px]
+              font-bold
+              leading-none
+
+              lg:text-[calc(var(--u)*13)]
+              lg:leading-[calc(var(--u)*15)]
+            "
+          >
+            Access Terms
+          </a>
         </div>
 
         {/* ==================================================== */}
