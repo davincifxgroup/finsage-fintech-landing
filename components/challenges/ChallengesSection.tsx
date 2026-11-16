@@ -1,31 +1,26 @@
 // Non-interactive labels. The first (black) chip is a caption, not a selected tab.
-const tabs = ["Your path", "Advisor", "Partner account", "Approval", "License", "Eligibility"];
+const tabs = ["Your path", "EA", "Partner account", "License", "Eligibility"];
 
 const steps = [
   {
     number: "01",
-    title: "Choose an advisor",
-    description: "Review its evaluation, broker compatibility and license terms.",
+    title: "Choose Your EA",
+    description: "Explore independently evaluated trading algorithms.",
   },
   {
     number: "02",
-    title: "Use an eligible partner account",
-    description: "Link an account in ForexLAB’s broker partner group. Compatibility depends on the advisor; existing accounts are checked individually.",
+    title: "Connect Your Account",
+    description: "Verify your account with an eligible partner broker.",
   },
   {
     number: "03",
-    title: "Receive your license",
-    description: "Once ForexLAB confirms your account, the developer issues the license and delivers the advisor for it.",
+    title: "Get Your License",
+    description: "Receive your EA without an upfront license payment.",
   },
   {
     number: "04",
-    title: "No upfront payment",
-    description: "Broker partner commission funds the service. Nothing is invoiced, and Access accounts do not earn cashback.",
-  },
-  {
-    number: "05",
-    title: "Access while eligible",
-    description: "Access continues while the account stays in the partner group. Three inactive months bring a warning with 7 days to reply before any suspension, which can be restored on request.",
+    title: "Keep Trading",
+    description: "Continue using your EA while your account remains eligible.",
   },
 ];
 
@@ -405,16 +400,44 @@ export function ChallengesSection() {
                 data-motion="challenge-code-muted"
                 className="
                   mt-2 border-t border-white/10 pt-4
-                  text-[12px] leading-[18px] text-[#8d8d8d]
 
                   lg:mt-[calc(var(--u)*4)]
                   lg:pt-[calc(var(--u)*14)]
-                  lg:text-[calc(var(--u)*12)]
-                  lg:leading-[calc(var(--u)*18)]
                 "
               >
-                Trading risk stays with you and returns are never guaranteed. Covering the
-                license price never grants ownership or permanent access.
+                <h4
+                  className="
+                    text-[13px] font-bold leading-[19px] text-white
+
+                    lg:text-[calc(var(--u)*14)]
+                    lg:leading-[calc(var(--u)*20)]
+                  "
+                >
+                  How Is Access Funded?
+                </h4>
+                <p
+                  className="
+                    mt-1 text-[13px] leading-[19px] text-[#a6a6a6]
+
+                    lg:mt-[calc(var(--u)*4)]
+                    lg:text-[calc(var(--u)*13)]
+                    lg:leading-[calc(var(--u)*20)]
+                  "
+                >
+                  Broker partner commissions fund Access, so you can use evaluated EAs without
+                  purchasing a license.
+                </p>
+                <p
+                  className="
+                    mt-2 text-[12px] leading-[18px] text-[#8d8d8d]
+
+                    lg:mt-[calc(var(--u)*6)]
+                    lg:text-[calc(var(--u)*12)]
+                    lg:leading-[calc(var(--u)*18)]
+                  "
+                >
+                  Trading involves risk. Returns are never guaranteed.
+                </p>
               </li>
             </ol>
 
