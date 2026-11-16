@@ -28,6 +28,19 @@ export const links = {
   mainSite: MAIN_SITE_URL,
 };
 
+/**
+ * Optional assisted setup for beginners (advisor installation/configuration and VPS setup).
+ * A paid service, separate from the advisor license (which has no upfront payment). The price
+ * lives only here; requests go through the existing Rebate support channel.
+ */
+const ASSISTED_SETUP_PRICE_USD = 100;
+
+export const assistedSetup = {
+  priceUsd: ASSISTED_SETUP_PRICE_USD,
+  priceLabel: `$${ASSISTED_SETUP_PRICE_USD}`,
+  requestUrl: `${REBATE_URL}/dashboard/support`,
+};
+
 /** Advisor selection in the Rebate client dashboard (sign-in first if needed). */
 export const selectAdvisorUrl = (slug: string) => `${REBATE_URL}/dashboard/advisors/select/${encodeURIComponent(slug)}/`;
 

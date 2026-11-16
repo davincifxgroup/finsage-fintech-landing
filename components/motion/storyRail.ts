@@ -72,7 +72,7 @@ export function setupStoryRail(gsap: Gsap, ScrollTrigger: ScrollTriggerStatic): 
     A chapter is active once its top has passed the viewport centre (the former
     "top center" start). A pinned section is measured by its pin-spacer, which covers the
     whole pinned scroll distance. sync() runs once per frame while scrolling, after every
-    ScrollTrigger refresh (resize, breakpoint change, FAQ static layout, section
+    ScrollTrigger refresh (resize, breakpoint change, FAQ answer expanded, section
     navigation) and on resize, and only updates the text when the chapter changes.
   */
   const sections = CHAPTERS.map(([selector]) => select<HTMLElement>(selector));

@@ -644,90 +644,6 @@ function setupInvestGptScroll(
   });
 }
 
-function setupLearningScrollytelling(
-  gsap: ReturnType<typeof getGsap>["gsap"],
-  matchMedia: ReturnType<ReturnType<typeof getGsap>["gsap"]["matchMedia"]>,
-) {
-  const section = select<HTMLElement>("[data-px='learning']");
-  const label = select<HTMLElement>("[data-px='learning.label']");
-  const header = select<HTMLElement>("[data-px='learning.header']");
-  const carousel = select<HTMLElement>("[data-px='learning.carousel']");
-  const track = select<HTMLElement>("[data-px='learning.track']");
-  const cards = selectAll<HTMLElement>("[data-px^='learning.card.']").filter(
-    (element) => /^learning\.card\.\d$/.test(element.dataset.px ?? ""),
-  );
-  const figures = selectAll<HTMLElement>(
-    "[data-px^='learning.card.'][data-px$='.figure']",
-  );
-
-  if (!section || !label || !header || !carousel || !track || cards.length < 2) {
-    return;
-  }
-
-  matchMedia.add("(min-width: 1024px)", () => {
-    const travel = () => Math.max(0, track.scrollWidth - carousel.clientWidth + 28);
-
-    gsap
-      .timeline({
-        defaults: { ease: "none" },
-        scrollTrigger: {
-          id: FAQ_RAIL_TRIGGER_ID,
-          trigger: section,
-          start: "top top",
-          end: () => `+=${Math.max(window.innerHeight * 1.8, travel() * 5)}`,
-          pin: true,
-          scrub: 0.85,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        },
-      })
-      .from(label, { autoAlpha: 0, x: -42, duration: 0.08, ease: "power3.out" })
-      .from(
-        header,
-        { autoAlpha: 0, y: 62, duration: 0.14, ease: "power3.out" },
-        0.04,
-      )
-      .from(
-        cards,
-        {
-          autoAlpha: 0,
-          y: (cardIndex) => 90 + cardIndex * 22,
-          rotation: (cardIndex) => (cardIndex % 2 === 0 ? -2 : 2),
-          stagger: 0.045,
-          duration: 0.18,
-          ease: "power3.out",
-        },
-        0.12,
-      )
-      .to(track, { x: () => -travel(), duration: 0.5 }, 0.44)
-      .to(
-        figures,
-        {
-          rotation: (figureIndex) => (figureIndex % 2 === 0 ? -4 : 4),
-          transformOrigin: "50% 50%",
-          duration: 0.5,
-        },
-        0.44,
-      )
-      .to(figures, { rotation: 0, duration: 0.08 }, 0.94);
-  });
-
-  matchMedia.add("(max-width: 1023px)", () => {
-    gsap.from(cards, {
-      autoAlpha: 0,
-      y: 52,
-      stagger: 0.09,
-      duration: 0.6,
-      ease: "power3.out",
-      scrollTrigger: {
-        trigger: carousel,
-        start: "top 82%",
-        toggleActions: "play none none reverse",
-      },
-    });
-  });
-}
-
 function setupGlobalControlHovers(
   gsap: ReturnType<typeof getGsap>["gsap"],
   matchMedia: ReturnType<ReturnType<typeof getGsap>["gsap"]["matchMedia"]>,
@@ -825,551 +741,6 @@ function setupGlobalControlHovers(
         { x: 0, autoAlpha: 1, scale: 1, duration: 0.28, ease: "power3.out" },
       ),
     );
-
-    return () => cleanups.forEach((cleanup) => cleanup());
-  });
-}
-
-type MotionPrimitive = SVGGeometryElement | HTMLElement;
-
-function prepareStroke(
-  gsap: ReturnType<typeof getGsap>["gsap"],
-  element: SVGGeometryElement,
-) {
-  const length = element.getTotalLength();
-  gsap.set(element, {
-    strokeDasharray: length,
-    strokeDashoffset: 0,
-  });
-  return length;
-}
-
-function bindHoverTimeline(
-  gsap: ReturnType<typeof getGsap>["gsap"],
-  card: HTMLElement,
-  targets: MotionPrimitive[],
-  timeline: gsap.core.Timeline,
-) {
-  let resetTween: gsap.core.Tween | null = null;
-
-  const reset = () => {
-    timeline.pause();
-    resetTween?.kill();
-    resetTween = gsap.to(targets, {
-      autoAlpha: 1,
-      x: 0,
-      y: 0,
-      rotation: 0,
-      scale: 1,
-      scaleX: 1,
-      strokeDashoffset: 0,
-      duration: 0.32,
-      ease: "power2.inOut",
-      overwrite: "auto",
-    });
-  };
-
-  const enter = () => {
-    resetTween?.kill();
-    resetTween = null;
-    timeline.restart();
-  };
-
-  card.addEventListener("pointerenter", enter);
-  card.addEventListener("pointerleave", reset);
-
-  return () => {
-    card.removeEventListener("pointerenter", enter);
-    card.removeEventListener("pointerleave", reset);
-    resetTween?.kill();
-    timeline.kill();
-    gsap.killTweensOf(targets);
-  };
-}
-
-function setupLearningInteractions(
-  gsap: ReturnType<typeof getGsap>["gsap"],
-  matchMedia: ReturnType<ReturnType<typeof getGsap>["gsap"]["matchMedia"]>,
-) {
-  matchMedia.add("(hover: hover) and (pointer: fine)", () => {
-    const cleanups: Array<() => void> = [];
-
-    const learningCards = selectAll<HTMLElement>(
-      "[data-px^='learning.card.']",
-    ).filter((element) =>
-      /^learning\.card\.\d$/.test(element.dataset.px ?? ""),
-    );
-
-    learningCards.forEach((card) => {
-      const copy = card.querySelector<HTMLElement>("[data-px$='.copy']");
-      const figure = card.querySelector<HTMLElement>("[data-px$='.figure']");
-      const cta = card.querySelector<HTMLElement>("[data-px$='.cta']");
-      const arrow = cta?.querySelector<HTMLElement>("span") ?? null;
-
-      if (!copy || !figure || !cta) {
-        return;
-      }
-
-      let bounds = card.getBoundingClientRect();
-      const figureX = gsap.quickTo(figure, "x", {
-        duration: 0.45,
-        ease: "power3.out",
-      });
-      const figureY = gsap.quickTo(figure, "y", {
-        duration: 0.45,
-        ease: "power3.out",
-      });
-      const copyX = gsap.quickTo(copy, "x", {
-        duration: 0.4,
-        ease: "power3.out",
-      });
-
-      const enter = () => {
-        bounds = card.getBoundingClientRect();
-        gsap.set([copy, figure, cta], { willChange: "transform" });
-        gsap.to(card, {
-          filter: "brightness(1.045) saturate(1.06)",
-          duration: 0.34,
-          ease: "power3.out",
-          overwrite: "auto",
-        });
-        gsap.to(copy, {
-          y: -7,
-          duration: 0.34,
-          ease: "power3.out",
-          overwrite: "auto",
-        });
-        gsap.to(figure, {
-          scale: 1.035,
-          duration: 0.42,
-          ease: "power3.out",
-          overwrite: "auto",
-        });
-        gsap.to(cta, {
-          x: 6,
-          duration: 0.3,
-          ease: "power3.out",
-          overwrite: "auto",
-        });
-        if (arrow) {
-          gsap.to(arrow, {
-            x: 6,
-            duration: 0.3,
-            ease: "power3.out",
-            overwrite: "auto",
-          });
-        }
-      };
-
-      const move = (event: PointerEvent) => {
-        const normalizedX = (event.clientX - bounds.left) / bounds.width - 0.5;
-        const normalizedY = (event.clientY - bounds.top) / bounds.height - 0.5;
-        figureX(normalizedX * 16);
-        figureY(normalizedY * 14);
-        copyX(normalizedX * -5);
-      };
-
-      const leave = () => {
-        figureX(0);
-        figureY(0);
-        copyX(0);
-        gsap.to(card, {
-          filter: "brightness(1) saturate(1)",
-          scale: 1,
-          duration: 0.38,
-          ease: "power3.out",
-          overwrite: "auto",
-        });
-        gsap.to(copy, {
-          y: 0,
-          duration: 0.38,
-          ease: "power3.out",
-          overwrite: "auto",
-          onComplete: () => gsap.set(copy, { clearProps: "willChange" }),
-        });
-        gsap.to(figure, {
-          x: 0,
-          y: 0,
-          scale: 1,
-          duration: 0.42,
-          ease: "power3.out",
-          overwrite: "auto",
-          onComplete: () => gsap.set(figure, { clearProps: "willChange" }),
-        });
-        gsap.to(cta, {
-          x: 0,
-          duration: 0.34,
-          ease: "power3.out",
-          overwrite: "auto",
-          onComplete: () => gsap.set(cta, { clearProps: "willChange" }),
-        });
-        if (arrow) {
-          gsap.to(arrow, {
-            x: 0,
-            duration: 0.34,
-            ease: "power3.out",
-            overwrite: "auto",
-          });
-        }
-      };
-
-      const press = () =>
-        gsap.to(card, {
-          scale: 0.985,
-          duration: 0.12,
-          ease: "power2.out",
-          overwrite: "auto",
-        });
-      const release = () =>
-        gsap.to(card, {
-          scale: 1,
-          duration: 0.24,
-          ease: "power3.out",
-          overwrite: "auto",
-        });
-
-      card.addEventListener("pointerenter", enter);
-      card.addEventListener("pointermove", move);
-      card.addEventListener("pointerleave", leave);
-      card.addEventListener("pointerdown", press);
-      card.addEventListener("pointerup", release);
-
-      cleanups.push(() => {
-        card.removeEventListener("pointerenter", enter);
-        card.removeEventListener("pointermove", move);
-        card.removeEventListener("pointerleave", leave);
-        card.removeEventListener("pointerdown", press);
-        card.removeEventListener("pointerup", release);
-        gsap.killTweensOf([card, copy, figure, cta, arrow].filter(Boolean));
-      });
-    });
-
-    const videoCard = select<HTMLElement>("[data-px='learning.card.1']");
-    const videoAxis = select<SVGGeometryElement>("[data-motion='video-axis']");
-    const videoCurve = select<SVGGeometryElement>(
-      "[data-motion='video-curve']",
-    );
-
-    if (videoCard && videoAxis && videoCurve) {
-      const axisLength = prepareStroke(gsap, videoAxis);
-      const curveLength = prepareStroke(gsap, videoCurve);
-      const videoTargets = [videoAxis, videoCurve];
-      gsap.set(videoTargets, {
-        transformBox: "fill-box",
-        transformOrigin: "50% 50%",
-      });
-
-      const videoTimeline = gsap.timeline({
-        paused: true,
-        defaults: { ease: "power2.inOut", overwrite: "auto" },
-      });
-
-      videoTimeline
-        .to(
-          videoAxis,
-          {
-            strokeDashoffset: axisLength * 0.72,
-            rotation: -22,
-            x: -13,
-            y: 14,
-            autoAlpha: 0.28,
-            duration: 0.56,
-          },
-          0,
-        )
-        .to(
-          videoCurve,
-          {
-            strokeDashoffset: curveLength * 0.58,
-            rotation: 17,
-            x: 18,
-            y: -9,
-            duration: 0.56,
-          },
-          0,
-        )
-        .to(
-          videoTargets,
-          {
-            strokeDashoffset: 0,
-            rotation: 0,
-            x: 0,
-            y: 0,
-            autoAlpha: 1,
-            duration: 0.62,
-          },
-          0.56,
-        );
-
-      cleanups.push(
-        bindHoverTimeline(gsap, videoCard, videoTargets, videoTimeline),
-      );
-    }
-
-    const academyCard = select<HTMLElement>("[data-px='learning.card.2']");
-    const academyOuter = select<SVGGeometryElement>(
-      "[data-motion='academy-outer']",
-    );
-    const academyInner = select<SVGGeometryElement>(
-      "[data-motion='academy-inner']",
-    );
-    const academySpokeX = select<SVGGeometryElement>(
-      "[data-motion='academy-spoke-x']",
-    );
-    const academySpokeY = select<SVGGeometryElement>(
-      "[data-motion='academy-spoke-y']",
-    );
-
-    if (
-      academyCard &&
-      academyOuter &&
-      academyInner &&
-      academySpokeX &&
-      academySpokeY
-    ) {
-      const outerLength = prepareStroke(gsap, academyOuter);
-      const academyTargets = [
-        academyOuter,
-        academyInner,
-        academySpokeX,
-        academySpokeY,
-      ];
-      gsap.set(academyTargets, {
-        transformBox: "fill-box",
-        transformOrigin: "50% 50%",
-      });
-
-      const academyTimeline = gsap.timeline({
-        paused: true,
-        defaults: { ease: "power2.inOut", overwrite: "auto" },
-      });
-
-      academyTimeline
-        .to(
-          academyOuter,
-          {
-            strokeDashoffset: outerLength * 0.58,
-            rotation: 28,
-            x: -9,
-            y: -8,
-            duration: 0.58,
-          },
-          0,
-        )
-        .to(
-          academyInner,
-          { rotation: -24, x: -10, y: -3, duration: 0.58 },
-          0,
-        )
-        .to(
-          academySpokeX,
-          { rotation: -38, x: 16, y: -14, autoAlpha: 0.15, duration: 0.58 },
-          0,
-        )
-        .to(
-          academySpokeY,
-          { rotation: 54, x: -17, y: 10, autoAlpha: 0.18, duration: 0.58 },
-          0,
-        )
-        .to(
-          academyTargets,
-          {
-            strokeDashoffset: 0,
-            rotation: 0,
-            x: 0,
-            y: 0,
-            autoAlpha: 1,
-            duration: 0.66,
-          },
-          0.58,
-        );
-
-      cleanups.push(
-        bindHoverTimeline(
-          gsap,
-          academyCard,
-          academyTargets,
-          academyTimeline,
-        ),
-      );
-    }
-
-    const lensCard = select<HTMLElement>("[data-px='learning.card.3']");
-    const smallCircle = select<SVGGeometryElement>(
-      "[data-motion='market-small-circle']",
-    );
-    const spiral = select<SVGGeometryElement>("[data-motion='market-spiral']");
-    const axis = select<SVGGeometryElement>("[data-motion='market-axis']");
-    const largeCircle = select<SVGGeometryElement>(
-      "[data-motion='market-large-circle']",
-    );
-    const diagonalTop = select<SVGGeometryElement>(
-      "[data-motion='market-diagonal-top']",
-    );
-    const diagonalBottom = select<SVGGeometryElement>(
-      "[data-motion='market-diagonal-bottom']",
-    );
-
-    if (
-      lensCard &&
-      smallCircle &&
-      spiral &&
-      axis &&
-      largeCircle &&
-      diagonalTop &&
-      diagonalBottom
-    ) {
-      const smallLength = prepareStroke(gsap, smallCircle);
-      const spiralLength = prepareStroke(gsap, spiral);
-      const largeLength = prepareStroke(gsap, largeCircle);
-      const lensTargets = [
-        smallCircle,
-        spiral,
-        axis,
-        largeCircle,
-        diagonalTop,
-        diagonalBottom,
-      ];
-
-      gsap.set(lensTargets, {
-        transformBox: "fill-box",
-        transformOrigin: "50% 50%",
-      });
-      gsap.set(axis, { transformOrigin: "100% 50%" });
-
-      const lensTimeline = gsap.timeline({
-        paused: true,
-        defaults: { ease: "power2.inOut", overwrite: "auto" },
-      });
-
-      lensTimeline
-        .to(
-          smallCircle,
-          {
-            strokeDashoffset: smallLength * 0.66,
-            rotation: -35,
-            x: -11,
-            y: 6,
-            duration: 0.64,
-          },
-          0,
-        )
-        .to(
-          spiral,
-          {
-            strokeDashoffset: spiralLength * 0.76,
-            rotation: 22,
-            x: -7,
-            y: -5,
-            duration: 0.64,
-          },
-          0,
-        )
-        .to(axis, { scaleX: 0.12, autoAlpha: 0.3, duration: 0.64 }, 0)
-        .to(
-          largeCircle,
-          {
-            strokeDashoffset: largeLength * 0.8,
-            rotation: 34,
-            x: 18,
-            duration: 0.64,
-          },
-          0,
-        )
-        .to(
-          diagonalTop,
-          { rotation: 25, x: 21, y: -12, autoAlpha: 0.24, duration: 0.64 },
-          0,
-        )
-        .to(
-          diagonalBottom,
-          { rotation: -25, x: 18, y: 14, autoAlpha: 0.24, duration: 0.64 },
-          0,
-        )
-        .to(
-          lensTargets,
-          {
-            strokeDashoffset: 0,
-            rotation: 0,
-            x: 0,
-            y: 0,
-            scaleX: 1,
-            autoAlpha: 1,
-            duration: 0.72,
-          },
-          0.64,
-        );
-
-      cleanups.push(
-        bindHoverTimeline(gsap, lensCard, lensTargets, lensTimeline),
-      );
-    }
-
-    const smartCard = select<HTMLElement>("[data-px='learning.card.4']");
-    const smartCircle = select<SVGGeometryElement>(
-      "[data-motion='smart-circle']",
-    );
-    const smartAxis = select<SVGGeometryElement>("[data-motion='smart-axis']");
-
-    if (smartCard && smartCircle && smartAxis) {
-      const circleLength = prepareStroke(gsap, smartCircle);
-      const axisLength = prepareStroke(gsap, smartAxis);
-      const smartTargets = [smartCircle, smartAxis];
-      gsap.set(smartTargets, {
-        transformBox: "fill-box",
-        transformOrigin: "50% 50%",
-      });
-      gsap.set(smartAxis, { transformOrigin: "100% 50%" });
-
-      const smartTimeline = gsap.timeline({
-        paused: true,
-        defaults: { ease: "power2.inOut", overwrite: "auto" },
-      });
-
-      smartTimeline
-        .to(
-          smartCircle,
-          {
-            strokeDashoffset: circleLength * 0.7,
-            rotation: 105,
-            scale: 0.86,
-            x: 14,
-            y: -8,
-            duration: 0.6,
-          },
-          0,
-        )
-        .to(
-          smartAxis,
-          {
-            strokeDashoffset: axisLength * 0.82,
-            scaleX: 0.14,
-            rotation: -16,
-            x: -12,
-            autoAlpha: 0.22,
-            duration: 0.6,
-          },
-          0,
-        )
-        .to(
-          smartTargets,
-          {
-            strokeDashoffset: 0,
-            rotation: 0,
-            scale: 1,
-            scaleX: 1,
-            x: 0,
-            y: 0,
-            autoAlpha: 1,
-            duration: 0.68,
-          },
-          0.6,
-        );
-
-      cleanups.push(
-        bindHoverTimeline(gsap, smartCard, smartTargets, smartTimeline),
-      );
-    }
 
     return () => cleanups.forEach((cleanup) => cleanup());
   });
@@ -1529,70 +900,17 @@ function setupFooterReveal(
 ============================================================ */
 
 // How far into a pinned section's timeline its content is fully revealed.
-// The FAQ rail continues with horizontal travel after its cards appear, so
-// it lands where every card has appeared and the rail has not moved yet.
 const PINNED_REVEAL_PROGRESS: Record<string, number> = {
   insights: 1,
   challenges: 1,
-  learning: 0.44,
   "final-cta": 1,
 };
-
-const FAQ_RAIL_TRIGGER_ID = "faq-rail";
-// Timeline position where every FAQ card is revealed and the rail has not moved.
-const FAQ_RAIL_REVEALED_PROGRESS = 0.44;
 
 function setupSectionNavigation(
   ScrollTrigger: ReturnType<typeof getGsap>["ScrollTrigger"],
 ) {
   const sectionOf = (element: HTMLElement) =>
     element.closest<HTMLElement>("section[data-px], footer[data-px]") ?? element;
-
-  /*
-    FAQ static mode. Navigating to the FAQ shows all four cards at once (grid on
-    desktop, vertical list on phones; see app/globals.css). The pinned rail is
-    disabled with its timeline parked at "all cards revealed, no travel", and its
-    pin spacing is removed before positions are measured. The cinematic rail
-    comes back once the section is entirely below the viewport (the visitor
-    scrolled back up past it) or when navigating to another section, so the
-    layout change always happens off screen or as part of a jump.
-  */
-  const faqSection = select<HTMLElement>("[data-px='learning']");
-  const isFaqStatic = () => faqSection?.dataset.faqMode === "static";
-
-  /** Returns true when the layout actually changed. */
-  const setFaqStatic = (staticMode: boolean) => {
-    if (!faqSection || isFaqStatic() === staticMode) {
-      return false;
-    }
-    const rail = ScrollTrigger.getById(FAQ_RAIL_TRIGGER_ID);
-    if (staticMode) {
-      if (rail) {
-        rail.disable(true, true);
-        rail.animation?.progress(FAQ_RAIL_REVEALED_PROGRESS).pause();
-      }
-      faqSection.dataset.faqMode = "static";
-    } else {
-      delete faqSection.dataset.faqMode;
-      rail?.enable();
-    }
-    ScrollTrigger.refresh();
-    return true;
-  };
-
-  let restoreQueued = false;
-  const onScroll = () => {
-    if (!isFaqStatic() || restoreQueued || !faqSection) {
-      return;
-    }
-    restoreQueued = true;
-    requestAnimationFrame(() => {
-      restoreQueued = false;
-      if (isFaqStatic() && faqSection.getBoundingClientRect().top > window.innerHeight) {
-        setFaqStatic(false);
-      }
-    });
-  };
 
   const destinationFor = (element: HTMLElement) => {
     if (element.id === "top") {
@@ -1607,7 +925,7 @@ function setupSectionNavigation(
         (trigger.trigger === section || trigger.trigger.contains(element)),
     );
 
-    if (pinned && !(section === faqSection && isFaqStatic())) {
+    if (pinned) {
       const progress = PINNED_REVEAL_PROGRESS[section.dataset.px ?? ""] ?? 1;
       const position = pinned.start + (pinned.end - pinned.start) * progress;
       // Stay one pixel inside the pin so the section is still pinned in view.
@@ -1640,17 +958,8 @@ function setupSectionNavigation(
       return false;
     }
 
-    // Layout first (it changes pin spacing), then measure the destination.
-    const layoutChanged = setFaqStatic(faqSection !== null && sectionOf(element) === faqSection);
-
-    // Land, then (if pin spacing changed) re-measure every pin at the new position
-    // and land again, so no other section is left pinned over the destination.
     const land = () => {
       window.scrollTo({ top: destinationFor(element), behavior: "instant" });
-      if (layoutChanged) {
-        ScrollTrigger.refresh();
-        window.scrollTo({ top: destinationFor(element), behavior: "instant" });
-      }
       settleAnimations();
     };
     land();
@@ -1691,17 +1000,12 @@ function setupSectionNavigation(
 
   document.addEventListener("click", onClick);
   window.addEventListener("popstate", onPopState);
-  window.addEventListener("scroll", onScroll, { passive: true });
 
   return {
     goTo,
     cleanup: () => {
       document.removeEventListener("click", onClick);
       window.removeEventListener("popstate", onPopState);
-      window.removeEventListener("scroll", onScroll);
-      if (faqSection) {
-        delete faqSection.dataset.faqMode;
-      }
     },
   };
 }
@@ -1753,6 +1057,25 @@ export function LandingMotionController() {
     const widthObserver = new ResizeObserver(refreshIfWidthChanged);
     widthObserver.observe(root);
 
+    // The FAQ accordion is in normal flow: opening or closing an answer changes the page
+    // height, so the pinned sections after it are re-measured once the change settles.
+    const faq = select<HTMLElement>("[data-px='learning']");
+    let measuredFaqHeight = faq?.offsetHeight ?? 0;
+    let faqTimer = 0;
+    const faqObserver = new ResizeObserver(() => {
+      if (!faq || faq.offsetHeight === measuredFaqHeight) {
+        return;
+      }
+      window.clearTimeout(faqTimer);
+      faqTimer = window.setTimeout(() => {
+        measuredFaqHeight = faq.offsetHeight;
+        ScrollTrigger.refresh();
+      }, 120);
+    });
+    if (faq) {
+      faqObserver.observe(faq);
+    }
+
     document.body.style.overflow = "hidden";
 
     const releaseScroll = () => {
@@ -1786,9 +1109,7 @@ export function LandingMotionController() {
       setupTerminalReveal(gsap, matchMedia);
       setupRolesNarrative(gsap, matchMedia);
       setupInvestGptScroll(gsap, matchMedia);
-      setupLearningScrollytelling(gsap, matchMedia);
       setupGlobalControlHovers(gsap, matchMedia);
-      setupLearningInteractions(gsap, matchMedia);
       setupFinalCtaScrollytelling(gsap, matchMedia);
       setupFooterReveal(gsap);
       cleanupStoryRail = setupStoryRail(gsap, ScrollTrigger);
@@ -1810,6 +1131,8 @@ export function LandingMotionController() {
     return () => {
       active = false;
       widthObserver.disconnect();
+      faqObserver.disconnect();
+      window.clearTimeout(faqTimer);
       cancelAnimationFrame(widthFrame);
       navigation.cleanup();
       cleanupStoryRail();
