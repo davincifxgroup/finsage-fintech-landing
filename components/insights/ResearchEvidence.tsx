@@ -383,8 +383,8 @@ export function ResearchEvidence() {
 
         <div
           className="
-            mt-10 grid grid-cols-1 gap-12
-            lg:mt-[calc(var(--u)*34)]
+            mt-14 grid grid-cols-1 gap-12
+            lg:mt-[calc(var(--u)*56)]
             lg:grid-cols-[calc(var(--u)*506)_calc(var(--u)*506)]
             lg:justify-between
             lg:gap-0

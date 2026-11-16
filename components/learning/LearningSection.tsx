@@ -7,42 +7,57 @@ const faqItems: FaqItem[] = [
   {
     question: "Do I pay anything upfront?",
     answer:
-      "No. There is no upfront license payment: broker partner commissions cover the agreed license price over time. Any part that stays uncovered never becomes a debt or a bill. Trading costs and any losses remain yours.",
+      "No. You do not buy the EA license. ForexLAB Access is funded by the commission our broker partners pay us, and nothing becomes a debt or an invoice later, even if you stop trading.",
+  },
+  {
+    question: "Are there any hidden fees?",
+    answer:
+      "No. ForexLAB charges nothing for EA access. Your broker’s usual spreads, commissions and swaps still apply, as on any trading account, and the only paid extra is optional assisted setup.",
+  },
+  {
+    question: "How are Expert Advisors selected and tested?",
+    answer:
+      "ForexLAB evaluates every advisor before it can be listed. Depending on the advisor, this covers backtests on high-quality tick data with realistic spreads and commissions, out-of-sample and forward testing, risk and drawdown analysis, and comparison with live account records where they exist. Each advisor page states what was tested and its known limits.",
+  },
+  {
+    question: "Which brokers and trading accounts are eligible?",
+    answer:
+      "Your account must be with one of ForexLAB’s broker partners and registered in our partner group. Each advisor page lists the brokers and account types it supports.",
   },
   {
     question: "Can I use an existing broker account?",
     answer:
-      "A new or existing account works once it is confirmed in ForexLAB’s partner group and supported by the advisor you choose. Moving an existing account into the partner group depends on the broker’s approval, so not every account can be transferred.",
+      "Often, yes. An existing account qualifies once the broker moves it into ForexLAB’s partner group, which depends on the broker’s approval, so not every account can be moved.",
   },
   {
-    question: "When do I receive the advisor?",
+    question: "When can I start using the EA?",
     answer:
-      "As soon as ForexLAB confirms your account and the developer issues and activates a license bound to it. You do not wait for commissions to cover the license price.",
+      "Once ForexLAB confirms your account in the partner group, the developer issues a license tied to that account. You can download and use the EA as soon as the license is active.",
+  },
+  {
+    question: "Can I use more than one EA?",
+    answer:
+      "Yes. You can request several advisors, each under the same conditions. Every license is tied to one trading account.",
   },
   {
     question: "Do Access accounts earn cashback?",
     answer:
-      "No. An Access account earns no client cashback, even after its license price is fully covered. Your other accounts on ordinary ForexLAB Rebate are not affected.",
+      "No. An account used for Access does not earn cashback or rebates, because the partner commission funds your EA access. Cashback earned before the account joined Access, and your other ForexLAB Rebate accounts, are not affected.",
   },
   {
-    question: "What happens if I stop trading?",
+    question: "What happens if my trading account becomes inactive?",
     answer:
-      "After three full calendar months of confirmed inactivity, you receive seven calendar days’ notice before Access is suspended. A missing broker report alone never counts as inactivity. You can request restoration after account verification, with no new license payment and your coverage kept.",
+      "After three full calendar months in a row without confirmed trading, ForexLAB sends you a warning with the reasons and gives you 7 calendar days to respond. Access is suspended only after that review, and missing broker reports never count as inactivity. You can request restoration later at no cost.",
   },
   {
-    question: "What happens if I leave the partner group?",
+    question: "What happens if my account is no longer linked to a partner?",
     answer:
-      "Access ends, however much of the license price has been covered. The uncovered amount never becomes a payment obligation.",
+      "EA access ends when the account leaves ForexLAB’s broker partner group. You owe nothing, and no warning period applies in this case.",
   },
   {
-    question: "Can I move my license to another account?",
+    question: "Can I transfer my EA access to another trading account?",
     answer:
-      "Each transfer needs individual approval from ForexLAB and the developer, and a license runs on one account at a time. The agreed price and the coverage built up so far carry over.",
-  },
-  {
-    question: "Does testing guarantee trading results?",
-    answer:
-      "No. Historical tests and live monitoring do not guarantee future performance, and trading can result in losses.",
+      "Possibly. Each transfer needs individual approval from ForexLAB and the developer, and the new account must be verified in our partner group. A license runs on one trading account at a time.",
   },
   {
     question: "Can you set everything up for me?",
@@ -62,6 +77,11 @@ const faqItems: FaqItem[] = [
         </a>
       </>
     ),
+  },
+  {
+    question: "Does testing guarantee trading results?",
+    answer:
+      "No. Testing shows how an advisor behaved under specific historical and live conditions, not how it will perform in the future. Trading involves risk, and you can lose money.",
   },
 ];
 

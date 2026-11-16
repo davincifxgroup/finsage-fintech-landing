@@ -10,7 +10,7 @@ export type FaqItem = { question: string; answer: ReactNode };
  * are not focusable. The height transition is short and disabled for reduced motion.
  */
 export function FaqAccordion({ items }: { items: FaqItem[] }) {
-  const [open, setOpen] = useState<ReadonlySet<number>>(() => new Set([0]));
+  const [open, setOpen] = useState<ReadonlySet<number>>(() => new Set());
   const baseId = useId();
 
   const toggle = (index: number) =>
