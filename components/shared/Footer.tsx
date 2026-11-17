@@ -209,7 +209,7 @@ export function Footer({ anchorBase = "" }: { anchorBase?: string } = {}) {
         <div
           data-px="footer.legal"
           className="
-            mt-14 flex gap-[41px]
+            mt-14 flex flex-wrap gap-x-[41px] gap-y-[12px]
 
             lg:absolute
             lg:left-[calc(var(--u)*114)]
