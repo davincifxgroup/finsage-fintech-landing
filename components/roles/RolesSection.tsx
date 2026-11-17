@@ -51,6 +51,7 @@ const roles = [
 
 export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
   const hasAdvisors = advisors.length > 0;
+  const isDemo = advisors.some((advisor) => advisor.demo);
   return (
     <section
       id="mechanism"
@@ -470,7 +471,7 @@ export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
                   "
                 />
 
-                <span>Advisor Catalog</span>
+                <span>{isDemo ? "Demo · Fictional advisors" : "Advisor Catalog"}</span>
               </div>
 
               <h3
@@ -497,7 +498,7 @@ export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
                 <>
                 <ul
                   data-px="roles.investgpt.advisors"
-                  aria-label="Published advisors"
+                  aria-label={isDemo ? "Fictional demo advisors" : "Published advisors"}
                   className="
                     mt-6 w-full max-w-[460px]
 
@@ -536,7 +537,7 @@ export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
                               lg:leading-[calc(var(--u)*20)]
                             "
                           >
-                            <span className="mr-[6px] text-[11px] font-normal text-white/80 lg:text-[calc(var(--u)*11)]">No upfront payment</span>
+                            <span className="mr-[6px] text-[11px] font-normal text-white/80 lg:text-[calc(var(--u)*11)]">{advisor.demo ? "Example price" : "No upfront payment"}</span>
                             {formatPrice(advisor.currentPrice)}
                           </span>
                         </span>
@@ -567,7 +568,7 @@ export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
                     lg:leading-[calc(var(--u)*17)]
                   "
                 >
-                  License prices are not paid upfront. Covering a price does not grant ownership or permanent access.
+                  {isDemo ? "Fictional advisors and example prices. No licenses are offered in this preview." : "License prices are not paid upfront. Covering a price does not grant ownership or permanent access."}
                 </p>
                 </>
               ) : (

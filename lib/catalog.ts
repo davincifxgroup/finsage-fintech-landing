@@ -1,8 +1,8 @@
 /**
  * ForexLAB Access catalog: read-only client for the Rebate (Django) public API.
  *
- * Django is the source of truth. This site never reads Django's database and keeps no
- * copy of the catalog. Data is fetched on the server (build time + incremental
+ * Django is the source of truth for real listings. This site never reads Django's
+ * database. Data is fetched on the server (build time + incremental
  * revalidation) from:
  *
  *   GET {ACCESS_CATALOG_API_URL}/advisors/          -> { version, generatedAt, advisors: AdvisorCard[] }
@@ -14,20 +14,24 @@
  * send requests to a real environment. Unset = catalog unavailable = empty state.
  * ACCESS_CATALOG_REVALIDATE_SECONDS (default 60; 0 = no caching, for local review).
  *
- * If the API cannot be reached the page shows the honest empty state; nothing is
- * invented or cached locally as a fallback.
+ * If the API cannot be reached the page shows the honest empty state. Explicit
+ * ACCESS_CATALOG_DEMO=true instead selects labeled fictional presentation fixtures,
+ * only with onboarding closed. Demo data is never an API-error fallback.
  *
  * Import only from server components (pages/layouts): the API URL is server config.
  */
 import { unstable_rethrow } from "next/navigation";
 
 import { MAIN_SITE_URL } from "@/lib/site";
+import { getDemoCatalog } from "@/lib/demo-catalog";
 
 export const CATALOG_API_VERSION = 1;
 
 export type Price = { amount: string; currency: "USD"; effectiveFrom: string };
 
 export type AdvisorCard = {
+  /** Fictional, explicitly enabled presentation fixture; never an API fallback. */
+  demo?: true;
   slug: string;
   name: string;
   vendor: { displayName: string };
@@ -93,6 +97,8 @@ const fetchOptions = (): RequestInit & { next?: { revalidate: number } } => {
 const isSlug = (value: string) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
 
 export async function getPublishedAdvisors(): Promise<AdvisorCard[]> {
+  const demo = getDemoCatalog(process.env);
+  if (demo) return demo;
   const base = apiBase();
   if (!base) {
     return [];
@@ -119,8 +125,11 @@ export async function getPublishedAdvisors(): Promise<AdvisorCard[]> {
 
 /** null when the advisor is not public (404) or the API is unavailable. */
 export async function getPublishedAdvisor(slug: string): Promise<AdvisorDetail | null> {
+  if (!isSlug(slug)) return null;
+  const demo = getDemoCatalog(process.env);
+  if (demo) return demo.find((advisor) => advisor.slug === slug) ?? null;
   const base = apiBase();
-  if (!isSlug(slug) || !base) {
+  if (!base) {
     return null;
   }
   try {

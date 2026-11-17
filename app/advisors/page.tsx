@@ -13,6 +13,7 @@ export const metadata: Metadata = {
 
 export default async function AdvisorsPage() {
   const advisors = await getPublishedAdvisors();
+  const isDemo = advisors.some((advisor) => advisor.demo);
 
   return (
     <main className="relative isolate min-h-screen overflow-hidden bg-white [font-family:Lato,Arial,sans-serif]">
@@ -21,19 +22,23 @@ export default async function AdvisorsPage() {
 
       <div className="relative z-10 mx-auto w-full max-w-[1200px] px-5 pb-24 sm:px-8 lg:px-[60px]">
         <div className="mt-14 max-w-[760px] lg:mt-20">
-          <DotLabel>Advisor Catalog</DotLabel>
+          <DotLabel>{isDemo ? "Demo · Fictional advisors" : "Advisor Catalog"}</DotLabel>
           <h1 className="mt-6 text-[44px] font-black leading-[0.98] tracking-[-0.045em] sm:text-[58px] lg:text-[72px]">
-            Independently Selected Expert Advisors.
+            {isDemo ? "Explore the Advisor Experience." : "Independently Selected Expert Advisors."}
           </h1>
           <p className="mt-6 text-[15px] leading-[24px] text-[#555]">
-            Every advisor is published with dated evaluation evidence, known limitations, approved broker
-            compatibility and its license price, with no upfront payment. Access continues while your partner
-            account stays eligible, and Access accounts do not earn cashback. Trading risk always stays with you.
+            {isDemo ? (
+              <>Fictional advisors and example prices for demonstration only. No software, verified results or licenses are offered.</>
+            ) : (
+              <>Every advisor is published with dated evaluation evidence, known limitations, approved broker
+              compatibility and its license price, with no upfront payment. Access continues while your partner
+              account stays eligible, and Access accounts do not earn cashback. Trading risk always stays with you.</>
+            )}
           </p>
         </div>
 
         {advisors.length > 0 ? (
-          <ul className="mt-14 grid gap-[7px] sm:grid-cols-2 lg:grid-cols-3" aria-label="Published advisors">
+          <ul className="mt-14 grid gap-[7px] sm:grid-cols-2 lg:grid-cols-3" aria-label={isDemo ? "Fictional demo advisors" : "Published advisors"}>
             {advisors.map((advisor) => (
               <li key={advisor.slug}>
                 <a
@@ -46,11 +51,11 @@ export default async function AdvisorsPage() {
                   <span className="mt-3 text-[28px] font-black leading-[32px] tracking-[-0.035em]">{advisor.name}</span>
                   <span className="mt-3 text-[14px] leading-[22px] text-[#333]">{advisor.shortDescription}</span>
                   {advisor.brokers.length > 0 ? (
-                    <span className="mt-4 text-[12px] leading-[18px] text-[#707070]">Brokers: {advisor.brokers.join(", ")}</span>
+                    <span className="mt-4 text-[12px] leading-[18px] text-[#707070]">{advisor.demo ? "Broker examples" : "Brokers"}: {advisor.brokers.join(", ")}</span>
                   ) : null}
                   <span className="mt-auto flex items-end justify-between gap-4 pt-8">
                     <span>
-                      <span className="block text-[11px] text-[#707070]">License price · No upfront payment</span>
+                      <span className="block text-[11px] text-[#707070]">{advisor.demo ? "Example license price" : "License price · No upfront payment"}</span>
                       <span className="text-[22px] font-black leading-none">{formatPrice(advisor.currentPrice)}</span>
                     </span>
                     <span className="text-[13px] font-bold group-hover:underline">View details →</span>
