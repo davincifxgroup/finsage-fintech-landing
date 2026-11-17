@@ -1,6 +1,7 @@
 import type { AdvisorCard } from "@/lib/catalog";
 import { formatPrice } from "@/lib/catalog";
 import { asset, links } from "@/lib/site";
+import { OnboardingAction } from "@/components/shared/OnboardingAction";
 
 /** Advisors shown directly in the homepage panel; the full list lives at /advisors. */
 const PANEL_LIMIT = 3;
@@ -603,23 +604,40 @@ export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
               </ul>
               )}
 
-              <a
-                data-px="roles.investgpt.cta"
-                href={hasAdvisors ? "/advisors" : links.register}
-                className={`
-                  ${hasAdvisors ? "mt-8 lg:mt-[calc(var(--u)*26)]" : "mt-12 lg:mt-[calc(var(--u)*51)]"}
-                  inline-flex
-                  text-[13px] font-bold
-                  leading-none text-white
+              {hasAdvisors ? (
+                // Unchanged behaviour: a full page load to the catalog, as before this split.
+                // eslint-disable-next-line @next/next/no-html-link-for-pages
+                <a
+                  data-px="roles.investgpt.cta"
+                  href="/advisors"
+                  className="
+                    mt-8 lg:mt-[calc(var(--u)*26)]
+                    inline-flex
+                    text-[13px] font-bold
+                    leading-none text-white
 
-                  lg:text-[calc(var(--u)*13)]
-                `}
-              >
-                {hasAdvisors
-                  ? `View all ${advisors.length > PANEL_LIMIT ? `${advisors.length} ` : ""}advisors`
-                  : "Create Your Account"}
-                &nbsp; →
-              </a>
+                    lg:text-[calc(var(--u)*13)]
+                  "
+                >
+                  {`View all ${advisors.length > PANEL_LIMIT ? `${advisors.length} ` : ""}advisors`}
+                  &nbsp; →
+                </a>
+              ) : (
+                <OnboardingAction
+                  dataPx="roles.investgpt.cta"
+                  href={links.register}
+                  className="
+                    mt-12 lg:mt-[calc(var(--u)*51)]
+                    inline-flex
+                    text-[13px] font-bold
+                    leading-none text-white
+
+                    lg:text-[calc(var(--u)*13)]
+                  "
+                >
+                  Create Your Account &nbsp; →
+                </OnboardingAction>
+              )}
             </div>
           </div>
         </div>

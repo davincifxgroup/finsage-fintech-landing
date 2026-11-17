@@ -1,4 +1,5 @@
-import { asset, links, type NavLink } from "@/lib/site";
+import { asset, COMING_SOON, links, type NavLink } from "@/lib/site";
+import { OnboardingAction } from "@/components/shared/OnboardingAction";
 
 const navigationLinks: NavLink[] = [
   { label: "Advisors", href: "#advisors" },
@@ -8,10 +9,12 @@ const navigationLinks: NavLink[] = [
   { label: "FAQ", href: "#faq" },
 ];
 
-const toolLinks: NavLink[] = [
+type ToolLink = NavLink & { onboarding?: boolean };
+
+const toolLinks: ToolLink[] = [
   { label: "Client Log In", href: links.login },
-  { label: "Vendor Login", href: links.vendorLogin },
-  { label: "Create Account", href: links.register },
+  { label: "Vendor Login", href: links.vendorLogin, onboarding: true },
+  { label: "Create Account", href: links.register, onboarding: true },
   { label: "Dashboard", href: links.dashboard },
 ];
 
@@ -247,9 +250,11 @@ export function Footer({ anchorBase = "" }: { anchorBase?: string } = {}) {
             Terms of Service
           </a>
 
-          <a
-            data-px="footer.legal.access-terms"
+          {/* The Access Terms page is published with Access onboarding (Rebate backend). */}
+          <OnboardingAction
+            dataPx="footer.legal.access-terms"
             href={links.accessTerms}
+            closedLabel={`Access Terms · ${COMING_SOON}`}
             className="
               whitespace-nowrap
               text-[13px]
@@ -261,7 +266,7 @@ export function Footer({ anchorBase = "" }: { anchorBase?: string } = {}) {
             "
           >
             Access Terms
-          </a>
+          </OnboardingAction>
         </div>
 
         {/* ==================================================== */}
@@ -346,7 +351,7 @@ function FooterColumn({
 }: {
   dataPx: string;
   title: string;
-  links: NavLink[];
+  links: (NavLink & { onboarding?: boolean })[];
 }) {
   return (
     <nav data-px={dataPx}>
@@ -377,23 +382,48 @@ function FooterColumn({
       >
         {links.map((link, index) => (
           <li key={link.label}>
-            <a
-              data-px={`${dataPx}.link.${index + 1}`}
-              href={link.href}
-              className="
-                block
-                whitespace-nowrap
+            {link.onboarding ? (
+              <OnboardingAction
+                dataPx={`${dataPx}.link.${index + 1}`}
+                href={link.href}
+                closedLabel={
+                  <>
+                    {link.label} <span className="text-black/45">· {COMING_SOON}</span>
+                  </>
+                }
+                className="
+                  block
+                  whitespace-nowrap
 
-                text-[14px]
-                leading-[16px]
-                text-black
+                  text-[14px]
+                  leading-[16px]
+                  text-black
 
-                lg:text-[calc(var(--u)*14)]
-                lg:leading-[calc(var(--u)*16)]
-              "
-            >
-              {link.label}
-            </a>
+                  lg:text-[calc(var(--u)*14)]
+                  lg:leading-[calc(var(--u)*16)]
+                "
+              >
+                {link.label}
+              </OnboardingAction>
+            ) : (
+              <a
+                data-px={`${dataPx}.link.${index + 1}`}
+                href={link.href}
+                className="
+                  block
+                  whitespace-nowrap
+
+                  text-[14px]
+                  leading-[16px]
+                  text-black
+
+                  lg:text-[calc(var(--u)*14)]
+                  lg:leading-[calc(var(--u)*16)]
+                "
+              >
+                {link.label}
+              </a>
+            )}
           </li>
         ))}
       </ul>

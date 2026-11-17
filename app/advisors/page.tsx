@@ -4,6 +4,7 @@ import { DotLabel, SubpageBackdrop, SubpageHeader } from "@/components/catalog/S
 import { Footer } from "@/components/shared/Footer";
 import { formatPrice, getPublishedAdvisors } from "@/lib/catalog";
 import { links } from "@/lib/site";
+import { OnboardingAction } from "@/components/shared/OnboardingAction";
 
 export const metadata: Metadata = {
   title: "Expert Advisors | ForexLAB Access",
@@ -66,9 +67,9 @@ export default async function AdvisorsPage() {
               Listings appear only when testing is complete and the license price and support terms are approved.
               We do not publish placeholder strategies, projected returns or reviews.
             </p>
-            <a href={links.register} className="mt-8 inline-flex text-[13px] font-bold">
+            <OnboardingAction href={links.register} className="mt-8 inline-flex text-[13px] font-bold">
               Create Your Account&nbsp; →
-            </a>
+            </OnboardingAction>
           </div>
         )}
       </div>

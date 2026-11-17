@@ -1,4 +1,5 @@
 import { links } from "@/lib/site";
+import { OnboardingAction } from "@/components/shared/OnboardingAction";
 
 export function FinalCTA() {
   return (
@@ -224,8 +225,8 @@ export function FinalCTA() {
             {/* BUTTON — ALREADY PASS                             */}
             {/* ================================================= */}
 
-            <a
-              data-px="final-cta.button"
+            <OnboardingAction
+              dataPx="final-cta.button"
               href={links.register}
               className="
                 mt-12
@@ -258,7 +259,7 @@ export function FinalCTA() {
               "
             >
               Get Access
-            </a>
+            </OnboardingAction>
           </div>
         </div>
       </div>

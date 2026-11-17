@@ -5,7 +5,8 @@ import { notFound } from "next/navigation";
 import { DotLabel, SubpageBackdrop, SubpageHeader } from "@/components/catalog/SubpageHeader";
 import { Footer } from "@/components/shared/Footer";
 import { formatDate, formatPrice, getPublishedAdvisor, safeAnalysisUrl } from "@/lib/catalog";
-import { links, selectAdvisorUrl } from "@/lib/site";
+import { ACCESS_ONBOARDING_OPEN, links, selectAdvisorUrl } from "@/lib/site";
+import { OnboardingAction } from "@/components/shared/OnboardingAction";
 
 type Params = { slug: string };
 
@@ -96,12 +97,14 @@ export default async function AdvisorPage({ params }: { params: Promise<Params> 
               account, and the developer issues a license bound to it. New here? Create an account first.
             </div>
             <div className="mt-6 flex flex-col gap-[3px]">
-              <a href={selectAdvisorUrl(advisor.slug)} className="flex h-[42px] items-center justify-center rounded-[11px] bg-black text-[13px] font-bold text-white">
+              <OnboardingAction href={selectAdvisorUrl(advisor.slug)} className="flex h-[42px] items-center justify-center rounded-[11px] bg-black text-[13px] font-bold text-white">
                 Get This Advisor →
-              </a>
-              <a href={links.register} className="flex h-[42px] items-center justify-center rounded-[11px] border border-black text-[13px] font-bold">
-                Create Account
-              </a>
+              </OnboardingAction>
+              {ACCESS_ONBOARDING_OPEN ? (
+                <a href={links.register} className="flex h-[42px] items-center justify-center rounded-[11px] border border-black text-[13px] font-bold">
+                  Create Account
+                </a>
+              ) : null}
             </div>
           </aside>
         </div>

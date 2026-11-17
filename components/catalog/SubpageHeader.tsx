@@ -3,7 +3,8 @@ import "@fontsource/lato/900.css";
 
 import Link from "next/link";
 
-import { asset, links, sectionNav } from "@/lib/site";
+import { asset, COMING_SOON, links, sectionNav } from "@/lib/site";
+import { OnboardingAction } from "@/components/shared/OnboardingAction";
 
 /** Header for catalog subpages: same logo, links and sign-in entries as the homepage. */
 export function SubpageHeader() {
@@ -32,9 +33,13 @@ export function SubpageHeader() {
           <a href={links.login} className="inline-flex h-[34px] items-center whitespace-nowrap rounded-full bg-black px-4 text-[13px] font-bold text-white">
             Client Log In
           </a>
-          <a href={links.vendorLogin} className="inline-flex h-[34px] items-center whitespace-nowrap rounded-full border border-black px-4 text-[13px] font-bold">
+          <OnboardingAction
+            href={links.vendorLogin}
+            closedLabel={`Vendor Login · ${COMING_SOON}`}
+            className="inline-flex h-[34px] items-center whitespace-nowrap rounded-full border border-black px-4 text-[13px] font-bold"
+          >
             Vendor Login
-          </a>
+          </OnboardingAction>
         </div>
       </div>
     </header>

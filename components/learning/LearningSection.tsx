@@ -1,4 +1,5 @@
-import { assistedSetup, links } from "@/lib/site";
+import { assistedSetup, COMING_SOON, links } from "@/lib/site";
+import { OnboardingAction } from "@/components/shared/OnboardingAction";
 
 import { FaqAccordion, type FaqItem } from "./FaqAccordion";
 
@@ -65,7 +66,7 @@ const faqItems: FaqItem[] = [
       <>
         Yes. Optional assisted setup costs {assistedSetup.priceLabel} and includes advisor installation, configuration
         and VPS setup. VPS hosting is not included.{" "}
-        <a
+        <OnboardingAction
           href={assistedSetup.requestUrl}
           className="
             font-bold text-[#2A4FD8] underline decoration-[#2A4FD8]/30 underline-offset-[3px]
@@ -74,7 +75,7 @@ const faqItems: FaqItem[] = [
           "
         >
           Request setup
-        </a>
+        </OnboardingAction>
       </>
     ),
   },
@@ -144,12 +145,14 @@ export function LearningSection() {
 
           <p className="mt-6 text-[12px] leading-[18px] text-[#8a8a8a] lg:mt-[calc(var(--u)*26)] lg:text-[calc(var(--u)*12)] lg:leading-[calc(var(--u)*18)]">
             Full conditions:{" "}
-            <a
+            {/* The Access Terms page is published with Access onboarding (Rebate backend). */}
+            <OnboardingAction
               href={links.accessTerms}
+              closedLabel={`Access Terms · ${COMING_SOON}`}
               className="text-black underline decoration-black/25 underline-offset-[3px] hover:decoration-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2A4FD8]"
             >
               Access Terms
-            </a>
+            </OnboardingAction>
           </p>
         </div>
 

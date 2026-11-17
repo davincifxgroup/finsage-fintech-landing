@@ -43,6 +43,16 @@ export const assistedSetup = {
   requestUrl: `${REBATE_URL}/dashboard/support`,
 };
 
+/**
+ * Access onboarding (account creation for Access, advisor selection, vendor portal,
+ * assisted setup). Off unless the build sets NEXT_PUBLIC_ACCESS_ONBOARDING=open: those
+ * actions then render as "Coming soon". This is presentation only - the Rebate
+ * application enforces Access admission on the server (ACCESS_ADMISSION_MODE).
+ * Ordinary Rebate sign-in and dashboard links are unaffected.
+ */
+export const ACCESS_ONBOARDING_OPEN = process.env.NEXT_PUBLIC_ACCESS_ONBOARDING === "open";
+export const COMING_SOON = "Coming soon";
+
 /** Advisor selection in the Rebate client dashboard (sign-in first if needed). */
 export const selectAdvisorUrl = (slug: string) => `${REBATE_URL}/dashboard/advisors/select/${encodeURIComponent(slug)}/`;
 
