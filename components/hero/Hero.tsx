@@ -3,23 +3,25 @@ import "@fontsource/lato/900.css";
 
 import type { CSSProperties } from "react";
 
-const tickerItems = [
-  { name: "Alphabet", value: "↗ +0.85%" },
-  { name: "Amazon", value: "↗ +2.05%" },
-  { name: "Meta", value: "↗ +1.67%" },
-  { name: "Vanguard", value: "↘ +0.90%" },
-  { name: "Apple", value: "↗ +0.78%" },
-  { name: "Nvidia", value: "↗ +2.34%" },
+import { asset, links, sectionNav } from "@/lib/site";
+
+// Customer-facing facts for the top strip. No allocation figures, prices or returns.
+// `from` is the breakpoint at which a fact is shown, so narrower screens keep a short,
+// readable group instead of shrinking the text.
+const stripFacts: { text: string; from: "base" | "sm" | "md" | "lg" | "xl" }[] = [
+  { text: "No upfront license payment", from: "base" },
+  { text: "MT4 / MT5 Expert Advisors", from: "sm" },
+  { text: "Independently evaluated", from: "lg" },
+  { text: "License issued after account approval", from: "xl" },
 ];
 
-const navigationItems = [
-  "Favorites",
-  "Market Movers",
-  "AI Picks",
-  "Trade Alerts",
-  "History",
-  "Explore",
-];
+const factVisibility = {
+  base: "flex",
+  sm: "hidden sm:flex",
+  md: "hidden md:flex",
+  lg: "hidden lg:flex",
+  xl: "hidden xl:flex",
+};
 
 /* ============================================================
    FITTED BACKGROUND MODEL
@@ -104,37 +106,84 @@ const heroBackgroundStyle: CSSProperties = {
 
 export function Hero() {
   return (
-    <section data-px="hero" className="hero relative min-h-screen overflow-hidden">
+    <section
+      id="top"
+      data-px="hero"
+      className="hero relative min-h-screen overflow-hidden [--strip-h:44px] md:[--strip-h:48px]"
+    >
       {/* =====================================================
           1. MARKET TICKER
       ====================================================== */}
-      <div data-px="hero.ticker" className="hero-ticker relative z-30 h-7 w-full overflow-hidden bg-black text-white">
-        <div className="hero-ticker-track grid h-full w-full grid-cols-6 items-center">
-          {tickerItems.map((item) => (
-            <div
-              key={item.name}
-              className="
-                hero-ticker-item
-                flex
-                h-full
-                min-w-0
-                items-center
-                justify-between
-                px-5
-                text-[11px]
-                leading-none
-              "
+      <div
+        data-px="hero.ticker"
+        className="
+          hero-ticker
+          relative
+          z-30
+          flex
+          h-[var(--strip-h)]
+          w-full
+          items-center
+          justify-between
+          gap-4
+          bg-black
+          px-4
+          text-white
+          md:gap-6
+          md:px-[max(20px,calc(9.5vw-10px))]
+        "
+      >
+        {/* Short group of facts (left). Phones keep one fact beside the Log in link. */}
+        <ul className="hero-ticker-track flex min-w-0 items-center justify-start gap-x-4 text-[12px] leading-[16px] text-white/85 md:justify-start md:gap-x-0 md:text-[13px] md:leading-none">
+          {stripFacts.map((fact, index) => (
+            <li
+              key={fact.text}
+              className={`hero-ticker-item items-center whitespace-nowrap ${factVisibility[fact.from]}`}
             >
-              <span className="hero-ticker-name whitespace-nowrap">
-                {item.name}
-              </span>
-
-              <span className="hero-ticker-value whitespace-nowrap">
-                {item.value}
-              </span>
-            </div>
+              {index > 0 ? (
+                <span aria-hidden="true" className="mx-5 hidden h-[4px] w-[4px] rounded-full bg-white/40 md:block" />
+              ) : null}
+              {fact.text}
+            </li>
           ))}
-        </div>
+        </ul>
+
+        {/*
+          One understated sign-in link (right) into the Rebate authentication. Vendors use
+          the same sign-in; their portal link stays in the footer ("Vendor Login").
+        */}
+        <a
+          href={links.login}
+          data-px="hero.auth.login"
+          className="
+            hero-auth
+            -mr-2
+            inline-flex
+            h-[44px]
+            shrink-0
+            items-center
+            gap-[6px]
+            whitespace-nowrap
+            rounded-full
+            px-2
+            text-[13px]
+            font-bold
+            leading-none
+            text-white/90
+            underline-offset-4
+            transition-colors
+            hover:text-white
+            hover:underline
+            focus-visible:outline
+            focus-visible:outline-2
+            focus-visible:outline-offset-0
+            focus-visible:outline-white
+            md:h-[32px]
+          "
+        >
+          Log in
+          <span aria-hidden="true" className="text-[14px] font-normal leading-none">→</span>
+        </a>
       </div>
 
       {/* =====================================================
@@ -156,7 +205,7 @@ export function Hero() {
           hero-body
           relative
           isolate
-          h-[calc(100svh-28px)]
+          h-[calc(100svh-var(--strip-h))]
           min-h-[620px]
           w-full
           overflow-hidden
@@ -206,7 +255,7 @@ export function Hero() {
             top-0
             z-0
             aspect-[1024/657]
-            w-[max(100vw,calc((100svh-28px)*1.5586))]
+            w-[max(100vw,calc((100svh-var(--strip-h))*1.5586))]
             -translate-x-1/2
           "
         />
@@ -235,9 +284,11 @@ export function Hero() {
           className="
             hero-header
             absolute
-            left-[9.5vw]
-            right-[9.5vw]
-            top-[calc(var(--u)*28)]
+            left-5
+            right-5
+            top-[max(calc(var(--u)*24),14px)]
+            md:left-[9.5vw]
+            md:right-[9.5vw]
             z-20
             flex
             items-start
@@ -247,62 +298,24 @@ export function Hero() {
           {/* =================================================
               BRAND
           ================================================== */}
-          <div data-px="hero.brand" className="hero-brand flex items-center">
-            <div
+          <a data-px="hero.brand" href="#top" className="hero-brand flex items-center">
+            {/* Approved V2 compact horizontal logo (light-background variant). */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={asset("/brand/forexlab-access-header-light.svg")}
+              alt="ForexLAB Access"
+              width={332}
+              height={64}
               className="
-                hero-brand-mark
-                relative
-                h-[calc(var(--u)*18)]
-                w-[calc(var(--u)*28)]
-                shrink-0
+                hero-brand-logo
+                block
+                h-[max(calc(var(--u)*58),44px)]
+                w-auto
+                -ml-[calc(var(--u)*10)]
+                -mt-[calc(var(--u)*12)]
               "
-            >
-              <div
-                className="
-                  hero-brand-circle
-                  hero-brand-circle-left
-                  absolute
-                  left-0
-                  top-1/2
-                  h-[calc(var(--u)*18)]
-                  w-[calc(var(--u)*18)]
-                  -translate-y-1/2
-                  rounded-full
-                  bg-black
-                "
-              />
-
-              <div
-                className="
-                  hero-brand-circle
-                  hero-brand-circle-right
-                  absolute
-                  left-[calc(var(--u)*11)]
-                  top-1/2
-                  h-[calc(var(--u)*18)]
-                  w-[calc(var(--u)*18)]
-                  -translate-y-1/2
-                  rounded-full
-                  border
-                  border-black
-                  bg-white
-                "
-              />
-            </div>
-
-            <span
-              className="
-                hero-brand-name
-                -ml-[calc(var(--u)*2)]
-                whitespace-nowrap
-                text-[calc(var(--u)*18)]
-                font-normal
-                leading-[calc(var(--u)*18)]
-              "
-            >
-              FinSage
-            </span>
-          </div>
+            />
+          </a>
 
           {/* =================================================
               NAVIGATION
@@ -317,15 +330,16 @@ export function Hero() {
               flex
               flex-col
               items-end
-              text-[calc(var(--u)*11)]
+              text-[max(calc(var(--u)*11),12px)]
               font-normal
-              leading-[calc(var(--u)*21.2)]
+              leading-[max(calc(var(--u)*21.2),21px)]
             "
+            aria-label="Main"
           >
-            {navigationItems.map((item) => (
+            {sectionNav.map((item) => (
               <a
-                key={item}
-                href="#"
+                key={item.label}
+                href={item.href}
                 data-px="hero.nav.item"
                 className="
                   hero-navigation-item
@@ -335,7 +349,7 @@ export function Hero() {
                   underline-offset-[calc(var(--u)*1)]
                 "
               >
-                {item}
+                {item.label}
               </a>
             ))}
           </nav>
@@ -363,14 +377,24 @@ export function Hero() {
             top-1/2
             z-10
             aspect-[1024/657]
-            w-[min(100vw,calc((100svh-28px)*1.5586))]
+            w-[min(100vw,calc((100svh-var(--strip-h))*1.5586))]
             -translate-x-1/2
             -translate-y-1/2
             [container-type:inline-size]
+
+            max-md:top-[calc(50%+64px)]
+            max-md:flex
+            max-md:aspect-auto
+            max-md:w-[calc(100vw-40px)]
+            max-md:flex-col
+            max-md:items-center
+            max-md:gap-5
           "
         >
           {/* =================================================
               ARTWORK
+              The artwork is its own container so the circle offsets
+              scale with it (identical on desktop; reused on mobile).
           ================================================== */}
           <div
             data-px="hero.artwork"
@@ -382,6 +406,12 @@ export function Hero() {
               h-[7.128906cqw]
               w-[12.988281cqw]
               -translate-x-1/2
+              [container-type:inline-size]
+
+              max-md:static
+              max-md:h-[18.66cqw]
+              max-md:w-[34cqw]
+              max-md:translate-x-0
             "
           >
             <div className="hero-artwork-stage relative h-full w-full">
@@ -404,7 +434,7 @@ export function Hero() {
                 className="
                   hero-artwork-circle
                   absolute
-                  left-[1.464844cqw]
+                  left-[11.278195cqw]
                   top-1/2
                   aspect-square
                   h-full
@@ -419,7 +449,7 @@ export function Hero() {
                 className="
                   hero-artwork-circle
                   absolute
-                  left-[2.929688cqw]
+                  left-[22.556391cqw]
                   top-1/2
                   aspect-square
                   h-full
@@ -434,7 +464,7 @@ export function Hero() {
                 className="
                   hero-artwork-circle
                   absolute
-                  left-[4.394531cqw]
+                  left-[33.834586cqw]
                   top-1/2
                   aspect-square
                   h-full
@@ -449,7 +479,7 @@ export function Hero() {
                 className="
                   hero-artwork-circle
                   absolute
-                  left-[5.859375cqw]
+                  left-[45.112782cqw]
                   top-1/2
                   aspect-square
                   h-full
@@ -479,9 +509,16 @@ export function Hero() {
               font-normal
               leading-[1.367188cqw]
               tracking-[0.001953125cqw]
+
+              max-md:static
+              max-md:max-w-[300px]
+              max-md:translate-x-0
+              max-md:whitespace-normal
+              max-md:text-[13px]
+              max-md:leading-[19px]
             "
           >
-            On-demand AI insights for stocks, ETFs, crypto, and forex.
+            Independently evaluated Expert Advisors for MT4 and MT5 traders.
           </p>
 
           {/* =================================================
@@ -496,32 +533,37 @@ export function Hero() {
               top-[25.292969cqw]
               -translate-x-1/2
               text-center
-              text-[5.957031cqw]
+              text-[5.2cqw]
               font-black
-              leading-[6.152344cqw]
+              leading-[5.6cqw]
               tracking-normal
+
+              max-md:static
+              max-md:translate-x-0
+              max-md:text-[34px]
+              max-md:leading-[38px]
             "
           >
             <span
-              className="block whitespace-nowrap"
+              className="block whitespace-nowrap max-md:whitespace-normal max-md:text-balance"
               style={{
                 transform:
                   "translate(0.09765625cqw, 0.1171875cqw) scaleX(0.985) scaleY(1.16)",
                 transformOrigin: "center center",
               }}
             >
-              Data-Powered
+              Tested Expert Advisors.
             </span>
 
             <span
-              className="block whitespace-nowrap"
+              className="block whitespace-nowrap max-md:mt-1 max-md:whitespace-normal max-md:text-balance"
               style={{
                 transform:
                   "translate(-0.244140625cqw, 0.1171875cqw) scaleX(0.985) scaleY(1.16)",
                 transformOrigin: "center center",
               }}
             >
-              Investment Strategies.
+              No Upfront License Payment.
             </span>
           </h1>
 
@@ -540,15 +582,20 @@ export function Hero() {
               -translate-x-1/2
               flex-col
               gap-[0.195313cqw]
+
+              max-md:static
+              max-md:w-full
+              max-md:translate-x-0
+              max-md:gap-[3px]
             "
           >
-            <textarea
+            {/* Same framed panel as the original prompt box; static copy instead of an input. */}
+            <div
               data-px="hero.prompt.input"
               className="
                 hero-prompt-input
                 h-[7.617188cqw]
                 w-full
-                resize-none
                 rounded-[0.78125cqw]
                 border
                 border-black
@@ -558,13 +605,25 @@ export function Hero() {
                 text-[0.976563cqw]
                 font-normal
                 leading-[1.367188cqw]
-                outline-none
-              "
-              placeholder="Type a ticker or question..."
-            />
 
-            <button
-              type="button"
+                max-md:h-auto
+                max-md:rounded-[10px]
+                max-md:px-4
+                max-md:py-[14px]
+                max-md:text-[13px]
+                max-md:leading-[19px]
+              "
+            >
+              No upfront license payment: broker partner commission funds the service. The
+              developer issues your license once we approve your partner account, and access
+              continues while the account stays eligible.{" "}
+              <a href="#how-it-works" className="whitespace-nowrap underline underline-offset-2">
+                How It Works →
+              </a>
+            </div>
+
+            <a
+              href="#advisors"
               data-px="hero.prompt.submit"
               className="
                 hero-prompt-submit
@@ -579,10 +638,14 @@ export function Hero() {
                 font-normal
                 leading-none
                 text-white
+
+                max-md:h-[46px]
+                max-md:rounded-[11px]
+                max-md:text-[14px]
               "
             >
-              Ask AI →
-            </button>
+              Explore Advisors →
+            </a>
           </div>
         </div>
       </div>

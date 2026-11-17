@@ -1,48 +1,59 @@
+import type { AdvisorCard } from "@/lib/catalog";
+import { formatPrice } from "@/lib/catalog";
+import { asset, links } from "@/lib/site";
+import { OnboardingAction } from "@/components/shared/OnboardingAction";
+
+/** Advisors shown directly in the homepage panel; the full list lives at /advisors. */
+const PANEL_LIMIT = 3;
+
+// The customer benefit in plain English. No allocation figures are published.
 const roles = [
   {
-    title: "Day Traders",
+    title: "No Upfront License Fees",
     description: (
       <>
-        Live signals and momentum
+        Access professionally evaluated
         <br />
-        indicators to capture intraday
+        Expert Advisors without purchasing
         <br />
-        and swing opportunities.
+        a license.
       </>
     ),
-    icon: "chart",
+    icon: "license",
   },
   {
-    title: "Long-term Investors",
+    title: "Commission-Funded Access",
     description: (
       <>
-        In-depth research and strategic value
+        Broker partner commissions fund
         <br />
-        assessment to create lasting wealth
+        the service. No additional license
         <br />
-        through time.
+        payments or cashback.
       </>
     ),
-    icon: "card",
+    icon: "coins",
   },
   {
-    title: "Advisors & Planners",
+    title: "Access While Eligible",
     description: (
       <>
-        Client-ready reports and portfolio
+        Keep using your Expert Advisor as
         <br />
-        optimization features for superior
+        long as your broker account meets
         <br />
-        advisory outcomes.
+        the program requirements.
       </>
     ),
-    icon: "folder",
+    icon: "wallet",
   },
 ];
 
-export function RolesSection() {
+export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
+  const hasAdvisors = advisors.length > 0;
   return (
     <section
+      id="mechanism"
       data-px="roles"
       className="
         roles relative isolate w-full overflow-hidden bg-white
@@ -50,7 +61,6 @@ export function RolesSection() {
 
         min-h-screen
         lg:min-h-0
-        lg:aspect-[1198/1087]
       "
     >
       {/* BACKGROUND */}
@@ -77,7 +87,7 @@ export function RolesSection() {
           px-5 py-14
           sm:px-8
 
-          lg:absolute lg:inset-0
+          lg:relative
           lg:p-0
           lg:[container-type:inline-size]
           lg:[--u:0.083472454cqw]
@@ -113,7 +123,7 @@ export function RolesSection() {
               lg:text-[calc(var(--u)*13)]
             "
           >
-            Roles
+            Why No Upfront Price
           </span>
         </div>
 
@@ -144,7 +154,7 @@ export function RolesSection() {
               lg:leading-[calc(var(--u)*52)]
             "
           >
-            Solutions for Every Market Role.
+            How Access Is Funded.
           </h2>
 
           <p
@@ -161,9 +171,20 @@ export function RolesSection() {
               lg:leading-[calc(var(--u)*19)]
             "
           >
-            Whether you trade, invest, advise, or research, FinSage seamlessly
+            Broker partner commissions fund Access, so you can use{" "}
             <br className="hidden lg:block" />
-            integrates into your workflow.
+            evaluated EAs without purchasing a license.
+            <span
+              className="
+                mt-2 block text-[12px] leading-[18px] text-[#555]
+
+                lg:mt-[calc(var(--u)*8)]
+                lg:text-[calc(var(--u)*12)]
+                lg:leading-[calc(var(--u)*18)]
+              "
+            >
+              Trading involves risk. Returns are never guaranteed.
+            </span>
           </p>
         </div>
 
@@ -214,12 +235,16 @@ export function RolesSection() {
                 <div
                   data-px={`roles.card.${index + 1}.icon`}
                   className="
-                    flex h-[40px] w-[40px]
+                    flex h-[46px] w-[46px]
                     shrink-0 items-center justify-center
-                    rounded-full bg-black text-white
+                    rounded-[12px]
+                    border border-[#c9d7f8]
+                    bg-gradient-to-br from-[#f1f5ff] to-[#e3ebfd]
+                    text-[#1d4fd7]
 
-                    lg:h-[calc(var(--u)*40)]
-                    lg:w-[calc(var(--u)*40)]
+                    lg:h-[max(calc(var(--u)*46),40px)]
+                    lg:w-[max(calc(var(--u)*46),40px)]
+                    lg:rounded-[max(calc(var(--u)*12),10px)]
                   "
                 >
                   <RoleIcon type={role.icon} />
@@ -265,16 +290,16 @@ export function RolesSection() {
 
         {/* INVESTGPT */}
         <div
+          id="advisors"
           data-px="roles.investgpt"
           className="
             mt-20 grid overflow-hidden
             grid-cols-1 bg-black
 
-            lg:absolute
-            lg:left-[calc(var(--u)*117)]
-            lg:top-[calc(var(--u)*583)]
-            lg:mt-0
-            lg:h-[calc(var(--u)*460)]
+            lg:mb-[calc(var(--u)*44)]
+            lg:ml-[calc(var(--u)*117)]
+            lg:mt-[calc(var(--u)*583)]
+            lg:min-h-[calc(var(--u)*460)]
             lg:w-[calc(var(--u)*969)]
             lg:grid-cols-[calc(var(--u)*417)_calc(var(--u)*552)]
           "
@@ -287,7 +312,7 @@ export function RolesSection() {
               overflow-hidden bg-black
 
               lg:aspect-auto
-              lg:h-[calc(var(--u)*460)]
+              lg:min-h-[calc(var(--u)*460)]
               lg:w-[calc(var(--u)*417)]
             "
           >
@@ -352,44 +377,13 @@ export function RolesSection() {
                   lg:w-[calc(var(--u)*34)]
                 "
               >
-                <span
-                  className="
-                    absolute left-1/2 top-[2px]
-                    h-0 w-0 -translate-x-1/2
-
-                    border-l-[17px]
-                    border-r-[17px]
-                    border-t-[15px]
-
-                    border-l-transparent
-                    border-r-transparent
-                    border-t-black
-
-                    lg:top-[calc(var(--u)*2)]
-                    lg:border-l-[calc(var(--u)*17)]
-                    lg:border-r-[calc(var(--u)*17)]
-                    lg:border-t-[calc(var(--u)*15)]
-                  "
-                />
-
-                <span
-                  className="
-                    absolute bottom-[2px] left-1/2
-                    h-0 w-0 -translate-x-1/2
-
-                    border-b-[15px]
-                    border-l-[17px]
-                    border-r-[17px]
-
-                    border-b-black
-                    border-l-transparent
-                    border-r-transparent
-
-                    lg:bottom-[calc(var(--u)*2)]
-                    lg:border-b-[calc(var(--u)*15)]
-                    lg:border-l-[calc(var(--u)*17)]
-                    lg:border-r-[calc(var(--u)*17)]
-                  "
+                {/* Approved ForexLAB Access mark replaces the original symbol. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={asset("/brand/forexlab-access-mark-light.svg")}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 h-full w-full"
                 />
               </div>
             </div>
@@ -399,17 +393,19 @@ export function RolesSection() {
           <div
             data-px="roles.investgpt.panel"
             className="
-              relative overflow-hidden
+              relative
               bg-[#4e82f3]
               px-7 py-12
               text-white
 
-              lg:h-[calc(var(--u)*460)]
+              lg:min-h-[calc(var(--u)*460)]
               lg:w-[calc(var(--u)*552)]
               lg:px-0
               lg:py-0
             "
           >
+            {/* DECORATION (clipped on its own; the content below is never clipped) */}
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
             {/* LIGHT FIELD */}
             <div
               aria-hidden="true"
@@ -440,6 +436,7 @@ export function RolesSection() {
                 bg-black/80
               "
             />
+            </div>
 
             {/* CONTENT */}
             <div
@@ -447,9 +444,10 @@ export function RolesSection() {
               className="
                 relative z-10
 
-                lg:absolute
-                lg:left-[calc(var(--u)*52)]
-                lg:top-[calc(var(--u)*85)]
+                lg:pb-[calc(var(--u)*52)]
+                lg:pl-[calc(var(--u)*52)]
+                lg:pr-[calc(var(--u)*40)]
+                lg:pt-[calc(var(--u)*64)]
               "
             >
               <div
@@ -472,7 +470,7 @@ export function RolesSection() {
                   "
                 />
 
-                <span>InvestGPT</span>
+                <span>Advisor Catalog</span>
               </div>
 
               <h3
@@ -490,25 +488,105 @@ export function RolesSection() {
                   lg:leading-[calc(var(--u)*30)]
                 "
               >
-                AI Tools for Smarter
+                Independently Selected
                 <br />
-                Investing Decisions.
+                Expert Advisors.
               </h3>
 
-              <p
-                data-px="roles.investgpt.description"
-                className="
-                  mt-6 text-[13px]
-                  leading-[18px] text-white/95
+              {hasAdvisors ? (
+                <>
+                <ul
+                  data-px="roles.investgpt.advisors"
+                  aria-label="Published advisors"
+                  className="
+                    mt-6 w-full max-w-[460px]
 
-                  lg:mt-[calc(var(--u)*22)]
-                  lg:text-[calc(var(--u)*13)]
-                  lg:leading-[calc(var(--u)*18)]
-                "
-              >
-                Your 24/7 AI analyst for instant market answers.
-              </p>
+                    lg:mt-[calc(var(--u)*22)]
+                    lg:w-[calc(var(--u)*430)]
+                    lg:max-w-none
+                  "
+                >
+                  {advisors.slice(0, PANEL_LIMIT).map((advisor) => (
+                    <li key={advisor.slug} className="border-t border-white/35 last:border-b">
+                      <a
+                        href={`/advisors/${advisor.slug}`}
+                        className="
+                          group block py-[11px]
 
+                          lg:py-[calc(var(--u)*10)]
+                        "
+                      >
+                        <span className="flex items-baseline justify-between gap-4">
+                          <span
+                            className="
+                              text-[15px] font-bold leading-[20px]
+                              group-hover:underline group-hover:underline-offset-2
+
+                              lg:text-[calc(var(--u)*15)]
+                              lg:leading-[calc(var(--u)*20)]
+                            "
+                          >
+                            {advisor.name}
+                          </span>
+                          <span
+                            className="
+                              shrink-0 text-[13px] font-bold leading-[20px]
+
+                              lg:text-[calc(var(--u)*13)]
+                              lg:leading-[calc(var(--u)*20)]
+                            "
+                          >
+                            <span className="mr-[6px] text-[11px] font-normal text-white/80 lg:text-[calc(var(--u)*11)]">No upfront payment</span>
+                            {formatPrice(advisor.currentPrice)}
+                          </span>
+                        </span>
+                        <span
+                          className="
+                            mt-[3px] block truncate text-[12px] leading-[17px] text-white/85
+
+                            lg:mt-[calc(var(--u)*3)]
+                            lg:text-[calc(var(--u)*12)]
+                            lg:leading-[calc(var(--u)*17)]
+                          "
+                        >
+                          {advisor.platforms.join(" / ")} · by {advisor.vendor.displayName} · {advisor.shortDescription}
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+                <p
+                  data-px="roles.investgpt.price-note"
+                  className="
+                    mt-3 max-w-[460px] text-[12px] leading-[17px] text-white/85
+
+                    lg:mt-[calc(var(--u)*10)]
+                    lg:w-[calc(var(--u)*430)]
+                    lg:max-w-none
+                    lg:text-[calc(var(--u)*12)]
+                    lg:leading-[calc(var(--u)*17)]
+                  "
+                >
+                  License prices are not paid upfront. Covering a price does not grant ownership or permanent access.
+                </p>
+                </>
+              ) : (
+                <p
+                  data-px="roles.investgpt.description"
+                  className="
+                    mt-6 text-[13px]
+                    leading-[18px] text-white/95
+
+                    lg:mt-[calc(var(--u)*22)]
+                    lg:text-[calc(var(--u)*13)]
+                    lg:leading-[calc(var(--u)*18)]
+                  "
+                >
+                  The first advisors are in evaluation. Listings appear only when approved.
+                </p>
+              )}
+
+              {hasAdvisors ? null : (
               <ul
                 data-px="roles.investgpt.features"
                 className="
@@ -520,25 +598,46 @@ export function RolesSection() {
                   lg:text-[calc(var(--u)*13)]
                 "
               >
-                <li>→ &nbsp; Live data analysis</li>
-                <li>→ &nbsp; Tech &amp; fundamental insights</li>
-                <li>→ &nbsp; Just ask, get immediate answers</li>
+                <li>→ &nbsp; Dated test evidence and known limits</li>
+                <li>→ &nbsp; Compatible brokers and account types</li>
+                <li>→ &nbsp; Approved license price and support terms</li>
               </ul>
+              )}
 
-              <a
-                data-px="roles.investgpt.cta"
-                href="#"
-                className="
-                  mt-12 inline-flex
-                  text-[13px] font-bold
-                  leading-none text-white
+              {hasAdvisors ? (
+                // Unchanged behaviour: a full page load to the catalog, as before this split.
+                // eslint-disable-next-line @next/next/no-html-link-for-pages
+                <a
+                  data-px="roles.investgpt.cta"
+                  href="/advisors"
+                  className="
+                    mt-8 lg:mt-[calc(var(--u)*26)]
+                    inline-flex
+                    text-[13px] font-bold
+                    leading-none text-white
 
-                  lg:mt-[calc(var(--u)*51)]
-                  lg:text-[calc(var(--u)*13)]
-                "
-              >
-                Start Chatting&nbsp; →
-              </a>
+                    lg:text-[calc(var(--u)*13)]
+                  "
+                >
+                  {`View all ${advisors.length > PANEL_LIMIT ? `${advisors.length} ` : ""}advisors`}
+                  &nbsp; →
+                </a>
+              ) : (
+                <OnboardingAction
+                  dataPx="roles.investgpt.cta"
+                  href={links.register}
+                  className="
+                    mt-12 lg:mt-[calc(var(--u)*51)]
+                    inline-flex
+                    text-[13px] font-bold
+                    leading-none text-white
+
+                    lg:text-[calc(var(--u)*13)]
+                  "
+                >
+                  Create Your Account &nbsp; →
+                </OnboardingAction>
+              )}
             </div>
           </div>
         </div>
@@ -547,69 +646,52 @@ export function RolesSection() {
   );
 }
 
+/**
+ * Benefit icons: one family (24px grid, 1.6px round strokes, no fills) shown in 46px
+ * tinted tiles. license = key, coins = partner commission, wallet = continued access.
+ */
 function RoleIcon({ type }: { type: string }) {
-  if (type === "chart") {
+  const common = {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.6,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    className: "h-[24px] w-[24px] lg:h-[max(calc(var(--u)*24),21px)] lg:w-[max(calc(var(--u)*24),21px)]",
+    "aria-hidden": true,
+  };
+
+  if (type === "license") {
     return (
-      <svg
-        viewBox="0 0 24 24"
-        className="h-[18px] w-[18px]"
-        fill="none"
-        aria-hidden="true"
-      >
-        <rect x="4" y="11" width="3" height="8" fill="currentColor" />
-        <rect x="10" y="6" width="3" height="13" fill="currentColor" />
-        <rect x="16" y="9" width="3" height="10" fill="currentColor" />
+      <svg {...common}>
+        <circle cx="7.75" cy="16.25" r="4.6" />
+        <path d="M11 13 20.75 3.25" />
+        <path d="M17.25 6.75 19.75 9.25" />
+        <path d="M14.5 9.5 16.5 11.5" />
+        <circle cx="7.75" cy="16.25" r="1" fill="currentColor" stroke="none" />
       </svg>
     );
   }
 
-  if (type === "card") {
+  if (type === "coins") {
     return (
-      <svg
-        viewBox="0 0 24 24"
-        className="h-[18px] w-[18px]"
-        fill="none"
-        aria-hidden="true"
-      >
-        <rect
-          x="4"
-          y="6"
-          width="16"
-          height="12"
-          rx="1.5"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        />
-
-        <circle cx="9" cy="12" r="2" fill="currentColor" />
-
-        <path
-          d="M14 10H18M14 14H18"
-          stroke="currentColor"
-          strokeWidth="1.4"
-        />
+      <svg {...common}>
+        <ellipse cx="9.5" cy="5.75" rx="6" ry="2.5" />
+        <path d="M3.5 5.75v4.5c0 1.38 2.69 2.5 6 2.5s6-1.12 6-2.5v-4.5" />
+        <path d="M3.5 10.25v4.5c0 1.38 2.69 2.5 6 2.5" />
+        <circle cx="17.25" cy="16.75" r="4.25" strokeOpacity="0.35" />
+        <path d="M17.25 12.5a4.25 4.25 0 1 1-4.25 4.25" />
       </svg>
     );
   }
 
   return (
-    <svg
-      viewBox="0 0 24 24"
-      className="h-[18px] w-[18px]"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="M4.5 8.5H10L11.6 10H19.5V18H4.5V8.5Z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-
-      <path
-        d="M7 8.5V6.5H13L14.5 8.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
+    <svg {...common}>
+      <path d="M5.5 7.25V6.4c0-.87.8-1.52 1.65-1.34l9.6 2.19" />
+      <rect x="3.5" y="7.25" width="17" height="12" rx="2.5" />
+      <path d="M20.5 11.25h-3.25a2 2 0 0 0 0 4h3.25" />
+      <circle cx="17.4" cy="13.25" r="0.85" fill="currentColor" stroke="none" />
     </svg>
   );
 }

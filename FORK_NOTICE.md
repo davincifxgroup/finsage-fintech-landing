@@ -1,0 +1,85 @@
+# Fork notice: ForexLAB Access adaptation
+
+This repository is a fork of **[meligavincent/finsage-fintech-landing](https://github.com/meligavincent/finsage-fintech-landing)**
+by MELIGA Vincent. The original README, design and code authorship are preserved;
+see [README.md](README.md).
+
+- **Upstream commit:** `5b11b549e32ca8a267117ae4d0340fa4806d61a0` (2026-10-12)
+- **Adaptation branch:** `forexlab-access`, kept local and unpublished for internal review
+
+## Licensing status: unresolved
+
+The upstream repository has **no license**. There is no LICENSE file, GitHub reports
+no license, `package.json` is `"private": true`, and the README describes it as a
+portfolio prototype. With no license, normal copyright applies: public availability
+and GitHub forking do not grant permission to modify, redistribute, deploy or use
+this code, its styles, animations or its background image commercially.
+
+**Do not deploy, publish or merge this adaptation into any ForexLAB product until
+written permission (or a license) has been obtained from the upstream author.**
+
+Third-party dependencies keep their own licenses (Next.js, React, Tailwind CSS,
+GSAP, Lato via `@fontsource/lato`); GSAP's no-charge license terms should be
+confirmed for commercial use.
+
+## What was changed for ForexLAB Access
+
+- Branding: approved ForexLAB Access V2 logo and mark (`public/brand/`) replace the
+  FinSage mark and wordmarks in the header, footer and opening loader animation;
+  favicon and metadata (`noindex`); chapter labels renamed for Access.
+- Copy, navigation and section content replaced with ForexLAB Access product
+  content. No advisor names, prices, performance figures or testimonials are invented.
+  No revenue split or allocation percentages are shown publicly; the benefit is
+  explained in plain English.
+- How It Works shows five customer-facing steps inside the original terminal frame.
+  Tab-looking chips are non-interactive labels (a list, no hover affordance).
+- Separate "Client Log In" and "Vendor Login" entries. Both use the existing Rebate
+  authentication. Vendor Login opens the protected vendor portal at `/vendor/` on the
+  Rebate host (branch `access-vendor-portal`); anonymous visitors sign in first and
+  return there. Override with NEXT_PUBLIC_VENDOR_LOGIN_URL.
+- Brokers: `content/brokers.json`, exported from active Rebate `Broker` records with
+  `content/export_active_brokers.py` (refuses any roster other than the approved six:
+  IC Markets, Tickmill, RoboForex, IC Trading, Fusion Markets, FP Markets). Snapshot
+  taken from a disposable Rebate database prepared with migrate + seed_demo.
+- Advisor catalog (branch `access-catalog`): homepage panel, `/advisors` and
+  `/advisors/[slug]`, fed by the Rebate public catalog API; see [CATALOG.md](CATALOG.md).
+  The approved Access mark in the advisor panel is no longer rotated by the scroll
+  animation (brand rule); only its glow turns.
+- Links: authentication and accounts stay in ForexLAB Rebate (`lib/site.ts`,
+  `NEXT_PUBLIC_REBATE_URL`, `NEXT_PUBLIC_MAIN_SITE_URL`).
+- Layout, typography, gradients, spacing and GSAP motion are kept from upstream.
+  Deliberate deviations:
+  - **Hero, mobile:** a readable stacked layout below 768px. Upstream scales the
+    desktop frame down, which makes its text unreadably small.
+  - **Nav text:** a minimum size on mobile.
+  - **Orbital artwork:** circle offsets re-expressed against their own container,
+    with identical rendering on desktop.
+  - **Line breaks:** desktop-only breaks now keep word spacing on mobile.
+  - **Top strip:** a short group of customer-facing facts on the left and the Client Log In
+    (primary) / Vendor Login (secondary) buttons on the right. Phones show two facts and a
+    full-width row of 44px buttons; the hero navigation keeps only the section links.
+  - **Benefit icons:** one family of inline SVGs (license key, coins with payment progress,
+    wallet) in tinted rounded tiles instead of small glyphs in black circles.
+  - **Footer wordmark:** in normal flow below the proportional top region (no fixed aspect
+    ratio), so the whole word is visible in its final animated state at every width.
+  - **Layout width:** ScrollTrigger is refreshed whenever documentElement.clientWidth changes
+    (scrollbar returning after the intro, resize), and the desktop hero departure clears its
+    recorded inline styles when it stops matching, so resizing below 768px cannot leave the
+    heading offset or clipped.
+  - **In-page navigation** (`setupSectionNavigation` in
+    `components/motion/LandingMotionController.tsx`): clicks on in-page links,
+    direct hash URLs and back/forward land at the scroll position where the
+    destination is fully revealed (the end of a pinned reveal timeline, or the
+    section top), and finish any scrub smoothing at once. Normal scrolling keeps
+    every original animation. A direct hash URL skips the opening intro.
+  - **FAQ rail:** the horizontal travel starts once every card has appeared (0.44
+    instead of 0.38 of the pinned timeline).
+  - **FAQ static mode:** reaching the FAQ through navigation (menu, footer or card
+    link, direct `#faq` URL, back/forward) shows all four cards at once in a 4-column
+    grid on desktop and a vertical list on phones (2 columns from 640px). The rail's
+    pinned trigger is disabled with its timeline parked at "all revealed", and pins
+    are re-measured before landing. The cinematic rail returns once the section is
+    entirely below the viewport, or when navigating elsewhere, so the switch happens
+    off screen. Cards keep their 318:396 proportions. Styles: `app/globals.css`.
+  - **Risk note:** the How It Works note is dimmed only while motion runs, so it
+    stays readable with reduced motion.

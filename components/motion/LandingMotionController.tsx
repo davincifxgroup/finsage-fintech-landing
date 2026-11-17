@@ -4,6 +4,10 @@ import { useLayoutEffect } from "react";
 
 import { getGsap } from "@/lib/motion/gsap";
 import { readMotionMode } from "@/lib/motion/motion-mode";
+import { asset } from "@/lib/site";
+
+import { setupSectionNavigation } from "./sectionNavigation";
+import { setupStoryRail } from "./storyRail";
 
 const select = <T extends Element>(selector: string) =>
   document.querySelector<T>(selector);
@@ -76,7 +80,7 @@ function setupOpeningSequence(
   gsap.set(loaderWord, { x: -5 });
 
   const loaderRect = loaderLogo.getBoundingClientRect();
-  const brandRect = brand.getBoundingClientRect();
+  const brandRect = (brand.querySelector("img") ?? brand).getBoundingClientRect();
   const logoScale = brandRect.height / loaderRect.height;
   const logoX = brandRect.left - loaderRect.left;
   const logoY = brandRect.top - loaderRect.top;
@@ -211,67 +215,6 @@ function setupOpeningSequence(
     );
 }
 
-function setupStoryRail(
-  gsap: ReturnType<typeof getGsap>["gsap"],
-  ScrollTrigger: ReturnType<typeof getGsap>["ScrollTrigger"],
-) {
-  const rail = select<HTMLElement>("[data-motion-story-progress]");
-  const fill = select<HTMLElement>("[data-motion-story-progress-fill]");
-  const index = select<HTMLElement>("[data-motion-story-index]");
-  const label = select<HTMLElement>("[data-motion-story-label]");
-
-  if (!rail || !fill || !index || !label) {
-    return;
-  }
-
-  const chapters = [
-    ["[data-px='hero']", "Opening"],
-    ["[data-px='insights']", "Signal Engine"],
-    ["[data-px='challenges']", "AI Terminal"],
-    ["[data-px='roles']", "Market Roles"],
-    ["[data-px='learning']", "Knowledge Rail"],
-    ["[data-px='final-cta']", "Decision Point"],
-    ["[data-px='footer']", "FinSage"],
-  ] as const;
-
-  const setChapter = (chapter: number) => {
-    index.textContent = `${String(chapter + 1).padStart(2, "0")} / 07`;
-    label.textContent = chapters[chapter][1];
-    gsap.fromTo(
-      [index, label],
-      { autoAlpha: 0, x: 8 },
-      { autoAlpha: 1, x: 0, duration: 0.28, ease: "power3.out" },
-    );
-  };
-
-  gsap.to(rail, { autoAlpha: 1, duration: 0.5, delay: 2.25 });
-  gsap.set(fill, { scaleY: 0, transformOrigin: "top center" });
-  gsap.to(fill, {
-    scaleY: 1,
-    ease: "none",
-    scrollTrigger: {
-      start: 0,
-      end: "max",
-      scrub: 0.3,
-    },
-  });
-
-  chapters.forEach(([selector], chapter) => {
-    const element = select<HTMLElement>(selector);
-    if (!element) {
-      return;
-    }
-
-    ScrollTrigger.create({
-      trigger: element,
-      start: "top center",
-      end: "bottom center",
-      onEnter: () => setChapter(chapter),
-      onEnterBack: () => setChapter(chapter),
-    });
-  });
-}
-
 function setupHeroDeparture(
   gsap: ReturnType<typeof getGsap>["gsap"],
   matchMedia: ReturnType<ReturnType<typeof getGsap>["gsap"]["matchMedia"]>,
@@ -324,6 +267,17 @@ function setupHeroDeparture(
       .to(eyebrow, { x: 24, autoAlpha: 0 }, 0.08)
       .to(title, { y: -70, autoAlpha: 0.08, scale: 0.96 }, 0.04)
       .to(prompt, { y: 92, autoAlpha: 0 }, 0.08);
+
+    // This timeline is created while the opening sequence still has its temporary
+    // inline styles on these elements (hidden, offset, translate(-50%) from the Tailwind
+    // centring). When the query stops matching (resizing or rotating below 768px),
+    // GSAP restores the styles it recorded then, which would leave the mobile hero
+    // shifted or hidden (the clipped heading). Clear them so the stylesheet layout applies.
+    return () => {
+      gsap.set([background, header, artwork, ...rings, eyebrow, title, prompt], {
+        clearProps: "transform,opacity,visibility",
+      });
+    };
   });
 }
 
@@ -343,24 +297,30 @@ function setupInsightsProgress(
   const rails = selectAll<HTMLElement>("[data-motion^='insights-rail-']");
   const nodes = selectAll<HTMLElement>("[data-motion^='insights-node-']");
 
+  // One rail between each pair of consecutive steps.
   if (
     !section ||
     !header ||
     !tabs ||
     !copy ||
     !process ||
-    rails.length !== 2 ||
-    nodes.length !== 3
+    nodes.length < 2 ||
+    rails.length !== nodes.length - 1
   ) {
     return;
   }
+
+  const lit = { backgroundColor: "#000000", borderColor: "#000000" };
+  // Rails are drawn one after another between these timeline positions.
+  const railStart = 0.36;
+  const railSpan = 0.56 / rails.length;
 
   gsap.set(rails, {
     autoAlpha: 1,
     scaleY: 0,
     transformOrigin: "top center",
   });
-  gsap.set(nodes[0], { backgroundColor: "#000000", borderColor: "#000000" });
+  gsap.set(nodes[0], lit);
   gsap.set(nodes.slice(1), {
     backgroundColor: "#e8e8e8",
     borderColor: "#dedede",
@@ -399,67 +359,36 @@ function setupInsightsProgress(
       )
       .from(
         cards,
-        { autoAlpha: 0.14, x: 44, stagger: 0.04, duration: 0.18 },
+        { autoAlpha: 0.14, x: 44, stagger: 0.03, duration: 0.18 },
         0.25,
-      )
-      .to(rails[0], { scaleY: 1, duration: 0.22 }, 0.39)
-      .to(
-        nodes[1],
-        {
-          backgroundColor: "#000000",
-          borderColor: "#000000",
-          scale: 1.2,
-          duration: 0.08,
-        },
-        0.55,
-      )
-      .to(nodes[1], { scale: 1, duration: 0.06 }, 0.63)
-      .to(rails[1], { scaleY: 1, duration: 0.22 }, 0.65)
-      .to(
-        nodes[2],
-        {
-          backgroundColor: "#000000",
-          borderColor: "#000000",
-          scale: 1.2,
-          duration: 0.08,
-        },
-        0.82,
-      )
-      .to(nodes[2], { scale: 1, duration: 0.06 }, 0.9)
-      .to(process, { scale: 1.025, duration: 0.1 }, 0.89)
-      .to(process, { scale: 1, duration: 0.1 }, 0.99);
+      );
+
+    rails.forEach((rail, index) => {
+      const at = railStart + index * railSpan;
+      const node = nodes[index + 1];
+      timeline
+        .to(rail, { scaleY: 1, duration: railSpan * 0.75 }, at)
+        .to(node, { ...lit, scale: 1.2, duration: 0.05 }, at + railSpan * 0.7)
+        .to(node, { scale: 1, duration: 0.04 }, at + railSpan * 0.7 + 0.05);
+    });
   });
 
   matchMedia.add("(max-width: 1023px)", () => {
-    gsap
-      .timeline({
-        defaults: { ease: "power2.inOut" },
-        scrollTrigger: {
-          trigger: process,
-          start: "top 70%",
-          toggleActions: "play none none reverse",
-        },
-      })
-      .to(rails[0], { scaleY: 1, duration: 0.5 }, 0.15)
-      .to(
-        nodes[1],
-        {
-          backgroundColor: "#000000",
-          borderColor: "#000000",
-          duration: 0.18,
-        },
-        0.6,
-      )
-      .to(rails[1], { scaleY: 1, duration: 0.55 }, 0.9)
-      .to(
-        nodes[2],
-        {
-          backgroundColor: "#000000",
-          borderColor: "#000000",
-          duration: 0.2,
-        },
-        1.5,
-      );
+    const timeline = gsap.timeline({
+      defaults: { ease: "power2.inOut" },
+      scrollTrigger: {
+        trigger: process,
+        start: "top 70%",
+        toggleActions: "play none none reverse",
+      },
+    });
+
+    rails.forEach((rail, index) => {
+      const at = 0.15 + index * 0.45;
+      timeline
+        .to(rail, { scaleY: 1, duration: 0.4 }, at)
+        .to(nodes[index + 1], { ...lit, duration: 0.16 }, at + 0.38);
+    });
   });
 }
 
@@ -492,6 +421,10 @@ function setupTerminalReveal(
   }
 
   gsap.set(lines.slice(2), { autoAlpha: 0.08, y: 3 });
+  // Dimmed only when motion runs; readable by default (reduced motion, no JS).
+  if (mutedGroup) {
+    gsap.set(mutedGroup, { opacity: 0.16 });
+  }
 
   matchMedia.add("(min-width: 1024px)", () => {
     const timeline = gsap.timeline({
@@ -623,8 +556,8 @@ function setupRolesNarrative(
       .from(
         icons,
         {
-          rotation: -120,
-          scale: 0,
+          autoAlpha: 0,
+          scale: 0.6,
           stagger: 0.08,
           duration: 0.22,
         },
@@ -651,6 +584,17 @@ function setupRolesNarrative(
         { clipPath: "inset(0 0 0 100%)", x: 54, duration: 0.6 },
         0.08,
       );
+
+    // The label and header are centred with Tailwind's lg:-translate-x-1/2 (the CSS
+    // `translate` property). GSAP folds that into an inline transform (translate(-50%))
+    // with `translate: none`, and reverting this context below 1024px left them there,
+    // so the mobile eyebrow and heading were shifted left and clipped until a reload.
+    // Clear what this context animated so the stylesheet layout applies again.
+    return () => {
+      gsap.set([label, header, ...cards, ...icons, visual, panel], {
+        clearProps: "transform,translate,opacity,visibility,clipPath",
+      });
+    };
   });
 
   matchMedia.add("(max-width: 1023px)", () => {
@@ -692,95 +636,12 @@ function setupInvestGptScroll(
           scrub: 0.65,
         },
       })
-      .to(symbol, { rotation: 270, transformOrigin: "50% 50%" }, 0)
+      .to(symbol, { scale: 1.06, transformOrigin: "50% 50%" }, 0)
       .to(
         glow,
         { rotation: -80, scale: 1.02, transformOrigin: "50% 50%" },
         0,
       );
-  });
-}
-
-function setupLearningScrollytelling(
-  gsap: ReturnType<typeof getGsap>["gsap"],
-  matchMedia: ReturnType<ReturnType<typeof getGsap>["gsap"]["matchMedia"]>,
-) {
-  const section = select<HTMLElement>("[data-px='learning']");
-  const label = select<HTMLElement>("[data-px='learning.label']");
-  const header = select<HTMLElement>("[data-px='learning.header']");
-  const carousel = select<HTMLElement>("[data-px='learning.carousel']");
-  const track = select<HTMLElement>("[data-px='learning.track']");
-  const cards = selectAll<HTMLElement>("[data-px^='learning.card.']").filter(
-    (element) => /^learning\.card\.\d$/.test(element.dataset.px ?? ""),
-  );
-  const figures = selectAll<HTMLElement>(
-    "[data-px^='learning.card.'][data-px$='.figure']",
-  );
-
-  if (!section || !label || !header || !carousel || !track || cards.length < 2) {
-    return;
-  }
-
-  matchMedia.add("(min-width: 1024px)", () => {
-    const travel = () => Math.max(0, track.scrollWidth - carousel.clientWidth + 28);
-
-    gsap
-      .timeline({
-        defaults: { ease: "none" },
-        scrollTrigger: {
-          trigger: section,
-          start: "top top",
-          end: () => `+=${Math.max(window.innerHeight * 1.8, travel() * 5)}`,
-          pin: true,
-          scrub: 0.85,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        },
-      })
-      .from(label, { autoAlpha: 0, x: -42, duration: 0.08, ease: "power3.out" })
-      .from(
-        header,
-        { autoAlpha: 0, y: 62, duration: 0.14, ease: "power3.out" },
-        0.04,
-      )
-      .from(
-        cards,
-        {
-          autoAlpha: 0,
-          y: (cardIndex) => 90 + cardIndex * 22,
-          rotation: (cardIndex) => (cardIndex % 2 === 0 ? -2 : 2),
-          stagger: 0.045,
-          duration: 0.18,
-          ease: "power3.out",
-        },
-        0.12,
-      )
-      .to(track, { x: () => -travel(), duration: 0.58 }, 0.38)
-      .to(
-        figures,
-        {
-          rotation: (figureIndex) => (figureIndex % 2 === 0 ? -4 : 4),
-          transformOrigin: "50% 50%",
-          duration: 0.58,
-        },
-        0.38,
-      )
-      .to(figures, { rotation: 0, duration: 0.08 }, 0.94);
-  });
-
-  matchMedia.add("(max-width: 1023px)", () => {
-    gsap.from(cards, {
-      autoAlpha: 0,
-      y: 52,
-      stagger: 0.09,
-      duration: 0.6,
-      ease: "power3.out",
-      scrollTrigger: {
-        trigger: carousel,
-        start: "top 82%",
-        toggleActions: "play none none reverse",
-      },
-    });
   });
 }
 
@@ -795,7 +656,7 @@ function setupGlobalControlHovers(
     );
     const tabs = selectAll<HTMLElement>(
       "[data-px^='insights.tab.'], [data-px^='challenges.tab.']",
-    );
+    ).filter((element) => element.matches("a, button"));
     const claimed = new Set<HTMLElement>([...featured, ...tabs]);
     const quietControls = selectAll<HTMLElement>("a, button").filter(
       (element) =>
@@ -881,551 +742,6 @@ function setupGlobalControlHovers(
         { x: 0, autoAlpha: 1, scale: 1, duration: 0.28, ease: "power3.out" },
       ),
     );
-
-    return () => cleanups.forEach((cleanup) => cleanup());
-  });
-}
-
-type MotionPrimitive = SVGGeometryElement | HTMLElement;
-
-function prepareStroke(
-  gsap: ReturnType<typeof getGsap>["gsap"],
-  element: SVGGeometryElement,
-) {
-  const length = element.getTotalLength();
-  gsap.set(element, {
-    strokeDasharray: length,
-    strokeDashoffset: 0,
-  });
-  return length;
-}
-
-function bindHoverTimeline(
-  gsap: ReturnType<typeof getGsap>["gsap"],
-  card: HTMLElement,
-  targets: MotionPrimitive[],
-  timeline: gsap.core.Timeline,
-) {
-  let resetTween: gsap.core.Tween | null = null;
-
-  const reset = () => {
-    timeline.pause();
-    resetTween?.kill();
-    resetTween = gsap.to(targets, {
-      autoAlpha: 1,
-      x: 0,
-      y: 0,
-      rotation: 0,
-      scale: 1,
-      scaleX: 1,
-      strokeDashoffset: 0,
-      duration: 0.32,
-      ease: "power2.inOut",
-      overwrite: "auto",
-    });
-  };
-
-  const enter = () => {
-    resetTween?.kill();
-    resetTween = null;
-    timeline.restart();
-  };
-
-  card.addEventListener("pointerenter", enter);
-  card.addEventListener("pointerleave", reset);
-
-  return () => {
-    card.removeEventListener("pointerenter", enter);
-    card.removeEventListener("pointerleave", reset);
-    resetTween?.kill();
-    timeline.kill();
-    gsap.killTweensOf(targets);
-  };
-}
-
-function setupLearningInteractions(
-  gsap: ReturnType<typeof getGsap>["gsap"],
-  matchMedia: ReturnType<ReturnType<typeof getGsap>["gsap"]["matchMedia"]>,
-) {
-  matchMedia.add("(hover: hover) and (pointer: fine)", () => {
-    const cleanups: Array<() => void> = [];
-
-    const learningCards = selectAll<HTMLElement>(
-      "[data-px^='learning.card.']",
-    ).filter((element) =>
-      /^learning\.card\.\d$/.test(element.dataset.px ?? ""),
-    );
-
-    learningCards.forEach((card) => {
-      const copy = card.querySelector<HTMLElement>("[data-px$='.copy']");
-      const figure = card.querySelector<HTMLElement>("[data-px$='.figure']");
-      const cta = card.querySelector<HTMLElement>("[data-px$='.cta']");
-      const arrow = cta?.querySelector<HTMLElement>("span") ?? null;
-
-      if (!copy || !figure || !cta) {
-        return;
-      }
-
-      let bounds = card.getBoundingClientRect();
-      const figureX = gsap.quickTo(figure, "x", {
-        duration: 0.45,
-        ease: "power3.out",
-      });
-      const figureY = gsap.quickTo(figure, "y", {
-        duration: 0.45,
-        ease: "power3.out",
-      });
-      const copyX = gsap.quickTo(copy, "x", {
-        duration: 0.4,
-        ease: "power3.out",
-      });
-
-      const enter = () => {
-        bounds = card.getBoundingClientRect();
-        gsap.set([copy, figure, cta], { willChange: "transform" });
-        gsap.to(card, {
-          filter: "brightness(1.045) saturate(1.06)",
-          duration: 0.34,
-          ease: "power3.out",
-          overwrite: "auto",
-        });
-        gsap.to(copy, {
-          y: -7,
-          duration: 0.34,
-          ease: "power3.out",
-          overwrite: "auto",
-        });
-        gsap.to(figure, {
-          scale: 1.035,
-          duration: 0.42,
-          ease: "power3.out",
-          overwrite: "auto",
-        });
-        gsap.to(cta, {
-          x: 6,
-          duration: 0.3,
-          ease: "power3.out",
-          overwrite: "auto",
-        });
-        if (arrow) {
-          gsap.to(arrow, {
-            x: 6,
-            duration: 0.3,
-            ease: "power3.out",
-            overwrite: "auto",
-          });
-        }
-      };
-
-      const move = (event: PointerEvent) => {
-        const normalizedX = (event.clientX - bounds.left) / bounds.width - 0.5;
-        const normalizedY = (event.clientY - bounds.top) / bounds.height - 0.5;
-        figureX(normalizedX * 16);
-        figureY(normalizedY * 14);
-        copyX(normalizedX * -5);
-      };
-
-      const leave = () => {
-        figureX(0);
-        figureY(0);
-        copyX(0);
-        gsap.to(card, {
-          filter: "brightness(1) saturate(1)",
-          scale: 1,
-          duration: 0.38,
-          ease: "power3.out",
-          overwrite: "auto",
-        });
-        gsap.to(copy, {
-          y: 0,
-          duration: 0.38,
-          ease: "power3.out",
-          overwrite: "auto",
-          onComplete: () => gsap.set(copy, { clearProps: "willChange" }),
-        });
-        gsap.to(figure, {
-          x: 0,
-          y: 0,
-          scale: 1,
-          duration: 0.42,
-          ease: "power3.out",
-          overwrite: "auto",
-          onComplete: () => gsap.set(figure, { clearProps: "willChange" }),
-        });
-        gsap.to(cta, {
-          x: 0,
-          duration: 0.34,
-          ease: "power3.out",
-          overwrite: "auto",
-          onComplete: () => gsap.set(cta, { clearProps: "willChange" }),
-        });
-        if (arrow) {
-          gsap.to(arrow, {
-            x: 0,
-            duration: 0.34,
-            ease: "power3.out",
-            overwrite: "auto",
-          });
-        }
-      };
-
-      const press = () =>
-        gsap.to(card, {
-          scale: 0.985,
-          duration: 0.12,
-          ease: "power2.out",
-          overwrite: "auto",
-        });
-      const release = () =>
-        gsap.to(card, {
-          scale: 1,
-          duration: 0.24,
-          ease: "power3.out",
-          overwrite: "auto",
-        });
-
-      card.addEventListener("pointerenter", enter);
-      card.addEventListener("pointermove", move);
-      card.addEventListener("pointerleave", leave);
-      card.addEventListener("pointerdown", press);
-      card.addEventListener("pointerup", release);
-
-      cleanups.push(() => {
-        card.removeEventListener("pointerenter", enter);
-        card.removeEventListener("pointermove", move);
-        card.removeEventListener("pointerleave", leave);
-        card.removeEventListener("pointerdown", press);
-        card.removeEventListener("pointerup", release);
-        gsap.killTweensOf([card, copy, figure, cta, arrow].filter(Boolean));
-      });
-    });
-
-    const videoCard = select<HTMLElement>("[data-px='learning.card.1']");
-    const videoAxis = select<SVGGeometryElement>("[data-motion='video-axis']");
-    const videoCurve = select<SVGGeometryElement>(
-      "[data-motion='video-curve']",
-    );
-
-    if (videoCard && videoAxis && videoCurve) {
-      const axisLength = prepareStroke(gsap, videoAxis);
-      const curveLength = prepareStroke(gsap, videoCurve);
-      const videoTargets = [videoAxis, videoCurve];
-      gsap.set(videoTargets, {
-        transformBox: "fill-box",
-        transformOrigin: "50% 50%",
-      });
-
-      const videoTimeline = gsap.timeline({
-        paused: true,
-        defaults: { ease: "power2.inOut", overwrite: "auto" },
-      });
-
-      videoTimeline
-        .to(
-          videoAxis,
-          {
-            strokeDashoffset: axisLength * 0.72,
-            rotation: -22,
-            x: -13,
-            y: 14,
-            autoAlpha: 0.28,
-            duration: 0.56,
-          },
-          0,
-        )
-        .to(
-          videoCurve,
-          {
-            strokeDashoffset: curveLength * 0.58,
-            rotation: 17,
-            x: 18,
-            y: -9,
-            duration: 0.56,
-          },
-          0,
-        )
-        .to(
-          videoTargets,
-          {
-            strokeDashoffset: 0,
-            rotation: 0,
-            x: 0,
-            y: 0,
-            autoAlpha: 1,
-            duration: 0.62,
-          },
-          0.56,
-        );
-
-      cleanups.push(
-        bindHoverTimeline(gsap, videoCard, videoTargets, videoTimeline),
-      );
-    }
-
-    const academyCard = select<HTMLElement>("[data-px='learning.card.2']");
-    const academyOuter = select<SVGGeometryElement>(
-      "[data-motion='academy-outer']",
-    );
-    const academyInner = select<SVGGeometryElement>(
-      "[data-motion='academy-inner']",
-    );
-    const academySpokeX = select<SVGGeometryElement>(
-      "[data-motion='academy-spoke-x']",
-    );
-    const academySpokeY = select<SVGGeometryElement>(
-      "[data-motion='academy-spoke-y']",
-    );
-
-    if (
-      academyCard &&
-      academyOuter &&
-      academyInner &&
-      academySpokeX &&
-      academySpokeY
-    ) {
-      const outerLength = prepareStroke(gsap, academyOuter);
-      const academyTargets = [
-        academyOuter,
-        academyInner,
-        academySpokeX,
-        academySpokeY,
-      ];
-      gsap.set(academyTargets, {
-        transformBox: "fill-box",
-        transformOrigin: "50% 50%",
-      });
-
-      const academyTimeline = gsap.timeline({
-        paused: true,
-        defaults: { ease: "power2.inOut", overwrite: "auto" },
-      });
-
-      academyTimeline
-        .to(
-          academyOuter,
-          {
-            strokeDashoffset: outerLength * 0.58,
-            rotation: 28,
-            x: -9,
-            y: -8,
-            duration: 0.58,
-          },
-          0,
-        )
-        .to(
-          academyInner,
-          { rotation: -24, x: -10, y: -3, duration: 0.58 },
-          0,
-        )
-        .to(
-          academySpokeX,
-          { rotation: -38, x: 16, y: -14, autoAlpha: 0.15, duration: 0.58 },
-          0,
-        )
-        .to(
-          academySpokeY,
-          { rotation: 54, x: -17, y: 10, autoAlpha: 0.18, duration: 0.58 },
-          0,
-        )
-        .to(
-          academyTargets,
-          {
-            strokeDashoffset: 0,
-            rotation: 0,
-            x: 0,
-            y: 0,
-            autoAlpha: 1,
-            duration: 0.66,
-          },
-          0.58,
-        );
-
-      cleanups.push(
-        bindHoverTimeline(
-          gsap,
-          academyCard,
-          academyTargets,
-          academyTimeline,
-        ),
-      );
-    }
-
-    const lensCard = select<HTMLElement>("[data-px='learning.card.3']");
-    const smallCircle = select<SVGGeometryElement>(
-      "[data-motion='market-small-circle']",
-    );
-    const spiral = select<SVGGeometryElement>("[data-motion='market-spiral']");
-    const axis = select<SVGGeometryElement>("[data-motion='market-axis']");
-    const largeCircle = select<SVGGeometryElement>(
-      "[data-motion='market-large-circle']",
-    );
-    const diagonalTop = select<SVGGeometryElement>(
-      "[data-motion='market-diagonal-top']",
-    );
-    const diagonalBottom = select<SVGGeometryElement>(
-      "[data-motion='market-diagonal-bottom']",
-    );
-
-    if (
-      lensCard &&
-      smallCircle &&
-      spiral &&
-      axis &&
-      largeCircle &&
-      diagonalTop &&
-      diagonalBottom
-    ) {
-      const smallLength = prepareStroke(gsap, smallCircle);
-      const spiralLength = prepareStroke(gsap, spiral);
-      const largeLength = prepareStroke(gsap, largeCircle);
-      const lensTargets = [
-        smallCircle,
-        spiral,
-        axis,
-        largeCircle,
-        diagonalTop,
-        diagonalBottom,
-      ];
-
-      gsap.set(lensTargets, {
-        transformBox: "fill-box",
-        transformOrigin: "50% 50%",
-      });
-      gsap.set(axis, { transformOrigin: "100% 50%" });
-
-      const lensTimeline = gsap.timeline({
-        paused: true,
-        defaults: { ease: "power2.inOut", overwrite: "auto" },
-      });
-
-      lensTimeline
-        .to(
-          smallCircle,
-          {
-            strokeDashoffset: smallLength * 0.66,
-            rotation: -35,
-            x: -11,
-            y: 6,
-            duration: 0.64,
-          },
-          0,
-        )
-        .to(
-          spiral,
-          {
-            strokeDashoffset: spiralLength * 0.76,
-            rotation: 22,
-            x: -7,
-            y: -5,
-            duration: 0.64,
-          },
-          0,
-        )
-        .to(axis, { scaleX: 0.12, autoAlpha: 0.3, duration: 0.64 }, 0)
-        .to(
-          largeCircle,
-          {
-            strokeDashoffset: largeLength * 0.8,
-            rotation: 34,
-            x: 18,
-            duration: 0.64,
-          },
-          0,
-        )
-        .to(
-          diagonalTop,
-          { rotation: 25, x: 21, y: -12, autoAlpha: 0.24, duration: 0.64 },
-          0,
-        )
-        .to(
-          diagonalBottom,
-          { rotation: -25, x: 18, y: 14, autoAlpha: 0.24, duration: 0.64 },
-          0,
-        )
-        .to(
-          lensTargets,
-          {
-            strokeDashoffset: 0,
-            rotation: 0,
-            x: 0,
-            y: 0,
-            scaleX: 1,
-            autoAlpha: 1,
-            duration: 0.72,
-          },
-          0.64,
-        );
-
-      cleanups.push(
-        bindHoverTimeline(gsap, lensCard, lensTargets, lensTimeline),
-      );
-    }
-
-    const smartCard = select<HTMLElement>("[data-px='learning.card.4']");
-    const smartCircle = select<SVGGeometryElement>(
-      "[data-motion='smart-circle']",
-    );
-    const smartAxis = select<SVGGeometryElement>("[data-motion='smart-axis']");
-
-    if (smartCard && smartCircle && smartAxis) {
-      const circleLength = prepareStroke(gsap, smartCircle);
-      const axisLength = prepareStroke(gsap, smartAxis);
-      const smartTargets = [smartCircle, smartAxis];
-      gsap.set(smartTargets, {
-        transformBox: "fill-box",
-        transformOrigin: "50% 50%",
-      });
-      gsap.set(smartAxis, { transformOrigin: "100% 50%" });
-
-      const smartTimeline = gsap.timeline({
-        paused: true,
-        defaults: { ease: "power2.inOut", overwrite: "auto" },
-      });
-
-      smartTimeline
-        .to(
-          smartCircle,
-          {
-            strokeDashoffset: circleLength * 0.7,
-            rotation: 105,
-            scale: 0.86,
-            x: 14,
-            y: -8,
-            duration: 0.6,
-          },
-          0,
-        )
-        .to(
-          smartAxis,
-          {
-            strokeDashoffset: axisLength * 0.82,
-            scaleX: 0.14,
-            rotation: -16,
-            x: -12,
-            autoAlpha: 0.22,
-            duration: 0.6,
-          },
-          0,
-        )
-        .to(
-          smartTargets,
-          {
-            strokeDashoffset: 0,
-            rotation: 0,
-            scale: 1,
-            scaleX: 1,
-            x: 0,
-            y: 0,
-            autoAlpha: 1,
-            duration: 0.68,
-          },
-          0.6,
-        );
-
-      cleanups.push(
-        bindHoverTimeline(gsap, smartCard, smartTargets, smartTimeline),
-      );
-    }
 
     return () => cleanups.forEach((cleanup) => cleanup());
   });
@@ -1572,6 +888,7 @@ function setupFooterReveal(
     );
 }
 
+
 export function LandingMotionController() {
   useLayoutEffect(() => {
     const mode = readMotionMode();
@@ -1597,40 +914,107 @@ export function LandingMotionController() {
     const previousOverflow = document.body.style.overflow;
     let scrollReleased = false;
 
+    // Pinned sections and scrub ranges are measured in pixels. The intro locks scrolling
+    // with overflow:hidden, which also removes a classic scrollbar, so everything set up
+    // during the intro is measured at the full window width. When the lock is released
+    // the scrollbar returns and narrows the layout (e.g. 1440 -> 1425) without a window
+    // resize event, so ScrollTrigger would keep the old widths and the page would scroll
+    // sideways. Re-measure whenever the real layout width (documentElement.clientWidth)
+    // changes: after the release, when a scrollbar appears/disappears, and on resize.
+    let measuredWidth = root.clientWidth;
+    let widthFrame = 0;
+    const refreshIfWidthChanged = () => {
+      cancelAnimationFrame(widthFrame);
+      widthFrame = requestAnimationFrame(() => {
+        const width = root.clientWidth;
+        if (width !== measuredWidth) {
+          measuredWidth = width;
+          ScrollTrigger.refresh();
+        }
+      });
+    };
+    const widthObserver = new ResizeObserver(refreshIfWidthChanged);
+    widthObserver.observe(root);
+
+    // The FAQ accordion is in normal flow: opening or closing an answer changes the page
+    // height, so the pinned sections after it are re-measured once the change settles.
+    const faq = select<HTMLElement>("[data-px='learning']");
+    let measuredFaqHeight = faq?.offsetHeight ?? 0;
+    let faqTimer = 0;
+    const faqObserver = new ResizeObserver(() => {
+      if (!faq || faq.offsetHeight === measuredFaqHeight) {
+        return;
+      }
+      window.clearTimeout(faqTimer);
+      faqTimer = window.setTimeout(() => {
+        measuredFaqHeight = faq.offsetHeight;
+        ScrollTrigger.refresh();
+      }, 120);
+    });
+    if (faq) {
+      faqObserver.observe(faq);
+    }
+
     document.body.style.overflow = "hidden";
 
     const releaseScroll = () => {
       if (!scrollReleased) {
         document.body.style.overflow = previousOverflow;
         scrollReleased = true;
+        refreshIfWidthChanged();
       }
     };
 
+    // A direct link to a section skips the intro so the visitor lands on it at once.
+    const initialHash = window.location.hash.length > 1 ? window.location.hash : "";
+    const startsAtSection =
+      initialHash !== "" && initialHash !== "#top" && document.getElementById(initialHash.slice(1)) !== null;
+
     const matchMedia = gsap.matchMedia();
+    // setupStoryRail registers window and ScrollTrigger listeners and may queue a frame;
+    // context.revert() does not remove those, so its own cleanup is kept and called below.
+    let cleanupStoryRail = () => {};
     const context = gsap.context(() => {
-      setupOpeningSequence(gsap, releaseScroll);
+      if (startsAtSection) {
+        if (loader) {
+          loader.style.display = "none";
+        }
+        releaseScroll();
+      } else {
+        setupOpeningSequence(gsap, releaseScroll);
+      }
       setupHeroDeparture(gsap, matchMedia);
       setupInsightsProgress(gsap, matchMedia);
       setupTerminalReveal(gsap, matchMedia);
       setupRolesNarrative(gsap, matchMedia);
       setupInvestGptScroll(gsap, matchMedia);
-      setupLearningScrollytelling(gsap, matchMedia);
       setupGlobalControlHovers(gsap, matchMedia);
-      setupLearningInteractions(gsap, matchMedia);
       setupFinalCtaScrollytelling(gsap, matchMedia);
       setupFooterReveal(gsap);
-      setupStoryRail(gsap, ScrollTrigger);
+      cleanupStoryRail = setupStoryRail(gsap, ScrollTrigger);
     }, document.body);
+
+    const navigation = setupSectionNavigation(ScrollTrigger);
 
     let active = true;
     void document.fonts.ready.then(() => {
       if (active) {
+        measuredWidth = root.clientWidth;
         ScrollTrigger.refresh();
+        if (startsAtSection) {
+          navigation.goTo(initialHash, { updateHistory: false });
+        }
       }
     });
 
     return () => {
       active = false;
+      widthObserver.disconnect();
+      faqObserver.disconnect();
+      window.clearTimeout(faqTimer);
+      cancelAnimationFrame(widthFrame);
+      navigation.cleanup();
+      cleanupStoryRail();
       releaseScroll();
       matchMedia.revert();
       context.revert();
@@ -1649,7 +1033,7 @@ export function LandingMotionController() {
           data-motion-story-label
           className="whitespace-nowrap text-[9px] font-bold uppercase tracking-[0.18em]"
         >
-          Opening
+          Welcome
         </span>
         <span
           data-motion-story-index
@@ -1670,31 +1054,37 @@ export function LandingMotionController() {
         aria-hidden="true"
         className="fixed inset-0 z-[100] flex items-center justify-center bg-white [font-family:Lato,Arial,sans-serif]"
       >
-        <div data-motion-loader-logo className="flex items-center">
+        {/*
+          Approved ForexLAB Access logo, rebuilt from the mark and the header
+          artwork (56px tall: header scale 0.875) so the same opening motion
+          applies: the mark grows in, then the wordmark is revealed.
+        */}
+        <div data-motion-loader-logo className="flex h-[56px] items-center">
           <span
             data-motion-loader-mark
-            className="relative block h-[22px] w-[34px] shrink-0"
+            className="relative block h-[56px] w-[49px] shrink-0"
           >
-            <span
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               data-motion-loader-filled
-              className="absolute left-0 top-1/2 block h-[22px] w-[22px] -translate-y-1/2 rounded-full bg-black"
+              src={asset("/brand/forexlab-access-mark-light.svg")}
+              alt=""
+              className="absolute left-[8.59px] top-[12.09px] block h-[31.82px] w-[31.82px]"
             />
-            <span
-              data-motion-loader-outline
-              className="absolute left-[12px] top-1/2 block h-[22px] w-[22px] -translate-y-1/2 rounded-full border border-black bg-white"
-            />
+            <span data-motion-loader-outline className="absolute left-0 top-0 block h-0 w-0" />
           </span>
 
           <span
             data-motion-loader-word-mask
-            className="ml-[7px] block overflow-hidden"
+            className="block h-[56px] w-[241.5px] overflow-hidden"
           >
-            <span
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               data-motion-loader-word
-              className="block whitespace-nowrap text-[22px] font-normal leading-none text-black"
-            >
-              FinSage
-            </span>
+              src={asset("/brand/forexlab-access-header-light.svg")}
+              alt=""
+              className="-ml-[49px] block h-[56px] w-[290.5px] max-w-none"
+            />
           </span>
         </div>
       </div>

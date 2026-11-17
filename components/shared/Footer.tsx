@@ -1,27 +1,38 @@
-const navigationLinks = [
-  "Home",
-  "Discover",
-  "InvestGPT",
-  "Portfolio Toolbox",
+import { asset, COMING_SOON, links, type NavLink } from "@/lib/site";
+import { OnboardingAction } from "@/components/shared/OnboardingAction";
+
+const navigationLinks: NavLink[] = [
+  { label: "Advisors", href: "#advisors" },
+  { label: "How It Works", href: "#how-it-works" },
+  { label: "Our Testing", href: "#testing" },
+  { label: "Brokers", href: "#brokers" },
+  { label: "FAQ", href: "#faq" },
 ];
 
-const toolLinks = [
-  "Watchlist",
-  "Market Movers",
-  "AI Stock Picker",
-  "Smart Signals",
-  "Stocklist",
+type ToolLink = NavLink & { onboarding?: boolean };
+
+const toolLinks: ToolLink[] = [
+  { label: "Client Log In", href: links.login },
+  { label: "Vendor Login", href: links.vendorLogin, onboarding: true },
+  { label: "Create Account", href: links.register, onboarding: true },
+  { label: "Dashboard", href: links.dashboard },
 ];
 
-const resourceLinks = [
-  "Affiliate Program",
-  "Academy",
-  "API for Signal DB",
-  "Pricing Plans",
-  "Podcast",
+const resourceLinks: NavLink[] = [
+  { label: "EA Forex LAB", href: links.mainSite },
+  { label: "ForexLAB Rebate", href: links.rebate },
+  { label: "Risk Disclosure", href: "#risk" },
 ];
 
-export function Footer() {
+export function Footer({ anchorBase = "" }: { anchorBase?: string } = {}) {
+  // On subpages in-page anchors point back to the homepage ("/#faq").
+  const withBase = (list: NavLink[]) =>
+    list.map((link) => (link.href.startsWith("#") ? { ...link, href: anchorBase + link.href } : link));
+  const nav = withBase(navigationLinks);
+  const tools = withBase(toolLinks);
+  const resources = withBase(resourceLinks);
+  const logoHref = anchorBase ? anchorBase : "#top";
+
   return (
     <footer
       data-px="footer"
@@ -30,8 +41,6 @@ export function Footer() {
         relative isolate w-full overflow-hidden
         bg-white text-black
         [font-family:Lato,Arial,sans-serif]
-
-        lg:aspect-[1199/480]
       "
     >
       {/* ====================================================== */}
@@ -49,7 +58,9 @@ export function Footer() {
       />
 
       {/* ====================================================== */}
-      {/* CANONICAL 1199 × 480 FRAME                             */}
+      {/* FRAME: proportional top region (1199-unit grid) with   */}
+      {/* the wordmark below it in normal flow, so the footer is */}
+      {/* always tall enough for the complete word.              */}
       {/* ====================================================== */}
 
       <div
@@ -57,13 +68,12 @@ export function Footer() {
         className="
           relative z-10
           mx-auto w-full
-          px-5 pb-0 pt-14
+          px-5 pb-10 pt-14
 
           sm:px-8
 
-          lg:absolute
-          lg:inset-0
           lg:p-0
+          lg:pb-[calc(var(--u)*64)]
 
           lg:[container-type:inline-size]
           lg:[--u:0.0834028357cqw]
@@ -83,25 +93,25 @@ export function Footer() {
           "
         >
           <div>
-            <FooterLogo />
+            <FooterLogo href={logoHref} />
           </div>
 
           <FooterColumn
             dataPx="footer.navigation.mobile"
-            title="Navigation"
-            links={navigationLinks}
+            title="Access"
+            links={nav}
           />
 
           <FooterColumn
             dataPx="footer.tools.mobile"
-            title="Tools"
-            links={toolLinks}
+            title="Account"
+            links={tools}
           />
 
           <FooterColumn
             dataPx="footer.resources.mobile"
-            title="Resources"
-            links={resourceLinks}
+            title="ForexLAB"
+            links={resources}
           />
         </div>
 
@@ -114,9 +124,9 @@ export function Footer() {
           className="
             hidden
 
-            lg:absolute
-            lg:inset-0
+            lg:relative
             lg:block
+            lg:h-[calc(var(--u)*300)]
           "
         >
           {/* ================================================== */}
@@ -131,7 +141,7 @@ export function Footer() {
               lg:top-[calc(var(--u)*122)]
             "
           >
-            <FooterLogo />
+            <FooterLogo href={logoHref} />
           </div>
 
           {/* ================================================== */}
@@ -148,8 +158,8 @@ export function Footer() {
           >
             <FooterColumn
               dataPx="footer.navigation"
-              title="Navigation"
-              links={navigationLinks}
+              title="Access"
+              links={nav}
             />
           </div>
 
@@ -167,8 +177,8 @@ export function Footer() {
           >
             <FooterColumn
               dataPx="footer.tools"
-              title="Tools"
-              links={toolLinks}
+              title="Account"
+              links={tools}
             />
           </div>
 
@@ -186,8 +196,8 @@ export function Footer() {
           >
             <FooterColumn
               dataPx="footer.resources"
-              title="Resources"
-              links={resourceLinks}
+              title="ForexLAB"
+              links={resources}
             />
           </div>
         </div>
@@ -199,7 +209,7 @@ export function Footer() {
         <div
           data-px="footer.legal"
           className="
-            mt-14 flex gap-[41px]
+            mt-14 flex flex-wrap gap-x-[41px] gap-y-[12px]
 
             lg:absolute
             lg:left-[calc(var(--u)*114)]
@@ -210,7 +220,7 @@ export function Footer() {
         >
           <a
             data-px="footer.legal.privacy"
-            href="#"
+            href={links.privacy}
             className="
               whitespace-nowrap
               text-[13px]
@@ -226,7 +236,7 @@ export function Footer() {
 
           <a
             data-px="footer.legal.terms"
-            href="#"
+            href={links.terms}
             className="
               whitespace-nowrap
               text-[13px]
@@ -237,38 +247,57 @@ export function Footer() {
               lg:leading-[calc(var(--u)*15)]
             "
           >
-            Terms of Use
+            Terms of Service
           </a>
+
+          {/* The Access Terms page is published with Access onboarding (Rebate backend). */}
+          <OnboardingAction
+            dataPx="footer.legal.access-terms"
+            href={links.accessTerms}
+            closedLabel={`Access Terms · ${COMING_SOON}`}
+            className="
+              whitespace-nowrap
+              text-[13px]
+              font-bold
+              leading-none
+
+              lg:text-[calc(var(--u)*13)]
+              lg:leading-[calc(var(--u)*15)]
+            "
+          >
+            Access Terms
+          </OnboardingAction>
         </div>
 
         {/* ==================================================== */}
         {/* GIANT WORDMARK                                       */}
         {/* ==================================================== */}
 
+        {/* Line height 0.9 keeps the whole glyph box (cap height and round */}
+        {/* overshoots) inside the element, so nothing is cut by the footer. */}
         <div
           data-px="footer.wordmark"
           aria-hidden="true"
           className="
-            mt-20
+            mt-16
             select-none
             whitespace-nowrap
 
-            text-[105px]
+            text-[min(27vw,105px)]
             font-black
-            leading-[0.78]
+            leading-[0.9]
             tracking-[-0.07em]
 
-            lg:absolute
-            lg:left-[calc(var(--u)*106)]
-            lg:top-[calc(var(--u)*328)]
+            sm:text-[105px]
+
+            lg:ml-[calc(var(--u)*106)]
             lg:mt-0
 
-            lg:text-[calc(var(--u)*310)]
-            lg:leading-[0.77]
+            lg:text-[calc(var(--u)*290)]
             lg:tracking-[-0.07em]
           "
         >
-          FinSage
+          Access
         </div>
       </div>
     </footer>
@@ -279,11 +308,11 @@ export function Footer() {
 /* LOGO                                                         */
 /* ============================================================ */
 
-function FooterLogo() {
+function FooterLogo({ href }: { href: string }) {
   return (
     <a
       data-px="footer.logo"
-      href="#"
+      href={href}
       className="
         inline-flex items-center
         gap-[10px]
@@ -291,64 +320,22 @@ function FooterLogo() {
         lg:gap-[calc(var(--u)*10)]
       "
     >
-      <span
+      {/* Approved V2 compact horizontal logo (light-background variant). */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         data-px="footer.logo.mark"
-        aria-hidden="true"
+        src={asset("/brand/forexlab-access-header-light.svg")}
+        alt="ForexLAB Access"
+        width={332}
+        height={64}
         className="
-          relative block
-          h-[23px] w-[35px]
-          shrink-0
+          block h-[40px] w-auto
+          -ml-[8px]
 
-          lg:h-[calc(var(--u)*23)]
-          lg:w-[calc(var(--u)*35)]
+          lg:-ml-[calc(var(--u)*8)]
+          lg:h-[calc(var(--u)*40)]
         "
-      >
-        {/* FILLED CIRCLE */}
-
-        <span
-          className="
-            absolute
-            left-0 top-1/2
-            h-[22px] w-[22px]
-            -translate-y-1/2
-            rounded-full
-            bg-black
-
-            lg:h-[calc(var(--u)*22)]
-            lg:w-[calc(var(--u)*22)]
-          "
-        />
-
-        {/* OUTLINED CIRCLE */}
-
-        <span
-          className="
-            absolute
-            right-0 top-1/2
-            h-[21px] w-[21px]
-            -translate-y-1/2
-            rounded-full
-            border border-black
-            bg-transparent
-
-            lg:h-[calc(var(--u)*21)]
-            lg:w-[calc(var(--u)*21)]
-          "
-        />
-      </span>
-
-      <span
-        className="
-          text-[21px]
-          font-bold
-          leading-none
-          tracking-[-0.035em]
-
-          lg:text-[calc(var(--u)*21)]
-        "
-      >
-        FinSage
-      </span>
+      />
     </a>
   );
 }
@@ -364,7 +351,7 @@ function FooterColumn({
 }: {
   dataPx: string;
   title: string;
-  links: string[];
+  links: (NavLink & { onboarding?: boolean })[];
 }) {
   return (
     <nav data-px={dataPx}>
@@ -394,24 +381,49 @@ function FooterColumn({
         "
       >
         {links.map((link, index) => (
-          <li key={link}>
-            <a
-              data-px={`${dataPx}.link.${index + 1}`}
-              href="#"
-              className="
-                block
-                whitespace-nowrap
+          <li key={link.label}>
+            {link.onboarding ? (
+              <OnboardingAction
+                dataPx={`${dataPx}.link.${index + 1}`}
+                href={link.href}
+                closedLabel={
+                  <>
+                    {link.label} <span className="text-black/45">· {COMING_SOON}</span>
+                  </>
+                }
+                className="
+                  block
+                  whitespace-nowrap
 
-                text-[14px]
-                leading-[16px]
-                text-black
+                  text-[14px]
+                  leading-[16px]
+                  text-black
 
-                lg:text-[calc(var(--u)*14)]
-                lg:leading-[calc(var(--u)*16)]
-              "
-            >
-              {link}
-            </a>
+                  lg:text-[calc(var(--u)*14)]
+                  lg:leading-[calc(var(--u)*16)]
+                "
+              >
+                {link.label}
+              </OnboardingAction>
+            ) : (
+              <a
+                data-px={`${dataPx}.link.${index + 1}`}
+                href={link.href}
+                className="
+                  block
+                  whitespace-nowrap
+
+                  text-[14px]
+                  leading-[16px]
+                  text-black
+
+                  lg:text-[calc(var(--u)*14)]
+                  lg:leading-[calc(var(--u)*16)]
+                "
+              >
+                {link.label}
+              </a>
+            )}
           </li>
         ))}
       </ul>

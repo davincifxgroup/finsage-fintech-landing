@@ -1,6 +1,10 @@
+import { links } from "@/lib/site";
+import { OnboardingAction } from "@/components/shared/OnboardingAction";
+
 export function FinalCTA() {
   return (
     <section
+      id="risk"
       data-px="final-cta"
       className="
         final-cta
@@ -182,9 +186,9 @@ export function FinalCTA() {
                 lg:tracking-[-0.055em]
               "
             >
-              Trade smarter, let
+              Start with one
               <br />
-              AI handle the market.
+              ForexLAB account.
             </h2>
 
             {/* ================================================= */}
@@ -210,22 +214,20 @@ export function FinalCTA() {
                 lg:tracking-[0.005em]
               "
             >
-              As you navigate through overwhelming data and emotions, our AI
-              agents provide in-depth
+              Create your account, link an eligible partner account and choose an advisor.{" "}
               <br className="hidden lg:block" />
-              research across stocks, crypto, forex, and ETFs. They help you
-              make confident, rational
+              Spreads and commissions stay the same; Access accounts earn no cashback.{" "}
               <br className="hidden lg:block" />
-              trading and investment decisions.
+              Trading involves risk of loss; past or simulated results never guarantee returns.
             </p>
 
             {/* ================================================= */}
             {/* BUTTON — ALREADY PASS                             */}
             {/* ================================================= */}
 
-            <a
-              data-px="final-cta.button"
-              href="#"
+            <OnboardingAction
+              dataPx="final-cta.button"
+              href={links.register}
               className="
                 mt-12
                 inline-flex
@@ -256,8 +258,8 @@ export function FinalCTA() {
                 lg:text-[calc(var(--u)*13)]
               "
             >
-              Get Started
-            </a>
+              Get Access
+            </OnboardingAction>
           </div>
         </div>
       </div>

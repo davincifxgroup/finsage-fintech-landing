@@ -1,571 +1,163 @@
-const learningCards = [
+import { assistedSetup, COMING_SOON, links } from "@/lib/site";
+import { OnboardingAction } from "@/components/shared/OnboardingAction";
+
+import { FaqAccordion, type FaqItem } from "./FaqAccordion";
+
+// Short answers; the detailed terms stay in the agreement, Terms and the advisor pages.
+const faqItems: FaqItem[] = [
   {
-    title: "Video Tutorials",
-    description: (
-      <>
-        How-to videos on AI tools, features,
-        <br />
-        and smarter investing.
-      </>
-    ),
-    cta: "Start Learning",
-    variant: "video",
+    question: "Do I pay anything upfront?",
+    answer:
+      "No. You do not buy the EA license. ForexLAB Access is funded by the commission our broker partners pay us, and nothing becomes a debt or an invoice later, even if you stop trading.",
   },
   {
-    title: "Academy",
-    description: (
-      <>
-        Learning center with tutorials, glossary,
-        <br />
-        help docs, and expert tips.
-      </>
-    ),
-    cta: "Start Learning",
-    variant: "academy",
+    question: "Are there any hidden fees?",
+    answer:
+      "No. ForexLAB charges nothing for EA access. Your broker’s usual spreads, commissions and swaps still apply, as on any trading account, and the only paid extra is optional assisted setup.",
   },
   {
-    title: "Market Lens",
-    description: (
-      <>
-        Actionable ideas and insights across
-        <br />
-        stocks, ETFs, crypto, and forex.
-      </>
-    ),
-    cta: "Start Learning",
-    variant: "lens",
+    question: "How are Expert Advisors selected and tested?",
+    answer:
+      "ForexLAB evaluates every advisor before it can be listed. Depending on the advisor, this covers backtests on high-quality tick data with realistic spreads and commissions, out-of-sample and forward testing, risk and drawdown analysis, and comparison with live account records where they exist. Each advisor page states what was tested and its known limits.",
   },
   {
-    title: "Smart Investing",
-    description: (
+    question: "Which brokers and trading accounts are eligible?",
+    answer:
+      "Your account must be with one of ForexLAB’s broker partners and registered in our partner group. Each advisor page lists the brokers and account types it supports.",
+  },
+  {
+    question: "Can I use an existing broker account?",
+    answer:
+      "Often, yes. An existing account qualifies once the broker moves it into ForexLAB’s partner group, which depends on the broker’s approval, so not every account can be moved.",
+  },
+  {
+    question: "When can I start using the EA?",
+    answer:
+      "Once ForexLAB confirms your account in the partner group, the developer issues a license tied to that account. You can download and use the EA as soon as the license is active.",
+  },
+  {
+    question: "Can I use more than one EA?",
+    answer:
+      "Yes. You can request several advisors, each under the same conditions. Every license is tied to one trading account.",
+  },
+  {
+    question: "Do Access accounts earn cashback?",
+    answer:
+      "No. An account used for Access does not earn cashback or rebates, because the partner commission funds your EA access. Cashback earned before the account joined Access, and your other ForexLAB Rebate accounts, are not affected.",
+  },
+  {
+    question: "What happens if my trading account becomes inactive?",
+    answer:
+      "After three full calendar months in a row without confirmed trading, ForexLAB sends you a warning with the reasons and gives you 7 calendar days to respond. Access is suspended only after that review, and missing broker reports never count as inactivity. You can request restoration later at no cost.",
+  },
+  {
+    question: "What happens if my account is no longer linked to a partner?",
+    answer:
+      "EA access ends when the account leaves ForexLAB’s broker partner group. You owe nothing, and no warning period applies in this case.",
+  },
+  {
+    question: "Can I transfer my EA access to another trading account?",
+    answer:
+      "Possibly. Each transfer needs individual approval from ForexLAB and the developer, and the new account must be verified in our partner group. A license runs on one trading account at a time.",
+  },
+  {
+    question: "Can you set everything up for me?",
+    answer: (
       <>
-        Explore AI-driven tools and insights for
-        <br />
-        more confident investing decisions.
+        Yes. Optional assisted setup costs {assistedSetup.priceLabel} and includes advisor installation, configuration
+        and VPS setup. VPS hosting is not included.{" "}
+        <OnboardingAction
+          href={assistedSetup.requestUrl}
+          className="
+            font-bold text-[#2A4FD8] underline decoration-[#2A4FD8]/30 underline-offset-[3px]
+            hover:decoration-[#2A4FD8]
+            focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2A4FD8]
+          "
+        >
+          Request setup
+        </OnboardingAction>
       </>
     ),
-    cta: "Start Learning",
-    variant: "smart",
+  },
+  {
+    question: "Does testing guarantee trading results?",
+    answer:
+      "No. Testing shows how an advisor behaved under specific historical and live conditions, not how it will perform in the future. Trading involves risk, and you can lose money.",
   },
 ];
 
 export function LearningSection() {
   return (
     <section
+      id="faq"
       data-px="learning"
+      aria-labelledby="faq-title"
       className="
-        learning
-        relative isolate w-full overflow-hidden
-        bg-[#fdfdfd]
+        learning relative w-full bg-[#fdfdfd]
         [font-family:Lato,Arial,sans-serif]
-
-        min-h-screen
-
-        lg:min-h-0
-        lg:aspect-[1197/803]
+        lg:[container-type:inline-size]
       "
     >
-      {/* ====================================================== */}
-      {/* BACKGROUND                                             */}
-      {/* ====================================================== */}
-
-      <div
-        data-px="learning.background"
-        aria-hidden="true"
-        className="
-          pointer-events-none absolute inset-0 z-0
-          bg-[#fdfdfd]
-        "
-      />
-
-      {/* ====================================================== */}
-      {/* CANONICAL 1197px DESIGN FRAME                          */}
-      {/* ====================================================== */}
-
       <div
         data-px="learning.stage"
         className="
-          relative z-10 mx-auto w-full
-          px-5 py-14
-          sm:px-8
+          mx-auto grid w-full grid-cols-1 gap-10
+          px-5 py-16 sm:px-8 sm:py-20
 
-          lg:absolute lg:inset-0
-          lg:p-0
-          lg:[container-type:inline-size]
+          lg:grid-cols-[calc(var(--u)*380)_calc(var(--u)*566)]
+          lg:justify-between lg:gap-0
+          lg:px-[calc(var(--u)*116)] lg:py-[calc(var(--u)*110)]
           lg:[--u:0.083542189cqw]
         "
       >
-        {/* ==================================================== */}
-        {/* EYEBROW                                              */}
-        {/* ==================================================== */}
+        <div data-px="learning.header" className="lg:sticky lg:top-[calc(var(--u)*110)] lg:self-start">
+          <div data-px="learning.label" className="flex items-center gap-2 lg:gap-[calc(var(--u)*7)]">
+            <span
+              aria-hidden="true"
+              className="h-[7px] w-[7px] shrink-0 rounded-full bg-black lg:h-[calc(var(--u)*7)] lg:w-[calc(var(--u)*7)]"
+            />
+            <span className="text-[13px] leading-none text-black lg:text-[calc(var(--u)*13)]">FAQ</span>
+          </div>
 
-        <div
-          data-px="learning.label"
-          className="
-            flex items-center gap-2
-
-            lg:absolute
-            lg:left-[calc(var(--u)*116)]
-            lg:top-[calc(var(--u)*110)]
-            lg:gap-[calc(var(--u)*7)]
-          "
-        >
-          <span
-            aria-hidden="true"
-            className="
-              h-[7px] w-[7px]
-              shrink-0 rounded-full bg-black
-
-              lg:h-[calc(var(--u)*7)]
-              lg:w-[calc(var(--u)*7)]
-            "
-          />
-
-          <span
-            className="
-              text-[13px] leading-none text-black
-
-              lg:text-[calc(var(--u)*13)]
-            "
-          >
-            Insights &amp; Learning
-          </span>
-        </div>
-
-        {/* ==================================================== */}
-        {/* INTRO                                                */}
-        {/* ==================================================== */}
-
-        <div
-          data-px="learning.header"
-          className="
-            mt-14 grid grid-cols-1 gap-7
-
-            lg:absolute
-            lg:left-[calc(var(--u)*117)]
-            lg:top-[calc(var(--u)*177)]
-            lg:mt-0
-            lg:w-[calc(var(--u)*966)]
-            lg:grid-cols-[calc(var(--u)*500)_calc(var(--u)*402)]
-            lg:justify-between
-            lg:gap-0
-          "
-        >
           <h2
+            id="faq-title"
             data-px="learning.title"
             className="
-              max-w-[550px]
-              text-[40px] font-black
-              leading-[1.04]
-              tracking-[-0.045em]
-              text-black
-
-              sm:text-[48px]
-
-              lg:w-[calc(var(--u)*500)]
-              lg:max-w-none
-              lg:text-[calc(var(--u)*46)]
-              lg:leading-[calc(var(--u)*51)]
+              mt-8 max-w-[420px]
+              text-[40px] font-black leading-[1.04] tracking-[-0.045em] text-black
+              sm:text-[46px]
+              lg:mt-[calc(var(--u)*30)] lg:max-w-none
+              lg:text-[calc(var(--u)*46)] lg:leading-[calc(var(--u)*51)]
             "
           >
-            Expert Insights, AI Tools,
-            <br />
-            Smarter Investing.
+            Before you get started.
           </h2>
 
           <p
             data-px="learning.description"
             className="
-              max-w-[430px]
-              text-[13px]
-              leading-[19px]
-              text-[#646464]
-
-              lg:mt-[calc(var(--u)*64)]
-              lg:w-[calc(var(--u)*402)]
-              lg:max-w-none
-              lg:text-[calc(var(--u)*13)]
-              lg:leading-[calc(var(--u)*19)]
+              mt-5 text-[15px] leading-[22px] text-[#646464]
+              lg:mt-[calc(var(--u)*18)] lg:text-[calc(var(--u)*15)] lg:leading-[calc(var(--u)*22)]
             "
           >
-            Discover expert analysis, AI-driven guidance, and practical resources
-            <br className="hidden lg:block" />
-            designed to help you invest smarter and grow confidently.
+            Clear terms. No surprises.
+          </p>
+
+          <p className="mt-6 text-[12px] leading-[18px] text-[#8a8a8a] lg:mt-[calc(var(--u)*26)] lg:text-[calc(var(--u)*12)] lg:leading-[calc(var(--u)*18)]">
+            Full conditions:{" "}
+            {/* The Access Terms page is published with Access onboarding (Rebate backend). */}
+            <OnboardingAction
+              href={links.accessTerms}
+              closedLabel={`Access Terms · ${COMING_SOON}`}
+              className="text-black underline decoration-black/25 underline-offset-[3px] hover:decoration-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2A4FD8]"
+            >
+              Access Terms
+            </OnboardingAction>
           </p>
         </div>
 
-        {/* ==================================================== */}
-        {/* CAROUSEL / CARD RAIL                                 */}
-        {/* ==================================================== */}
-
-        <div
-          data-px="learning.carousel"
-          className="
-            mt-12 w-full overflow-x-auto
-            [scrollbar-width:none]
-            [&::-webkit-scrollbar]:hidden
-
-            lg:absolute
-            lg:left-[calc(var(--u)*116)]
-            lg:top-[calc(var(--u)*315)]
-            lg:mt-0
-            lg:w-[calc(100%-var(--u)*116)]
-            lg:overflow-hidden
-          "
-        >
-          <div
-            data-px="learning.track"
-            className="
-              flex w-max gap-2
-
-              lg:gap-[calc(var(--u)*7)]
-            "
-          >
-            {learningCards.map((card, index) => (
-              <article
-                key={card.title}
-                data-px={`learning.card.${index + 1}`}
-                className={`
-                  relative
-                  h-[396px] w-[318px]
-                  shrink-0 overflow-hidden
-                  rounded-[6px]
-
-                  lg:h-[calc(var(--u)*396)]
-                  lg:w-[calc(var(--u)*318)]
-                  lg:rounded-[calc(var(--u)*6)]
-
-                  ${
-                    card.variant === "video"
-                      ? "bg-[#faa6d9]"
-                      : card.variant === "academy"
-                        ? "bg-[#4d82f2]"
-                        : card.variant === "lens"
-                          ? "bg-[#31d0f6]"
-                          : "bg-[#e5aa68]"
-                  }
-                `}
-              >
-                {/* ============================================== */}
-                {/* CARD COPY                                      */}
-                {/* ============================================== */}
-
-                <div
-                  data-px={`learning.card.${index + 1}.copy`}
-                  className="
-                    absolute left-[33px] top-[34px]
-                    z-20
-
-                    lg:left-[calc(var(--u)*33)]
-                    lg:top-[calc(var(--u)*34)]
-                  "
-                >
-                  <h3
-                    data-px={`learning.card.${index + 1}.title`}
-                    className="
-                      whitespace-nowrap
-                      text-[28px] font-black
-                      leading-[32px]
-                      tracking-[-0.035em]
-                      text-black
-
-                      lg:text-[calc(var(--u)*28)]
-                      lg:leading-[calc(var(--u)*32)]
-                    "
-                  >
-                    {card.title}
-                  </h3>
-
-                  <p
-                    data-px={`learning.card.${index + 1}.description`}
-                    className="
-                      mt-[7px]
-                      text-[13px]
-                      leading-[20px]
-                      text-black
-
-                      lg:mt-[calc(var(--u)*7)]
-                      lg:text-[calc(var(--u)*13)]
-                      lg:leading-[calc(var(--u)*20)]
-                    "
-                  >
-                    {card.description}
-                  </p>
-                </div>
-
-                {/* ============================================== */}
-                {/* GEOMETRIC FIGURE                               */}
-                {/* ============================================== */}
-
-                <div
-                  data-px={`learning.card.${index + 1}.figure`}
-                  aria-hidden="true"
-                  className="absolute inset-0 z-10"
-                >
-                  <LearningFigure variant={card.variant} />
-                </div>
-
-                {/* ============================================== */}
-                {/* CTA                                            */}
-                {/* ============================================== */}
-
-                <a
-                  data-px={`learning.card.${index + 1}.cta`}
-                  href="#"
-                  className="
-                    absolute bottom-[34px] left-[33px]
-                    z-20
-                    inline-flex items-center
-                    text-[13px] font-bold
-                    leading-none text-black
-
-                    lg:bottom-[calc(var(--u)*34)]
-                    lg:left-[calc(var(--u)*33)]
-                    lg:text-[calc(var(--u)*13)]
-                  "
-                >
-                  {card.cta}
-                  <span
-                    aria-hidden="true"
-                    className="
-                      ml-[5px]
-
-                      lg:ml-[calc(var(--u)*5)]
-                    "
-                  >
-                    →
-                  </span>
-                </a>
-              </article>
-            ))}
-          </div>
-        </div>
+        <FaqAccordion items={faqItems} />
       </div>
     </section>
-  );
-}
-
-/* ============================================================ */
-/* GEOMETRIC FIGURES                                            */
-/* ============================================================ */
-
-function LearningFigure({ variant }: { variant: string }) {
-  if (variant === "video") {
-    return (
-      <svg
-        viewBox="0 0 318 396"
-        preserveAspectRatio="none"
-        className="h-full w-full"
-        fill="none"
-      >
-        {/*
-          Reference geometry:
-          vertical ≈ x181
-          horizontal ≈ y222
-          quarter curve from bottom-left toward top-right
-        */}
-
-        <path
-          data-motion="video-axis"
-          d="M181 396V222H318"
-          stroke="black"
-          strokeWidth="1.15"
-          vectorEffect="non-scaling-stroke"
-        />
-
-        <path
-          data-motion="video-curve"
-          d="
-            M181 396
-            C181 300
-             240 222
-             318 222
-          "
-          stroke="black"
-          strokeWidth="1.15"
-          fill="none"
-          vectorEffect="non-scaling-stroke"
-        />
-      </svg>
-    );
-  }
-
-  if (variant === "academy") {
-    return (
-      <svg
-        viewBox="0 0 318 396"
-        preserveAspectRatio="none"
-        className="h-full w-full"
-        fill="none"
-      >
-        {/*
-          Large construction circle.
-          Center intentionally below/right.
-        */}
-
-        <circle
-          data-motion="academy-outer"
-          cx="269"
-          cy="331"
-          r="105"
-          stroke="black"
-          strokeWidth="1.15"
-          vectorEffect="non-scaling-stroke"
-        />
-
-        {/* vertical construction line */}
-
-        <path
-          data-motion="academy-spoke-y"
-          d="M277 0V331"
-          stroke="black"
-          strokeWidth="1.15"
-          vectorEffect="non-scaling-stroke"
-        />
-
-        {/* horizontal construction line */}
-
-        <path
-          data-motion="academy-spoke-x"
-          d="M148 331H318"
-          stroke="black"
-          strokeWidth="1.15"
-          vectorEffect="non-scaling-stroke"
-        />
-
-        {/* inner circle */}
-
-        <circle
-          data-motion="academy-inner"
-          cx="269"
-          cy="322"
-          r="35"
-          stroke="black"
-          strokeWidth="1.15"
-          vectorEffect="non-scaling-stroke"
-        />
-      </svg>
-    );
-  }
-
-  if (variant === "lens") {
-    return (
-      <svg
-        viewBox="0 0 318 396"
-        preserveAspectRatio="none"
-        className="h-full w-full"
-        fill="none"
-      >
-        {/* ============================================ */}
-        {/* SMALL CONCENTRIC / SPIRAL FIGURE             */}
-        {/* ============================================ */}
-
-        <circle
-          data-motion="market-small-circle"
-          cx="131"
-          cy="239"
-          r="56"
-          stroke="black"
-          strokeWidth="1.15"
-          vectorEffect="non-scaling-stroke"
-        />
-
-        <path
-          data-motion="market-spiral"
-          d="
-            M108 269
-            C92 256
-             91 229
-             105 212
-            C120 194
-             149 193
-             165 208
-            C180 222
-             182 247
-             169 264
-          "
-          stroke="black"
-          strokeWidth="1.15"
-          strokeLinecap="round"
-          vectorEffect="non-scaling-stroke"
-        />
-
-        {/* horizontal axis */}
-
-        <path
-          data-motion="market-axis"
-          d="M137 239H318"
-          stroke="black"
-          strokeWidth="1.15"
-          vectorEffect="non-scaling-stroke"
-        />
-
-        {/* ============================================ */}
-        {/* LARGE RIGHT CIRCLE                           */}
-        {/* ============================================ */}
-
-        <circle
-          data-motion="market-large-circle"
-          cx="320"
-          cy="239"
-          r="95"
-          stroke="black"
-          strokeWidth="1.15"
-          vectorEffect="non-scaling-stroke"
-        />
-
-        {/* upper diagonal */}
-
-        <path
-          data-motion="market-diagonal-top"
-          d="M247 159L318 230"
-          stroke="black"
-          strokeWidth="1.15"
-          vectorEffect="non-scaling-stroke"
-        />
-
-        {/* lower diagonal */}
-
-        <path
-          data-motion="market-diagonal-bottom"
-          d="M247 319L318 248"
-          stroke="black"
-          strokeWidth="1.15"
-          vectorEffect="non-scaling-stroke"
-        />
-      </svg>
-    );
-  }
-
-  return (
-    <svg
-      viewBox="0 0 318 396"
-      preserveAspectRatio="none"
-      className="h-full w-full"
-      fill="none"
-    >
-      {/*
-        Fourth card is mostly outside the canonical viewport.
-        Keep its construction deliberately subtle for now.
-      */}
-
-      <circle
-        data-motion="smart-circle"
-        cx="258"
-        cy="275"
-        r="86"
-        stroke="black"
-        strokeWidth="1.15"
-        vectorEffect="non-scaling-stroke"
-      />
-
-      <path
-        data-motion="smart-axis"
-        d="M172 275H318"
-        stroke="black"
-        strokeWidth="1.15"
-        vectorEffect="non-scaling-stroke"
-      />
-    </svg>
   );
 }

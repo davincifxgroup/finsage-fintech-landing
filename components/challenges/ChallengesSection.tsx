@@ -1,8 +1,33 @@
-const tabs = ["NVDA", "Stocks", "Opportunities", "Apple"];
+// Non-interactive labels. The first (black) chip is a caption, not a selected tab.
+const tabs = ["Your path", "EA", "Partner account", "License", "Eligibility"];
+
+const steps = [
+  {
+    number: "01",
+    title: "Choose Your EA",
+    description: "Explore independently evaluated trading algorithms.",
+  },
+  {
+    number: "02",
+    title: "Connect Your Account",
+    description: "Verify your account with an eligible partner broker.",
+  },
+  {
+    number: "03",
+    title: "Get Your License",
+    description: "Receive your EA without an upfront license payment.",
+  },
+  {
+    number: "04",
+    title: "Keep Trading",
+    description: "Continue using your EA while your account remains eligible.",
+  },
+];
 
 export function ChallengesSection() {
   return (
     <section
+      id="how-it-works"
       data-px="challenges"
       className="
         challenges relative isolate
@@ -103,7 +128,7 @@ export function ChallengesSection() {
               lg:text-[calc(var(--u)*13)]
             "
           >
-            Challenges
+            How It Works
           </span>
         </div>
 
@@ -144,9 +169,9 @@ export function ChallengesSection() {
               lg:leading-[calc(var(--u)*52)]
             "
           >
-            Instant AI Insights
+            From Approval
             <br />
-            in Seconds.
+            to Access.
           </h2>
 
           <p
@@ -163,11 +188,11 @@ export function ChallengesSection() {
               lg:leading-[calc(var(--u)*20)]
             "
           >
-            Institutional-grade AI agents analyze stocks, crypto, forex,
+            Choose an advisor, verify your partner account and{" "}
             <br className="hidden lg:block" />
-            and ETFs in real time, providing actionable insights
+            receive your license. Partner commission funds the{" "}
             <br className="hidden lg:block" />
-            for quick, informed decisions.
+            service while your account stays eligible.
           </p>
         </div>
 
@@ -175,9 +200,9 @@ export function ChallengesSection() {
         {/* FILTER TABS                                          */}
         {/* ==================================================== */}
 
-        <nav
+        <ul
           data-px="challenges.tabs"
-          aria-label="AI insight categories"
+          aria-label="Access steps"
           className="
             mt-10 flex flex-wrap items-center gap-[2px]
 
@@ -190,11 +215,11 @@ export function ChallengesSection() {
           "
         >
           {tabs.map((tab, index) => (
-            <button
+            <li
               key={tab}
               data-px={`challenges.tab.${index + 1}`}
-              type="button"
               className={`
+                inline-flex items-center whitespace-nowrap
                 h-[27px]
                 rounded-[5px]
                 px-[14px]
@@ -215,9 +240,9 @@ export function ChallengesSection() {
               `}
             >
               {tab}
-            </button>
+            </li>
           ))}
-        </nav>
+        </ul>
 
         {/* ==================================================== */}
         {/* TERMINAL / ANALYSIS WINDOW                           */}
@@ -233,7 +258,7 @@ export function ChallengesSection() {
             lg:left-[calc(var(--u)*115)]
             lg:top-[calc(var(--u)*302)]
             lg:mt-0
-            lg:h-[calc(var(--u)*456)]
+            lg:h-[calc(var(--u)*348)]
             lg:w-[calc(var(--u)*968)]
             lg:rounded-[calc(var(--u)*7)]
           "
@@ -260,7 +285,7 @@ export function ChallengesSection() {
                 lg:text-[calc(var(--u)*16)]
               "
             >
-              Should I buy NVDA now?
+              How Access works for you
             </h3>
 
             <div
@@ -307,143 +332,77 @@ export function ChallengesSection() {
           <div
             data-px="challenges.terminal.body"
             className="
-              relative h-[410px]
+              relative h-auto
               overflow-hidden bg-black
               px-6 py-7
 
-              lg:h-[calc(var(--u)*398)]
+              lg:h-[calc(var(--u)*290)]
               lg:px-[calc(var(--u)*34)]
-              lg:py-[calc(var(--u)*27)]
+              lg:py-[calc(var(--u)*30)]
             "
           >
-            <div
+            <ol
               data-px="challenges.code"
+              aria-label="How Access works"
               className="
-                font-mono
-                text-[12px]
-                leading-[24px]
+                flex flex-col gap-[20px]
 
-                lg:text-[calc(var(--u)*12)]
-                lg:leading-[calc(var(--u)*24)]
+                lg:gap-[calc(var(--u)*30)]
               "
             >
-              <CodeLine>
-                <span className="text-[#a6a6a6]">
-                  def analyze_nvidia():
-                </span>
-              </CodeLine>
+              {steps.map((step) => (
+                <li
+                  key={step.number}
+                  data-motion="challenge-code-line"
+                  className="
+                    grid grid-cols-[34px_1fr] gap-x-3
 
-              <CodeLine indent={1}>
-                <span className="text-[#ffbe00]">print</span>
-                <span className="text-[#d0d0d0]">(</span>
-                <span className="text-[#009e8e]">
-                  &quot;[INFO] Starting AI analysis of NVIDIA...&quot;
-                </span>
-                <span className="text-[#d0d0d0]">)</span>
-              </CodeLine>
+                    lg:grid-cols-[calc(var(--u)*56)_calc(var(--u)*300)_1fr]
+                    lg:items-baseline
+                    lg:gap-x-[calc(var(--u)*18)]
+                  "
+                >
+                  <span
+                    className="
+                      font-mono text-[13px] leading-[22px] text-[#ffbe00]
 
-              <CodeSpacer />
-
-              <CodeLine indent={1}>
-                <span className="text-[#9c9c9c]">
-                  # Fundamental Agent Analysis
-                </span>
-              </CodeLine>
-
-              <CodeLine indent={1}>
-                <span className="text-[#ffbe00]">print</span>
-                <span className="text-[#d0d0d0]">(</span>
-                <span className="text-[#009e8e]">
-                  &quot;[INFO] Analyzing fundamental data...&quot;
-                </span>
-                <span className="text-[#d0d0d0]">)</span>
-              </CodeLine>
-
-              <CodeLine indent={1}>
-                <span className="text-[#d8d8d8]">
-                  P_E_ratio = 65
-                </span>
-                <span className="text-[#8d8d8d]">
-                  &nbsp;&nbsp;&nbsp;# P/E ratio for NVIDIA
-                </span>
-              </CodeLine>
-
-              <CodeLine indent={1}>
-                <span className="text-[#d8d8d8]">
-                  sector_avg = 28
-                </span>
-                <span className="text-[#8d8d8d]">
-                  &nbsp;&nbsp;&nbsp;# Sector average
-                </span>
-              </CodeLine>
-
-              <CodeLine indent={1}>
-                <span className="text-[#6ec5ff]">if</span>
-                <span className="text-[#d8d8d8]">
-                  {" "}
-                  P_E_ratio &gt; sector_avg:
-                </span>
-              </CodeLine>
-
-              <CodeLine indent={2}>
-                <span className="text-[#a7a7a7]">print</span>
-                <span className="text-[#757575]">(f</span>
-                <span className="text-[#009e8e]">
-                  &quot;[INFO] P/E ratio: {"{P_E_ratio}"}x, significantly above
-                  sector average of {"{sector_avg}"}x. Justified by strong YoY
-                  growth of 87%, reflecting a solid premium.&quot;
-                </span>
-                <span className="text-[#757575]">)</span>
-              </CodeLine>
-
-              <CodeLine indent={1}>
-                <span className="text-[#999]">
-                  # Technical Agent Analysis
-                </span>
-              </CodeLine>
-
-              <div
-                data-motion="challenge-code-muted"
-                className="opacity-[0.16]"
-              >
-                <CodeLine indent={1}>
-                  <span className="text-[#9c9c9c]">
-                    print(&quot;[INFO] Analyzing technical data...&quot;)
+                      lg:text-[calc(var(--u)*16)]
+                      lg:leading-[calc(var(--u)*28)]
+                    "
+                  >
+                    {step.number}
                   </span>
-                </CodeLine>
+                  <span
+                    className="
+                      text-[17px] font-bold leading-[22px] text-white
 
-                <CodeLine indent={1}>
-                  <span className="text-[#9c9c9c]">
-                    RSI = 72&nbsp;&nbsp;&nbsp;# RSI value
+                      lg:text-[calc(var(--u)*21)]
+                      lg:leading-[calc(var(--u)*28)]
+                    "
+                  >
+                    {step.title}
                   </span>
-                </CodeLine>
+                  <span
+                    className="
+                      col-start-2 mt-1 text-[15px] leading-[21px] text-[#a6a6a6]
 
-                <CodeLine indent={1}>
-                  <span className="text-[#9c9c9c]">
-                    resistance = 950&nbsp;&nbsp;&nbsp;# Resistance level
+                      lg:col-start-3 lg:mt-0
+                      lg:text-[calc(var(--u)*16)]
+                      lg:leading-[calc(var(--u)*28)]
+                    "
+                  >
+                    {step.description}
                   </span>
-                </CodeLine>
-
-                <CodeLine indent={1}>
-                  <span className="text-[#9c9c9c]">
-                    support = 890&nbsp;&nbsp;&nbsp;# Support level
-                  </span>
-                </CodeLine>
-
-                <CodeLine indent={1}>
-                  <span className="text-[#9c9c9c]">
-                    if RSI &gt; 70:
-                  </span>
-                </CodeLine>
-              </div>
-            </div>
+                </li>
+              ))}
+            </ol>
 
             {/* Lower fade */}
             <div
               aria-hidden="true"
               className="
                 pointer-events-none absolute
-                inset-x-0 bottom-0 h-[125px]
+                inset-x-0 bottom-0 h-[36px]
                 bg-gradient-to-b
                 from-transparent
                 via-black/70
@@ -457,26 +416,3 @@ export function ChallengesSection() {
   );
 }
 
-function CodeLine({
-  children,
-  indent = 0,
-}: {
-  children: React.ReactNode;
-  indent?: number;
-}) {
-  return (
-    <div
-      data-motion="challenge-code-line"
-      className="whitespace-nowrap"
-      style={{
-        paddingLeft: `calc(var(--code-indent, 20px) * ${indent})`,
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
-function CodeSpacer() {
-  return <div className="h-[12px] lg:h-[calc(var(--u)*12)]" />;
-}
