@@ -20,7 +20,7 @@ type Params = { slug: string };
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const advisor = await getPublishedAdvisor((await params).slug);
   return advisor
-    ? { title: `${advisor.name} | ForexLAB Access`, description: advisor.shortDescription }
+    ? { title: `${advisor.demo ? "Demo · " : ""}${advisor.name} | ForexLAB Access`, description: advisor.shortDescription }
     : { title: "Advisor not found | ForexLAB Access" };
 }
 
@@ -57,7 +57,7 @@ export default async function AdvisorPage({ params }: { params: Promise<Params> 
         {/* Intro + price */}
         <div className="mt-8 grid gap-10 lg:mt-10 lg:grid-cols-[1fr_380px] lg:items-start lg:gap-16">
           <div className="min-w-0">
-            <DotLabel>Advisor Catalog</DotLabel>
+            <DotLabel>{advisor.demo ? "Demo · Fictional advisor" : "Advisor Catalog"}</DotLabel>
             <h1 className="mt-6 text-[44px] font-black leading-[0.98] tracking-[-0.045em] sm:text-[58px] lg:text-[72px]">
               {advisor.name}
             </h1>
@@ -82,10 +82,10 @@ export default async function AdvisorPage({ params }: { params: Promise<Params> 
           </div>
 
           <aside aria-label="License price" className="rounded-[6px] bg-[#f4f4f6] p-7 lg:sticky lg:top-8">
-            <p className="text-[12px] text-[#707070]">License price · <span className="font-bold text-black">No upfront payment</span></p>
+            <p className="text-[12px] text-[#707070]">{advisor.demo ? "Example license price" : <>License price · <span className="font-bold text-black">No upfront payment</span></>}</p>
             <p className="mt-2 text-[44px] font-black leading-none tracking-[-0.04em]">{formatPrice(advisor.currentPrice)}</p>
             <p className="mt-2 text-[12px] text-[#707070]">
-              {advisor.currentPrice.currency} · in effect since {formatDate(advisor.currentPrice.effectiveFrom)}
+              {advisor.currentPrice.currency} · {advisor.demo ? "illustrative price only" : `in effect since ${formatDate(advisor.currentPrice.effectiveFrom)}`}
             </p>
             <p className="mt-6 text-[13px] leading-[20px] text-[#333]">
               No upfront payment: broker partner commission funds the service and this price is never invoiced. Covering it
@@ -93,8 +93,12 @@ export default async function AdvisorPage({ params }: { params: Promise<Params> 
               accounts do not earn cashback.
             </p>
             <div className="mt-6 rounded-[5px] bg-white px-4 py-3 text-[12px] leading-[18px] text-[#555]">
-              Select this advisor in your ForexLAB dashboard, then choose the trading account. ForexLAB confirms the
-              account, and the developer issues a license bound to it. New here? Create an account first.
+              {advisor.demo ? (
+                <>Fictional listing for demonstration only. No software or license is available, and this example cannot be selected.</>
+              ) : (
+                <>Select this advisor in your ForexLAB dashboard, then choose the trading account. ForexLAB confirms the
+                account, and the developer issues a license bound to it. New here? Create an account first.</>
+              )}
             </div>
             <div className="mt-6 flex flex-col gap-[3px]">
               <OnboardingAction href={selectAdvisorUrl(advisor.slug)} className="flex h-[42px] items-center justify-center rounded-[11px] bg-black text-[13px] font-bold text-white">
@@ -165,10 +169,12 @@ export default async function AdvisorPage({ params }: { params: Promise<Params> 
 
           <Block label="Broker compatibility" id="compatibility">
             <p className="text-[14px] leading-[22px] text-[#555]">
-              Only the broker, account type and platform combinations below are approved for this advisor.
+              {advisor.demo
+                ? "Illustrative combinations only. No broker compatibility has been approved for this fictional advisor."
+                : "Only the broker, account type and platform combinations below are approved for this advisor."}
             </p>
             {/* Phones: stacked rows, no horizontal scrolling. */}
-            <ul className="mt-6 border-t border-black/15 sm:hidden" aria-label="Approved combinations">
+            <ul className="mt-6 border-t border-black/15 sm:hidden" aria-label={advisor.demo ? "Illustrative combinations" : "Approved combinations"}>
               {advisor.compatibility.map((row) => (
                 <li key={`m-${row.broker}-${row.accountType}-${row.platform}`} className="border-b border-black/10 py-3">
                   <p className="text-[15px] font-bold">{row.broker}</p>
