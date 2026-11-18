@@ -5,6 +5,8 @@ import { Footer } from "@/components/shared/Footer";
 import { formatPrice, getPublishedAdvisors } from "@/lib/catalog";
 import { links } from "@/lib/site";
 import { OnboardingAction } from "@/components/shared/OnboardingAction";
+import { TrackView } from "@/components/analytics/TrackView";
+import { catalogModeOf, ctaAttributes } from "@/lib/analytics";
 
 export const metadata: Metadata = {
   title: "Expert Advisors | ForexLAB Access",
@@ -14,11 +16,13 @@ export const metadata: Metadata = {
 export default async function AdvisorsPage() {
   const advisors = await getPublishedAdvisors();
   const isDemo = advisors.some((advisor) => advisor.demo);
+  const catalogMode = catalogModeOf(advisors);
 
   return (
     <main className="relative isolate min-h-screen overflow-hidden bg-white [font-family:Lato,Arial,sans-serif]">
       <SubpageBackdrop />
       <SubpageHeader />
+      <TrackView event="catalog_view" catalogMode={catalogMode} />
 
       <div className="relative z-10 mx-auto w-full max-w-[1200px] px-5 pb-24 sm:px-8 lg:px-[60px]">
         <div className="mt-14 max-w-[760px] lg:mt-20">
@@ -43,6 +47,7 @@ export default async function AdvisorsPage() {
               <li key={advisor.slug}>
                 <a
                   href={`/advisors/${advisor.slug}`}
+                  {...ctaAttributes("catalog_card", "advisor_detail", advisor.slug)}
                   className="group flex h-full flex-col rounded-[6px] bg-[#f4f4f6] p-7 transition-colors hover:bg-[#ececf0]"
                 >
                   <span className="text-[12px] text-[#707070]">
@@ -72,7 +77,11 @@ export default async function AdvisorsPage() {
               Listings appear only when testing is complete and the license price and support terms are approved.
               We do not publish placeholder strategies, projected returns or reviews.
             </p>
-            <OnboardingAction href={links.register} className="mt-8 inline-flex text-[13px] font-bold">
+            <OnboardingAction
+              href={links.register}
+              analytics={{ placement: "catalog_empty_create_account", destination: "register" }}
+              className="mt-8 inline-flex text-[13px] font-bold"
+            >
               Create Your Account&nbsp; →
             </OnboardingAction>
           </div>

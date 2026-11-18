@@ -1,3 +1,4 @@
+import { ctaAttributes, type Placement, type RebateDestination } from "@/lib/analytics";
 import { asset, COMING_SOON, links, type NavLink } from "@/lib/site";
 import { OnboardingAction } from "@/components/shared/OnboardingAction";
 
@@ -9,24 +10,25 @@ const navigationLinks: NavLink[] = [
   { label: "FAQ", href: "#faq" },
 ];
 
-type ToolLink = NavLink & { onboarding?: boolean };
+type Tracking = { placement: Placement; destination: RebateDestination };
+type ToolLink = NavLink & { onboarding?: boolean; analytics?: Tracking };
 
 const toolLinks: ToolLink[] = [
-  { label: "Client Log In", href: links.login },
-  { label: "Vendor Login", href: links.vendorLogin, onboarding: true },
-  { label: "Create Account", href: links.register, onboarding: true },
-  { label: "Dashboard", href: links.dashboard },
+  { label: "Client Log In", href: links.login, analytics: { placement: "footer_login", destination: "login" } },
+  { label: "Vendor Login", href: links.vendorLogin, onboarding: true, analytics: { placement: "footer_vendor", destination: "vendor_portal" } },
+  { label: "Create Account", href: links.register, onboarding: true, analytics: { placement: "footer_register", destination: "register" } },
+  { label: "Dashboard", href: links.dashboard, analytics: { placement: "footer_dashboard", destination: "dashboard" } },
 ];
 
-const resourceLinks: NavLink[] = [
+const resourceLinks: ToolLink[] = [
   { label: "EA Forex LAB", href: links.mainSite },
-  { label: "ForexLAB Rebate", href: links.rebate },
+  { label: "ForexLAB Rebate", href: links.rebate, analytics: { placement: "footer_rebate", destination: "rebate_home" } },
   { label: "Risk Disclosure", href: "#risk" },
 ];
 
 export function Footer({ anchorBase = "" }: { anchorBase?: string } = {}) {
   // On subpages in-page anchors point back to the homepage ("/#faq").
-  const withBase = (list: NavLink[]) =>
+  const withBase = <T extends NavLink>(list: T[]): T[] =>
     list.map((link) => (link.href.startsWith("#") ? { ...link, href: anchorBase + link.href } : link));
   const nav = withBase(navigationLinks);
   const tools = withBase(toolLinks);
@@ -351,7 +353,7 @@ function FooterColumn({
 }: {
   dataPx: string;
   title: string;
-  links: (NavLink & { onboarding?: boolean })[];
+  links: ToolLink[];
 }) {
   return (
     <nav data-px={dataPx}>
@@ -386,6 +388,7 @@ function FooterColumn({
               <OnboardingAction
                 dataPx={`${dataPx}.link.${index + 1}`}
                 href={link.href}
+                analytics={link.analytics}
                 closedLabel={
                   <>
                     {link.label} <span className="text-black/45">· {COMING_SOON}</span>
@@ -409,6 +412,7 @@ function FooterColumn({
               <a
                 data-px={`${dataPx}.link.${index + 1}`}
                 href={link.href}
+                {...(link.analytics ? ctaAttributes(link.analytics.placement, link.analytics.destination) : {})}
                 className="
                   block
                   whitespace-nowrap

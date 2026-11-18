@@ -3,6 +3,7 @@ import "@fontsource/lato/900.css";
 
 import Link from "next/link";
 
+import { ctaAttributes } from "@/lib/analytics";
 import { asset, COMING_SOON, links, sectionNav } from "@/lib/site";
 import { OnboardingAction } from "@/components/shared/OnboardingAction";
 
@@ -30,11 +31,12 @@ export function SubpageHeader() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
-          <a href={links.login} className="inline-flex h-[34px] items-center whitespace-nowrap rounded-full bg-black px-4 text-[13px] font-bold text-white">
+          <a href={links.login} {...ctaAttributes("header_login", "login")} className="inline-flex h-[34px] items-center whitespace-nowrap rounded-full bg-black px-4 text-[13px] font-bold text-white">
             Client Log In
           </a>
           <OnboardingAction
             href={links.vendorLogin}
+            analytics={{ placement: "header_vendor", destination: "vendor_portal" }}
             closedLabel={`Vendor Login · ${COMING_SOON}`}
             className="inline-flex h-[34px] items-center whitespace-nowrap rounded-full border border-black px-4 text-[13px] font-bold"
           >

@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+import { Analytics } from "@/components/analytics/Analytics";
+import { catalogModeOf } from "@/lib/analytics";
+import { getPublishedAdvisors } from "@/lib/catalog";
+
 export const metadata: Metadata = {
   title: "ForexLAB Access | Tested Expert Advisors. No Upfront License Payment.",
   description:
@@ -11,14 +15,18 @@ export const metadata: Metadata = {
   icons: { icon: `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/brand/favicon.svg` },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        {/* Same cached catalog request the pages make; sets catalog_mode for every event. */}
+        <Analytics catalogMode={catalogModeOf(await getPublishedAdvisors())} />
+      </body>
     </html>
   );
 }

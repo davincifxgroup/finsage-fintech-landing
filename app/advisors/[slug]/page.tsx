@@ -7,6 +7,8 @@ import { Footer } from "@/components/shared/Footer";
 import { formatDate, formatPrice, getPublishedAdvisor, safeAnalysisUrl } from "@/lib/catalog";
 import { ACCESS_ONBOARDING_OPEN, links, selectAdvisorUrl } from "@/lib/site";
 import { OnboardingAction } from "@/components/shared/OnboardingAction";
+import { TrackView } from "@/components/analytics/TrackView";
+import { ctaAttributes } from "@/lib/analytics";
 
 type Params = { slug: string };
 
@@ -43,14 +45,17 @@ export default async function AdvisorPage({ params }: { params: Promise<Params> 
     notFound();
   }
   const analysisUrl = safeAnalysisUrl(advisor.analysisUrl);
+  // A detail page exists only for a listed advisor: demo fixture or live listing.
+  const catalogMode = advisor.demo ? "demo" : "live";
 
   return (
     <main className="relative isolate min-h-screen overflow-hidden bg-white [font-family:Lato,Arial,sans-serif]">
       <SubpageBackdrop />
       <SubpageHeader />
+      <TrackView event="advisor_view" catalogMode={catalogMode} advisorSlug={advisor.slug} />
 
       <div className="relative z-10 mx-auto w-full max-w-[1200px] px-5 pb-20 sm:px-8 lg:px-[60px]">
-        <Link href="/advisors" className="mt-10 inline-flex text-[13px] font-bold lg:mt-14">
+        <Link href="/advisors" {...ctaAttributes("advisor_detail_back", "catalog")} className="mt-10 inline-flex text-[13px] font-bold lg:mt-14">
           ← All advisors
         </Link>
 
@@ -101,11 +106,18 @@ export default async function AdvisorPage({ params }: { params: Promise<Params> 
               )}
             </div>
             <div className="mt-6 flex flex-col gap-[3px]">
-              <OnboardingAction href={selectAdvisorUrl(advisor.slug)} className="flex h-[42px] items-center justify-center rounded-[11px] bg-black text-[13px] font-bold text-white">
+              <OnboardingAction
+                href={selectAdvisorUrl(advisor.slug)}
+                analytics={{ placement: "advisor_detail_get_advisor", destination: "dashboard", advisorSlug: advisor.slug }}
+                className="flex h-[42px] items-center justify-center rounded-[11px] bg-black text-[13px] font-bold text-white">
                 Get This Advisor →
               </OnboardingAction>
               {ACCESS_ONBOARDING_OPEN ? (
-                <a href={links.register} className="flex h-[42px] items-center justify-center rounded-[11px] border border-black text-[13px] font-bold">
+                <a
+                  href={links.register}
+                  {...ctaAttributes("advisor_detail_create_account", "register")}
+                  className="flex h-[42px] items-center justify-center rounded-[11px] border border-black text-[13px] font-bold"
+                >
                   Create Account
                 </a>
               ) : null}

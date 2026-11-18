@@ -3,6 +3,7 @@ import "@fontsource/lato/900.css";
 
 import type { CSSProperties } from "react";
 
+import { ctaAttributes } from "@/lib/analytics";
 import { asset, links, sectionNav } from "@/lib/site";
 
 // Customer-facing facts for the top strip. No allocation figures, prices or returns.
@@ -155,6 +156,7 @@ export function Hero() {
         <a
           href={links.login}
           data-px="hero.auth.login"
+          {...ctaAttributes("hero_login", "login")}
           className="
             hero-auth
             -mr-2
@@ -625,6 +627,7 @@ export function Hero() {
             <a
               href="#advisors"
               data-px="hero.prompt.submit"
+              {...ctaAttributes("hero_primary", "advisors_section")}
               className="
                 hero-prompt-submit
                 flex
