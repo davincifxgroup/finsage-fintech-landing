@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-import { track, type CatalogMode } from "@/lib/analytics";
+import { track } from "@/lib/analytics";
 
 /**
  * One document-level delegate for links marked with ctaAttributes(). It never cancels
@@ -11,7 +11,7 @@ import { track, type CatalogMode } from "@/lib/analytics";
  * auxclick; a repeat on the same element within 800 ms counts once. Disabled
  * "Coming soon" controls carry no data-analytics-event and are never counted.
  */
-export function AnalyticsClicks({ catalogMode }: { catalogMode: CatalogMode }) {
+export function AnalyticsClicks() {
   useEffect(() => {
     const last = new WeakMap<Element, number>();
 
@@ -25,7 +25,6 @@ export function AnalyticsClicks({ catalogMode }: { catalogMode: CatalogMode }) {
         cta_placement: el.getAttribute("data-analytics-placement") ?? undefined,
         destination: el.getAttribute("data-analytics-destination") ?? undefined,
         advisor_slug: el.getAttribute("data-analytics-advisor-slug") ?? undefined,
-        catalog_mode: catalogMode,
       });
     };
 
@@ -39,7 +38,7 @@ export function AnalyticsClicks({ catalogMode }: { catalogMode: CatalogMode }) {
       document.removeEventListener("click", onClick);
       document.removeEventListener("auxclick", onAuxClick);
     };
-  }, [catalogMode]);
+  }, []);
 
   return null;
 }

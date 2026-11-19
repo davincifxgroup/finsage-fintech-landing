@@ -11,13 +11,14 @@ import { ResearchToolsStrip } from "@/components/tools/ResearchToolsStrip";
 import { AnalyticsPage } from "@/components/analytics/AnalyticsPage";
 import { catalogModeOf } from "@/lib/analytics";
 import { getPublishedAdvisors } from "@/lib/catalog";
+import { HOME_TITLE } from "@/lib/site";
 
 export default async function Home() {
   // Published advisors from the Rebate catalog API (empty list -> honest empty state).
   const advisors = await getPublishedAdvisors();
   return (
     <main>
-      <AnalyticsPage route="home" catalogMode={catalogModeOf(advisors)} />
+      <AnalyticsPage route="home" catalogMode={catalogModeOf(advisors)} title={HOME_TITLE} />
       <LandingMotionController />
       <Hero />
       <ResearchToolsStrip />

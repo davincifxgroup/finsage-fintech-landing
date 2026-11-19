@@ -22,40 +22,49 @@ until the owner approves the consent review in the shared plan.
 
 ## Why the stream setting is required
 
-Access sends its own page views (`send_page_view: false`): one per page visit, on the
-first load, on every pathname change (client-side navigation, back/forward) and for pages
-restored from the back/forward cache. `#section` jumps send nothing. With the history
-setting on, GA4 would add its own page view for every client-side navigation and for
-every `#faq` / `#advisors` jump the landing page pushes into history, and no tag option
-can turn that off. The production stream `G-FFS5QEXYBR` has it on today, so changing it
-is an owner decision (shared plan, section 7).
+Access sends its own page views (`send_page_view: false`): one per visit to a known
+page — first load, client-side navigation, back/forward (including back from a 404) and
+pages restored from the back/forward cache. `#section` jumps send nothing. With the
+history setting on, GA4 would add its own page view for every client-side navigation and
+for every `#faq` / `#advisors` jump the landing page pushes into history, and no tag
+option can turn that off. The production stream `G-FFS5QEXYBR` has it on today, so
+changing it is an owner decision (shared plan, section 7).
 
 ## How it works
 
-- `components/analytics/Analytics.tsx` (root layout): host check, then
-  `gtag('config', ID, { cookie_domain: 'auto', send_page_view: false, catalog_mode })`
-  and gtag.js. `_ga` cookies live on `ea-forexlab.com`, shared with Rebate.
-- `components/analytics/AnalyticsPage.tsx` + `registerPage()` / `pageView()` in
-  `lib/analytics.ts`: each known page declares its analytics path — `/`, `/advisors`, or
-  `/advisors/<slug>` for an advisor the page actually rendered (published listing or
-  labeled demo fixture; slug validated). The raw URL path is never sent. A 404 or an
-  unknown advisor declares nothing, so it sends no page view and no events.
+- **The tag loads only on a page the app confirms.** `components/analytics/Analytics.tsx`
+  (root layout) does not load gtag.js. The first `<AnalyticsPage>` to mount — on `/`,
+  `/advisors`, or an advisor the page actually rendered — loads and initializes it
+  (`gtag('config', ID, { cookie_domain: 'auto', send_page_view: false })`). A direct
+  visit to a 404 or an unknown advisor never loads or initializes the tag. `_ga` cookies
+  live on `ea-forexlab.com`, shared with Rebate.
+- **One visit per `<AnalyticsPage>` mount** (`registerPage()` in `lib/analytics.ts`):
+  `page_view`, then `catalog_view` / `advisor_view`. Returning to a page (back/forward,
+  or back from a 404) remounts it and is a new visit; `#section` jumps do not remount and
+  send nothing.
+- **Paths and titles come from the page, never from the URL or `document.title`:**
+  `/`, `/advisors`, `/advisors/<slug>` (published listing or labeled demo fixture; slug
+  validated) and the page's own title (the same constant as its metadata).
   `page_location` = origin + that path + campaign parameters with safe values only (same
   rules and examples as Rebate: `tests/analytics/campaign-value-examples.json`);
-  `page_referrer` = origin; `page_title` with digit runs, `#123` and emails masked.
-- `components/analytics/PageViews.tsx`: re-sends the view for pages restored from the
-  back/forward cache.
-  After client-side navigation the view waits (≤1 s) for the new title, and that page's
-  events are held behind it.
+  `page_referrer` = origin; `catalog_mode` from the page.
+- **Leaving for an unconfirmed page:** `components/analytics/PageViews.tsx` checks every
+  route change. If no known page claims the new pathname (client-side navigation to a 404
+  or unknown advisor after the tag is loaded), custom events stop and gtag's documented
+  opt-out flag `window['ga-disable-<ID>'] = true` stops all hits, automatic ones
+  included, until a known page confirms itself again. It also re-sends the view for pages
+  restored from the back/forward cache.
 - `components/analytics/AnalyticsClicks.tsx`: click/auxclick delegate for links marked
   with `ctaAttributes()`. Never cancels or delays navigation; repeat within 800 ms counts
   once.
-- `catalog_view` and `advisor_view` are sent by `AnalyticsPage` right after the page view,
-  once per view.
 - `OnboardingAction` adds tracking only while onboarding is open. A closed "Coming soon"
   control has no tracking attributes and never sends an event.
-- `track()` / `pageView()` check the build flag and hostname before anything is sent or
-  queued, even when `window.gtag` exists.
+- `track()` / `pageView()` check the build flag and hostname before anything is sent,
+  even when `window.gtag` exists.
+
+**Stream dependencies:** the opt-out flag covers every hit gtag sends from the page, so
+404s stay silent regardless of Enhanced Measurement settings. Duplicate-free page views
+still require "Page changes based on browser history events" to be off (above).
 
 ## Events
 

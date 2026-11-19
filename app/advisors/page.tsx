@@ -3,13 +3,13 @@ import type { Metadata } from "next";
 import { DotLabel, SubpageBackdrop, SubpageHeader } from "@/components/catalog/SubpageHeader";
 import { Footer } from "@/components/shared/Footer";
 import { formatPrice, getPublishedAdvisors } from "@/lib/catalog";
-import { links } from "@/lib/site";
+import { CATALOG_TITLE, links } from "@/lib/site";
 import { OnboardingAction } from "@/components/shared/OnboardingAction";
 import { AnalyticsPage } from "@/components/analytics/AnalyticsPage";
 import { catalogModeOf, ctaAttributes } from "@/lib/analytics";
 
 export const metadata: Metadata = {
-  title: "Expert Advisors | ForexLAB Access",
+  title: CATALOG_TITLE,
   description: "Independently evaluated Expert Advisors available through ForexLAB Access.",
 };
 
@@ -22,7 +22,7 @@ export default async function AdvisorsPage() {
     <main className="relative isolate min-h-screen overflow-hidden bg-white [font-family:Lato,Arial,sans-serif]">
       <SubpageBackdrop />
       <SubpageHeader />
-      <AnalyticsPage route="catalog" catalogMode={catalogMode} />
+      <AnalyticsPage route="catalog" catalogMode={catalogMode} title={CATALOG_TITLE} />
 
       <div className="relative z-10 mx-auto w-full max-w-[1200px] px-5 pb-24 sm:px-8 lg:px-[60px]">
         <div className="mt-14 max-w-[760px] lg:mt-20">

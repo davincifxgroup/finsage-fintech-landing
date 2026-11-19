@@ -10,7 +10,9 @@
  *       with that setting on, GA4 would add its own page views on every client-side
  *       navigation and every #section jump, and no tag setting can stop it.)
  * and only on hosts in NEXT_PUBLIC_ANALYTICS_HOSTS (default access.ea-forexlab.com), so
- * local and test traffic never reaches production. Every send is checked at dispatch:
+ * local and test traffic never reaches production. The tag is loaded and initialized
+ * only when the app confirms a known page (registerPage); a direct visit to a 404 or an
+ * unknown advisor never loads it. Every send is checked at dispatch:
  * a disabled build or another hostname never sends or queues anything, even if
  * window.gtag exists. NEXT_PUBLIC_GA4_DEBUG_MODE=true adds debug_mode (test streams);
  * NEXT_PUBLIC_GA4_TRANSPORT_URL sends hits to a local capture server (review only).
@@ -109,7 +111,8 @@ type SentEvent = { name: string; params: Record<string, string> };
 declare global {
   interface Window {
     gtag?: Gtag;
-    accessAnalytics?: { sent: SentEvent[]; pending: unknown[][] };
+    dataLayer?: unknown[];
+    accessAnalytics?: { sent: SentEvent[] };
   }
 }
 
@@ -123,17 +126,47 @@ export function analyticsActive(): boolean {
 }
 
 function dispatch(...args: unknown[]) {
-  if (!analyticsActive()) return;
-  if (typeof window.gtag === "function") {
-    window.gtag(...args);
-  } else {
-    // Before the loader has run (hydration effects): it flushes these in order.
-    log().pending.push(args);
-  }
+  if (!analyticsActive() || !loaded || typeof window.gtag !== "function") return;
+  window.gtag(...args);
 }
 
-function log(): { sent: SentEvent[]; pending: unknown[][] } {
-  return (window.accessAnalytics ??= { sent: [], pending: [] });
+function log(): { sent: SentEvent[] } {
+  return (window.accessAnalytics ??= { sent: [] });
+}
+
+// gtag's documented opt-out flag: while true, the tag sends no hits at all, including
+// its automatic events. Set while a page the app did not confirm is on screen.
+const DISABLE_KEY = `ga-disable-${GA4_ID}`;
+let loaded = false;
+
+function setCollection(on: boolean) {
+  (window as unknown as Record<string, unknown>)[DISABLE_KEY] = !on;
+}
+
+/** Load and initialize gtag.js once, on the first page the app confirms. */
+function ensureLoaded() {
+  if (loaded) return;
+  loaded = true;
+  setCollection(true);
+  const layer = (window.dataLayer ??= []);
+  if (typeof window.gtag !== "function") {
+    window.gtag = function gtag() {
+      // gtag.js reads the arguments object itself, not an array.
+      // eslint-disable-next-line prefer-rest-params
+      layer.push(arguments);
+    };
+  }
+  const config: Record<string, unknown> = { cookie_domain: "auto", send_page_view: false };
+  if (GA4_DEBUG_MODE) config.debug_mode = true;
+  if (GA4_TRANSPORT_URL) config.transport_url = GA4_TRANSPORT_URL;
+  window.gtag("js", new Date());
+  window.gtag("config", GA4_ID, config);
+  if (typeof document.createElement === "function") {
+    const script = document.createElement("script");
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(GA4_ID)}`;
+    document.head.appendChild(script);
+  }
 }
 
 const UTM_VALUE = /^[A-Za-z0-9][A-Za-z0-9._+ -]{0,99}$/;
@@ -199,98 +232,80 @@ export function sanitizeTitle(title: string): string {
     .slice(0, 150);
 }
 
-let currentPath: string | null = null;
 let firstView = true;
 // The page currently on screen, registered by <AnalyticsPage> on known routes only.
 // A 404 or an unknown advisor registers nothing, so nothing is sent for it.
-let registered: { pathname: string; path: string } | null = null;
-let lastTitle = "";
-// While a client-side page view waits for its title, that page's events wait behind it.
-let held: unknown[][] | null = null;
-let releaseHeld: (() => void) | null = null;
-const TITLE_WAIT_MS = 1000;
-
-function emit(...args: unknown[]) {
-  if (held) held.push(args);
-  else dispatch(...args);
-}
+let registered: { pathname: string; path: string; catalogMode: CatalogMode; title: string } | null = null;
 
 function registeredPath(): string | null {
   return registered && registered.pathname === window.location.pathname ? registered.path : null;
 }
 
-/** Called by <AnalyticsPage> when a known page renders; then sends its page view. */
-export function registerPage(path: string | null) {
+/**
+ * A known page has rendered: one visit. Called once per mount of <AnalyticsPage>, so a
+ * page reached again (back/forward, or back from a 404) is a new visit with its own
+ * page_view, while #section jumps (no remount) send nothing. Loads the tag on the first
+ * confirmed page and re-enables collection after a 404. The page passes its own title,
+ * so the view never depends on when Next.js updates document.title.
+ */
+export function registerPage(path: string | null, catalogMode: CatalogMode, title = "") {
   if (!analyticsActive()) return;
-  registered = path ? { pathname: window.location.pathname, path } : null;
-  pageView();
+  if (!path) {
+    leavePage();
+    return;
+  }
+  ensureLoaded();
+  setCollection(true);
+  registered = { pathname: window.location.pathname, path, catalogMode, title };
+  sendPageView();
 }
 
 /**
- * One page_view per page visit on a registered page: the first page, then every pathname
- * change (client-side navigation, back/forward). #section jumps and query-only changes
- * keep the pathname and send nothing. `force` re-sends for a page restored from the
- * back/forward cache. Every later hit on the page uses the same sanitized location,
- * referrer and title. After client-side navigation Next.js sets the new title a moment
- * after the route changes, so the view waits (up to 1 s) for a title other than the
- * previous page's.
+ * The route changed. If no known page has claimed the new pathname (a 404 or an unknown
+ * advisor), stop collecting until one does: no custom events, and the gtag opt-out flag
+ * stops automatic events too, so the raw URL is never collected.
  */
-export function pageView(force = false) {
-  if (!analyticsActive()) return;
-  const known = registeredPath();
-  if (!known) return;
-  const path = window.location.pathname;
-  if (!force && path === currentPath) return;
-  currentPath = path;
-  releaseHeld?.();
-  const location = sanitizedLocation(window.location.href, known);
-  const referrer = firstView ? referrerOrigin(document.referrer) : `${window.location.origin}/`;
-  // A restored page (force) already shows its own title.
-  const waitForTitle = !firstView && !force;
+export function syncPage() {
+  if (!analyticsActive() || registeredPath()) return;
+  leavePage();
+}
+
+function leavePage() {
+  registered = null;
+  if (loaded) setCollection(false);
+}
+
+/** A registered page restored from the back/forward cache is a new visit. */
+export function pageView() {
+  if (!analyticsActive() || !registeredPath()) return;
+  sendPageView();
+}
+
+/** page_view for the registered page; later hits on the page reuse the same fields. */
+function sendPageView() {
+  if (!registered) return;
+  const fields = {
+    page_location: sanitizedLocation(window.location.href, registered.path),
+    page_referrer: firstView ? referrerOrigin(document.referrer) : `${window.location.origin}/`,
+    page_title: sanitizeTitle(registered.title),
+    catalog_mode: registered.catalogMode,
+  };
   firstView = false;
-
-  const queue: unknown[][] = [];
-  held = queue;
-  const send = () => {
-    if (releaseHeld !== send) return;
-    releaseHeld = null;
-    window.removeEventListener("pagehide", send);
-    lastTitle = document.title;
-    const page = { page_location: location, page_referrer: referrer, page_title: sanitizeTitle(document.title) };
-    held = null;
-    dispatch("set", page);
-    dispatch("event", "page_view", page);
-    for (const args of queue) dispatch(...args);
-  };
-  releaseHeld = send;
-
-  const titleReady = () => document.title !== "" && document.title !== lastTitle;
-  if (!waitForTitle || titleReady()) {
-    send();
-    return;
-  }
-  window.addEventListener("pagehide", send);
-  const started = Date.now();
-  const poll = () => {
-    if (releaseHeld !== send) return;
-    if (titleReady() || Date.now() - started >= TITLE_WAIT_MS) send();
-    else setTimeout(poll, 50);
-  };
-  setTimeout(poll, 50);
+  dispatch("set", fields);
+  dispatch("event", "page_view", fields);
 }
 
 /**
  * Send an allowlisted event. No-op (nothing sent or queued) unless analytics is active
- * and the current page is a registered known page.
+ * and the current page is a registered known page. catalog_mode comes from that page.
  */
 export function track(event: string, params: AnalyticsParams) {
-  if (!analyticsActive() || !registeredPath()) return;
-  const clean = cleanParams(event, params);
+  if (!analyticsActive() || !registeredPath() || !registered) return;
+  const clean = cleanParams(event, { ...params, catalog_mode: registered.catalogMode });
   if (!clean) return;
-  pageView(); // no-op when this page's view was already sent
   const entries = log().sent;
   if (entries.length < 50) entries.push({ name: event, params: clean });
-  emit("event", event, clean);
+  dispatch("event", event, clean);
 }
 
 /** data-* attributes for a tracked link. Spread onto <a>. */
