@@ -5,8 +5,10 @@ import { notFound } from "next/navigation";
 import { DotLabel, SubpageBackdrop, SubpageHeader } from "@/components/catalog/SubpageHeader";
 import { Footer } from "@/components/shared/Footer";
 import { formatDate, formatPrice, getPublishedAdvisor, safeAnalysisUrl } from "@/lib/catalog";
-import { ACCESS_ONBOARDING_OPEN, links, selectAdvisorUrl } from "@/lib/site";
+import { ACCESS_ONBOARDING_OPEN, advisorTitle, links, selectAdvisorUrl } from "@/lib/site";
 import { OnboardingAction } from "@/components/shared/OnboardingAction";
+import { AnalyticsPage } from "@/components/analytics/AnalyticsPage";
+import { ctaAttributes } from "@/lib/analytics";
 
 type Params = { slug: string };
 
@@ -20,7 +22,7 @@ type Params = { slug: string };
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const advisor = await getPublishedAdvisor((await params).slug);
   return advisor
-    ? { title: `${advisor.demo ? "Demo · " : ""}${advisor.name} | ForexLAB Access`, description: advisor.shortDescription }
+    ? { title: advisorTitle(advisor), description: advisor.shortDescription }
     : { title: "Advisor not found | ForexLAB Access" };
 }
 
@@ -43,14 +45,17 @@ export default async function AdvisorPage({ params }: { params: Promise<Params> 
     notFound();
   }
   const analysisUrl = safeAnalysisUrl(advisor.analysisUrl);
+  // A detail page exists only for a listed advisor: demo fixture or live listing.
+  const catalogMode = advisor.demo ? "demo" : "live";
 
   return (
     <main className="relative isolate min-h-screen overflow-hidden bg-white [font-family:Lato,Arial,sans-serif]">
       <SubpageBackdrop />
       <SubpageHeader />
+      <AnalyticsPage route="advisor" catalogMode={catalogMode} advisorSlug={advisor.slug} title={advisorTitle(advisor)} />
 
       <div className="relative z-10 mx-auto w-full max-w-[1200px] px-5 pb-20 sm:px-8 lg:px-[60px]">
-        <Link href="/advisors" className="mt-10 inline-flex text-[13px] font-bold lg:mt-14">
+        <Link href="/advisors" {...ctaAttributes("advisor_detail_back", "catalog")} className="mt-10 inline-flex text-[13px] font-bold lg:mt-14">
           ← All advisors
         </Link>
 
@@ -101,11 +106,18 @@ export default async function AdvisorPage({ params }: { params: Promise<Params> 
               )}
             </div>
             <div className="mt-6 flex flex-col gap-[3px]">
-              <OnboardingAction href={selectAdvisorUrl(advisor.slug)} className="flex h-[42px] items-center justify-center rounded-[11px] bg-black text-[13px] font-bold text-white">
+              <OnboardingAction
+                href={selectAdvisorUrl(advisor.slug)}
+                analytics={{ placement: "advisor_detail_get_advisor", destination: "dashboard", advisorSlug: advisor.slug }}
+                className="flex h-[42px] items-center justify-center rounded-[11px] bg-black text-[13px] font-bold text-white">
                 Get This Advisor →
               </OnboardingAction>
               {ACCESS_ONBOARDING_OPEN ? (
-                <a href={links.register} className="flex h-[42px] items-center justify-center rounded-[11px] border border-black text-[13px] font-bold">
+                <a
+                  href={links.register}
+                  {...ctaAttributes("advisor_detail_create_account", "register")}
+                  className="flex h-[42px] items-center justify-center rounded-[11px] border border-black text-[13px] font-bold"
+                >
                   Create Account
                 </a>
               ) : null}

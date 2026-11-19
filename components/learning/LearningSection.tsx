@@ -68,6 +68,7 @@ const faqItems: FaqItem[] = [
         and VPS setup. VPS hosting is not included.{" "}
         <OnboardingAction
           href={assistedSetup.requestUrl}
+          analytics={{ placement: "faq_setup_request", destination: "support" }}
           className="
             font-bold text-[#2A4FD8] underline decoration-[#2A4FD8]/30 underline-offset-[3px]
             hover:decoration-[#2A4FD8]

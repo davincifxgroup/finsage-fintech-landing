@@ -1,5 +1,6 @@
 import type { AdvisorCard } from "@/lib/catalog";
 import { formatPrice } from "@/lib/catalog";
+import { ctaAttributes } from "@/lib/analytics";
 import { asset, links } from "@/lib/site";
 import { OnboardingAction } from "@/components/shared/OnboardingAction";
 
@@ -511,6 +512,7 @@ export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
                     <li key={advisor.slug} className="border-t border-white/35 last:border-b">
                       <a
                         href={`/advisors/${advisor.slug}`}
+                        {...ctaAttributes("roles_advisor", "advisor_detail", advisor.slug)}
                         className="
                           group block py-[11px]
 
@@ -611,6 +613,7 @@ export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
                 <a
                   data-px="roles.investgpt.cta"
                   href="/advisors"
+                  {...ctaAttributes("roles_view_all", "catalog")}
                   className="
                     mt-8 lg:mt-[calc(var(--u)*26)]
                     inline-flex
@@ -627,6 +630,7 @@ export function RolesSection({ advisors = [] }: { advisors?: AdvisorCard[] }) {
                 <OnboardingAction
                   dataPx="roles.investgpt.cta"
                   href={links.register}
+                  analytics={{ placement: "roles_create_account", destination: "register" }}
                   className="
                     mt-12 lg:mt-[calc(var(--u)*51)]
                     inline-flex

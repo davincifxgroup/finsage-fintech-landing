@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+import { Analytics } from "@/components/analytics/Analytics";
+import { HOME_TITLE } from "@/lib/site";
+
 export const metadata: Metadata = {
-  title: "ForexLAB Access | Tested Expert Advisors. No Upfront License Payment.",
+  title: HOME_TITLE,
   description:
     "Independently evaluated MT4/MT5 Expert Advisors. The developer issues an account-bound license after your partner account is approved; broker partner commission funds the service.",
   // Not indexable: presentation-only release. Nginx also sends
@@ -18,7 +21,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }

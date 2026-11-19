@@ -228,6 +228,7 @@ export function FinalCTA() {
             <OnboardingAction
               dataPx="final-cta.button"
               href={links.register}
+              analytics={{ placement: "final_cta", destination: "register" }}
               className="
                 mt-12
                 inline-flex

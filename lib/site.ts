@@ -53,6 +53,12 @@ export const assistedSetup = {
 export const ACCESS_ONBOARDING_OPEN = process.env.NEXT_PUBLIC_ACCESS_ONBOARDING === "open";
 export const COMING_SOON = "Coming soon";
 
+/** Page titles, used by page metadata and by analytics (page_title). */
+export const HOME_TITLE = "ForexLAB Access | Tested Expert Advisors. No Upfront License Payment.";
+export const CATALOG_TITLE = "Expert Advisors | ForexLAB Access";
+export const advisorTitle = (advisor: { name: string; demo?: true }) =>
+  `${advisor.demo ? "Demo · " : ""}${advisor.name} | ForexLAB Access`;
+
 /** Advisor selection in the Rebate client dashboard (sign-in first if needed). */
 export const selectAdvisorUrl = (slug: string) => `${REBATE_URL}/dashboard/advisors/select/${encodeURIComponent(slug)}/`;
 
