@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-import { analyticsPath, registerPage, track, type CatalogMode } from "@/lib/analytics";
+import { registerPage, type CatalogMode } from "@/lib/analytics";
 
 /**
  * Confirms a known page: declares its analytics path, loads the tag on the first
@@ -29,10 +29,7 @@ export function AnalyticsPage({
   useEffect(() => {
     if (visited.current) return;
     visited.current = true;
-    const path = analyticsPath(route, advisorSlug);
-    registerPage(path, catalogMode, title);
-    if (route === "catalog") track("catalog_view", {});
-    if (route === "advisor" && path) track("advisor_view", { advisor_slug: advisorSlug });
+    registerPage(route, catalogMode, title, advisorSlug);
   }, [route, catalogMode, advisorSlug, title]);
 
   return null;

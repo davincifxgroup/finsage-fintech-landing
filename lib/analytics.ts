@@ -116,13 +116,22 @@ declare global {
   }
 }
 
-/** True only for an enabled build on an allowed hostname. Checked before every send. */
-export function analyticsActive(): boolean {
+/** An enabled build on an allowed hostname. */
+function enabledHere(): boolean {
   return (
     ANALYTICS_ENABLED &&
     typeof window !== "undefined" &&
     ANALYTICS_HOSTS.includes(window.location.hostname.toLowerCase())
   );
+}
+
+/**
+ * True only for an enabled build, on an allowed hostname, for a visitor who has not opted
+ * out (window['ga-disable-<ID>'] = true). Checked before the tag is loaded and before
+ * every send; an opted-out visitor gets no tag, no queued events and no requests.
+ */
+export function analyticsActive(): boolean {
+  return enabledHere() && !visitorOptedOut();
 }
 
 function dispatch(...args: unknown[]) {
@@ -134,20 +143,52 @@ function log(): { sent: SentEvent[] } {
   return (window.accessAnalytics ??= { sent: [] });
 }
 
-// gtag's documented opt-out flag: while true, the tag sends no hits at all, including
-// its automatic events. Set while a page the app did not confirm is on screen.
+// gtag's documented opt-out flag: while window['ga-disable-<ID>'] is true, the tag sends
+// no hits at all, automatic events included. Two separate reasons can make it true:
+//  * the visitor's own opt-out (set by the visitor or a consent tool) — Access never
+//    clears it;
+//  * Access's temporary pause while a page the app did not confirm (404, unknown
+//    advisor) is on screen — lifted when a known page confirms itself.
+// When the tag loads, the flag becomes an accessor that keeps the two apart: reads return
+// "opted out OR paused", writes from anyone else set the visitor's choice.
 const DISABLE_KEY = `ga-disable-${GA4_ID}`;
 let loaded = false;
+let flagInstalled = false;
+let visitorOptOut = false;
+let paused = false;
 
-function setCollection(on: boolean) {
-  (window as unknown as Record<string, unknown>)[DISABLE_KEY] = !on;
+function rawFlag(): boolean {
+  return (window as unknown as Record<string, unknown>)[DISABLE_KEY] === true;
+}
+
+function visitorOptedOut(): boolean {
+  return flagInstalled ? visitorOptOut : rawFlag();
+}
+
+function installFlag() {
+  if (flagInstalled) return;
+  visitorOptOut = rawFlag();
+  Object.defineProperty(window, DISABLE_KEY, {
+    configurable: true,
+    enumerable: true,
+    get: () => visitorOptOut || paused,
+    set: (value: unknown) => {
+      visitorOptOut = value === true;
+    },
+  });
+  flagInstalled = true;
+}
+
+/** Access's own temporary pause; never touches the visitor's opt-out. */
+function setPaused(on: boolean) {
+  paused = on;
 }
 
 /** Load and initialize gtag.js once, on the first page the app confirms. */
 function ensureLoaded() {
   if (loaded) return;
   loaded = true;
-  setCollection(true);
+  installFlag();
   const layer = (window.dataLayer ??= []);
   if (typeof window.gtag !== "function") {
     window.gtag = function gtag() {
@@ -198,7 +239,7 @@ export function isSafeCampaignValue(key: string, value: string): boolean {
  * advisor the page actually rendered (published listing or labeled demo fixture).
  * Anything else is null, and nothing is sent for that page.
  */
-export function analyticsPath(route: "home" | "catalog" | "advisor", advisorSlug?: string): string | null {
+export function analyticsPath(route: Route, advisorSlug?: string): string | null {
   if (route === "home") return "/";
   if (route === "catalog") return "/advisors";
   return advisorSlug && SLUG.test(advisorSlug) ? `/advisors/${advisorSlug}` : null;
@@ -235,7 +276,15 @@ export function sanitizeTitle(title: string): string {
 let firstView = true;
 // The page currently on screen, registered by <AnalyticsPage> on known routes only.
 // A 404 or an unknown advisor registers nothing, so nothing is sent for it.
-let registered: { pathname: string; path: string; catalogMode: CatalogMode; title: string } | null = null;
+type Route = "home" | "catalog" | "advisor";
+let registered: {
+  pathname: string;
+  route: Route;
+  path: string;
+  advisorSlug?: string;
+  catalogMode: CatalogMode;
+  title: string;
+} | null = null;
 
 function registeredPath(): string | null {
   return registered && registered.pathname === window.location.pathname ? registered.path : null;
@@ -243,56 +292,68 @@ function registeredPath(): string | null {
 
 /**
  * A known page has rendered: one visit. Called once per mount of <AnalyticsPage>, so a
- * page reached again (back/forward, or back from a 404) is a new visit with its own
- * page_view, while #section jumps (no remount) send nothing. Loads the tag on the first
- * confirmed page and re-enables collection after a 404. The page passes its own title,
- * so the view never depends on when Next.js updates document.title.
+ * page reached again (back/forward, or back from a 404) is a new visit, while #section
+ * jumps (no remount) send nothing. Loads the tag on the first confirmed page and lifts
+ * Access's own 404 pause (never the visitor's opt-out). An unknown advisor (no valid
+ * path) is treated like a 404. The page passes its own title, so the view never depends
+ * on when Next.js updates document.title.
  */
-export function registerPage(path: string | null, catalogMode: CatalogMode, title = "") {
-  if (!analyticsActive()) return;
+export function registerPage(route: Route, catalogMode: CatalogMode, title: string, advisorSlug?: string) {
+  if (!enabledHere()) return;
+  const path = analyticsPath(route, advisorSlug);
   if (!path) {
     leavePage();
     return;
   }
+  registered = { pathname: window.location.pathname, route, path, advisorSlug, catalogMode, title };
+  setPaused(false);
+  if (!analyticsActive()) return; // visitor opted out: no tag, no events, no requests
   ensureLoaded();
-  setCollection(true);
-  registered = { pathname: window.location.pathname, path, catalogMode, title };
-  sendPageView();
+  sendVisit();
 }
 
 /**
  * The route changed. If no known page has claimed the new pathname (a 404 or an unknown
- * advisor), stop collecting until one does: no custom events, and the gtag opt-out flag
- * stops automatic events too, so the raw URL is never collected.
+ * advisor), pause until one does: no custom events, and the gtag opt-out flag stops
+ * automatic events too, so the raw URL is never collected.
  */
 export function syncPage() {
-  if (!analyticsActive() || registeredPath()) return;
+  if (!enabledHere() || registeredPath()) return;
   leavePage();
 }
 
 function leavePage() {
   registered = null;
-  if (loaded) setCollection(false);
+  if (loaded) setPaused(true);
 }
 
-/** A registered page restored from the back/forward cache is a new visit. */
-export function pageView() {
+/**
+ * A registered page restored from the back/forward cache (pageshow with persisted) is a
+ * new visit: the same page_view and view event as a fresh visit, once.
+ */
+export function restoreVisit() {
   if (!analyticsActive() || !registeredPath()) return;
-  sendPageView();
+  sendVisit();
 }
 
-/** page_view for the registered page; later hits on the page reuse the same fields. */
-function sendPageView() {
-  if (!registered) return;
+/**
+ * One visit: page_view, then catalog_view or advisor_view (home sends page_view only).
+ * Later hits on the page reuse the same page fields.
+ */
+function sendVisit() {
+  const page = registered;
+  if (!page) return;
   const fields = {
-    page_location: sanitizedLocation(window.location.href, registered.path),
+    page_location: sanitizedLocation(window.location.href, page.path),
     page_referrer: firstView ? referrerOrigin(document.referrer) : `${window.location.origin}/`,
-    page_title: sanitizeTitle(registered.title),
-    catalog_mode: registered.catalogMode,
+    page_title: sanitizeTitle(page.title),
+    catalog_mode: page.catalogMode,
   };
   firstView = false;
   dispatch("set", fields);
   dispatch("event", "page_view", fields);
+  if (page.route === "catalog") track("catalog_view", {});
+  if (page.route === "advisor") track("advisor_view", { advisor_slug: page.advisorSlug });
 }
 
 /**

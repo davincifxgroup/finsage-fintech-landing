@@ -57,14 +57,15 @@ const unconfirmed = await load({ ...ENABLED_ENV, NEXT_PUBLIC_GA4_HISTORY_PAGEVIE
 
 const pageViews = () => calls.filter((c) => c[0] === 'event' && c[1] === 'page_view');
 const eventNames = () => calls.filter((c) => c[0] === 'event').map((c) => c[1]);
-const optedOut = () => globalThis.window['ga-disable-G-TEST000000'] === true;
-// What <AnalyticsPage> does when a known page mounts (one visit).
+const KEY = 'ga-disable-G-TEST000000';
+const optedOut = () => globalThis.window[KEY] === true;
+// What <AnalyticsPage> does when a page mounts (one visit).
 const TITLES = { home: 'ForexLAB Access', catalog: 'Expert Advisors | ForexLAB Access' };
 function visit(mod, route, slug, mode = 'demo', title) {
-  mod.registerPage(mod.analyticsPath(route, slug), mode, title ?? TITLES[route] ?? `${slug} | ForexLAB Access`);
-  if (route === 'catalog') mod.track('catalog_view', {});
-  if (route === 'advisor') mod.track('advisor_view', { advisor_slug: slug });
+  mod.registerPage(route, mode, title ?? TITLES[route] ?? `${slug} | ForexLAB Access`, slug);
 }
+// An unknown advisor: the page asks for a path that does not validate (treated as a 404).
+const unknownAdvisor = (mod) => mod.registerPage('advisor', 'live', 'Advisor not found', 'Not A Slug');
 
 beforeEach(async () => {
   fakeWindow('https://access.example.test/');
@@ -74,7 +75,7 @@ beforeEach(async () => {
 test('disabled build sends, queues and loads nothing even when window.gtag exists', () => {
   assert.equal(disabled.ANALYTICS_ENABLED, false);
   visit(disabled, 'catalog');
-  disabled.pageView();
+  disabled.restoreVisit();
   disabled.syncPage();
   assert.deepEqual(calls, []);
   assert.deepEqual(scripts, []);
@@ -88,7 +89,7 @@ test('enabling requires confirming that history-based page views are off', () =>
 test('disallowed hostname sends, queues and loads nothing', () => {
   fakeWindow('https://localhost/advisors');
   visit(enabled, 'catalog');
-  enabled.pageView();
+  enabled.restoreVisit();
   assert.deepEqual(calls, []);
   assert.deepEqual(scripts, []);
 });
@@ -109,10 +110,10 @@ test('the tag is loaded and initialized only on a page the app confirms', () => 
 test('a direct 404 or unknown advisor never loads the tag', () => {
   for (const href of ['https://access.example.test/advisors/unknown-thing', 'https://access.example.test/no/such/route']) {
     fakeWindow(href, { withGtag: false });
-    enabled.registerPage(null, 'live'); // an unknown advisor resolves to no path
+    unknownAdvisor(enabled);
     enabled.syncPage();
     enabled.track('rebate_handoff_click', { cta_placement: 'header_login', destination: 'login' });
-    enabled.pageView();
+    enabled.restoreVisit();
     assert.deepEqual(scripts, []);
     assert.equal(globalThis.window.gtag, undefined);
     assert.equal(globalThis.window.dataLayer, undefined);
@@ -139,7 +140,7 @@ test('catalog -> 404 -> Back: exactly one more page_view, then one catalog_view'
   enabled.syncPage();
   assert.equal(optedOut(), true); // the gtag opt-out flag also stops automatic events
   enabled.track('access_cta_click', { cta_placement: 'catalog_card', destination: 'advisor_detail' });
-  enabled.pageView();
+  enabled.restoreVisit();
 
   navigate('https://access.example.test/advisors', 'Expert Advisors'); // Back remounts the catalog
   visit(enabled, 'catalog');
@@ -153,7 +154,7 @@ test('advisor -> 404 -> Back: one page_view, then one advisor_view', () => {
   fakeWindow('https://access.example.test/advisors/sample-ea', { title: 'Sample EA' });
   visit(enabled, 'advisor', 'sample-ea', 'live');
   navigate('https://access.example.test/advisors/not-published', '404: This page could not be found.');
-  enabled.registerPage(null, 'live');
+  unknownAdvisor(enabled);
   enabled.syncPage();
   navigate('https://access.example.test/advisors/sample-ea', 'Sample EA');
   visit(enabled, 'advisor', 'sample-ea', 'live');
@@ -200,11 +201,90 @@ test('back/forward between known pages: one page_view per visit', () => {
   assert.equal(pageViews()[1][2].page_referrer, 'https://access.example.test/');
 });
 
-test('a page restored from the back/forward cache is a new visit', () => {
+test('back/forward cache restore: catalog sends one page_view then one catalog_view', () => {
   fakeWindow('https://access.example.test/advisors', { title: 'Expert Advisors' });
   visit(enabled, 'catalog');
-  enabled.pageView();
-  assert.equal(pageViews().length, 2);
+  calls.length = 0;
+  enabled.restoreVisit();
+  assert.deepEqual(eventNames(), ['page_view', 'catalog_view']);
+  assert.equal(pageViews()[0][2].page_location, 'https://access.example.test/advisors');
+});
+
+test('back/forward cache restore: advisor sends one page_view then advisor_view with slug and mode', () => {
+  fakeWindow('https://access.example.test/advisors/sample-ea', { title: 'Sample EA' });
+  visit(enabled, 'advisor', 'sample-ea', 'live', 'Sample EA | ForexLAB Access');
+  calls.length = 0;
+  enabled.restoreVisit();
+  assert.deepEqual(eventNames(), ['page_view', 'advisor_view']);
+  const advisorView = calls.find((c) => c[0] === 'event' && c[1] === 'advisor_view');
+  assert.deepEqual(advisorView[2], { advisor_slug: 'sample-ea', catalog_mode: 'live' });
+  assert.equal(pageViews()[0][2].page_title, 'Sample EA | ForexLAB Access');
+});
+
+test('back/forward cache restore: home sends only page_view; 404 and section jumps send nothing', () => {
+  fakeWindow('https://access.example.test/', { title: 'ForexLAB Access' });
+  visit(enabled, 'home');
+  calls.length = 0;
+  enabled.restoreVisit();
+  assert.deepEqual(eventNames(), ['page_view']);
+
+  navigate('https://access.example.test/#faq');
+  enabled.syncPage();
+  assert.deepEqual(eventNames(), ['page_view']);
+
+  navigate('https://access.example.test/no/such/route', '404: This page could not be found.');
+  enabled.syncPage();
+  enabled.restoreVisit(); // a restored 404
+  assert.deepEqual(eventNames(), ['page_view']);
+});
+
+test('a pre-existing visitor opt-out: no tag, no queued events, no requests, also across a 404', () => {
+  fakeWindow('https://access.example.test/advisors', { withGtag: false });
+  globalThis.window[KEY] = true;
+  visit(enabled, 'catalog');
+  enabled.track('access_cta_click', { cta_placement: 'catalog_card', destination: 'advisor_detail' });
+  enabled.restoreVisit();
+  navigate('https://access.example.test/no/such/route', '404');
+  enabled.syncPage();
+  navigate('https://access.example.test/advisors', 'Expert Advisors');
+  visit(enabled, 'catalog');
+  enabled.syncPage();
+  assert.deepEqual(scripts, []);
+  assert.equal(globalThis.window.gtag, undefined);
+  assert.equal(globalThis.window.dataLayer, undefined);
+  assert.equal(globalThis.window.accessAnalytics, undefined);
+  assert.equal(globalThis.window[KEY], true); // never overwritten
+});
+
+test('an opt-out set after the tag loaded survives a 404 and the return', () => {
+  fakeWindow('https://access.example.test/advisors', { title: 'Expert Advisors' });
+  visit(enabled, 'catalog');
+  assert.deepEqual(eventNames(), ['page_view', 'catalog_view']);
+  globalThis.window[KEY] = true; // the visitor (or a consent tool) opts out
+  enabled.track('access_cta_click', { cta_placement: 'catalog_card', destination: 'advisor_detail' });
+  navigate('https://access.example.test/no/such/route', '404');
+  enabled.syncPage();
+  assert.equal(optedOut(), true);
+  navigate('https://access.example.test/advisors', 'Expert Advisors');
+  visit(enabled, 'catalog'); // returning lifts only Access's pause
+  enabled.syncPage();
+  enabled.restoreVisit();
+  assert.equal(optedOut(), true);
+  assert.deepEqual(eventNames(), ['page_view', 'catalog_view']);
+});
+
+test("Access's 404 pause is lifted on return, and a later opt-in by the visitor is respected", () => {
+  fakeWindow('https://access.example.test/advisors', { title: 'Expert Advisors' });
+  visit(enabled, 'catalog');
+  navigate('https://access.example.test/no/such/route', '404');
+  enabled.syncPage();
+  assert.equal(optedOut(), true); // paused by Access
+  globalThis.window[KEY] = false; // a visitor write does not lift the pause on a 404
+  assert.equal(optedOut(), true);
+  navigate('https://access.example.test/advisors', 'Expert Advisors');
+  visit(enabled, 'catalog');
+  assert.equal(optedOut(), false);
+  assert.deepEqual(eventNames(), ['page_view', 'catalog_view', 'page_view', 'catalog_view']);
 });
 
 test("page_title is the page's own title, even when document.title is stale", () => {

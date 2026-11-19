@@ -39,9 +39,10 @@ changing it is an owner decision (shared plan, section 7).
   visit to a 404 or an unknown advisor never loads or initializes the tag. `_ga` cookies
   live on `ea-forexlab.com`, shared with Rebate.
 - **One visit per `<AnalyticsPage>` mount** (`registerPage()` in `lib/analytics.ts`):
-  `page_view`, then `catalog_view` / `advisor_view`. Returning to a page (back/forward,
-  or back from a 404) remounts it and is a new visit; `#section` jumps do not remount and
-  send nothing.
+  `page_view`, then `catalog_view` / `advisor_view` (home: `page_view` only). Returning to
+  a page (back/forward, or back from a 404) remounts it and is a new visit; `#section`
+  jumps do not remount and send nothing. A page restored from the back/forward cache
+  (`pageshow` with `persisted`) sends the same visit once.
 - **Paths and titles come from the page, never from the URL or `document.title`:**
   `/`, `/advisors`, `/advisors/<slug>` (published listing or labeled demo fixture; slug
   validated) and the page's own title (the same constant as its metadata).
@@ -51,9 +52,15 @@ changing it is an owner decision (shared plan, section 7).
 - **Leaving for an unconfirmed page:** `components/analytics/PageViews.tsx` checks every
   route change. If no known page claims the new pathname (client-side navigation to a 404
   or unknown advisor after the tag is loaded), custom events stop and gtag's documented
-  opt-out flag `window['ga-disable-<ID>'] = true` stops all hits, automatic ones
-  included, until a known page confirms itself again. It also re-sends the view for pages
-  restored from the back/forward cache.
+  opt-out flag `window['ga-disable-<ID>']` stops all hits, automatic ones included,
+  until a known page confirms itself again. It also sends the visit for pages restored
+  from the back/forward cache.
+- **The visitor's opt-out is never overridden.** If `window['ga-disable-<ID>']` is `true`
+  (set by the visitor or a consent tool, before or after the tag loads), Access loads no
+  tag, queues no events and sends nothing. When the tag loads, the flag becomes an
+  accessor that keeps the visitor's choice separate from Access's temporary 404 pause:
+  reads return "opted out or paused", writes by anyone else set the visitor's choice, and
+  returning from a 404 lifts only Access's pause.
 - `components/analytics/AnalyticsClicks.tsx`: click/auxclick delegate for links marked
   with `ctaAttributes()`. Never cancels or delays navigation; repeat within 800 ms counts
   once.
