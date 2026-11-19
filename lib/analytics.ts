@@ -140,20 +140,39 @@ const UTM_VALUE = /^[A-Za-z0-9][A-Za-z0-9._+ -]{0,99}$/;
 const CLICK_ID_VALUE = /^[A-Za-z0-9_-]{8,200}$/;
 const LINKER_VALUE = /^[A-Za-z0-9*._-]{1,300}$/;
 const TOKEN_LIKE = /(?=[A-Za-z0-9]*\d)(?=[A-Za-z0-9]*[A-Za-z])[A-Za-z0-9]{24,}/;
+// Phone-like: 7+ digits, optionally split by single spaces, dots or hyphens.
+const PHONE_LIKE = /\d(?:[ .-]?\d){6,}/;
 export const CAMPAIGN_QUERY_PARAMS = [
   "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "utm_id",
   "gclid", "gbraid", "wbraid", "_gl",
 ];
 
-/** Same rules as Rebate apps/core/analytics.py: tag-like values only. */
+/**
+ * Same rules as Rebate apps/core/analytics.py, checked against the same examples
+ * (tests/analytics/campaign-value-examples.json): tag-like UTM values only, without 6+
+ * digit runs, phone-like numbers (7+ digits split by spaces, dots or hyphens) or long
+ * token-like strings. Click IDs and the linker keep their own formats.
+ */
 export function isSafeCampaignValue(key: string, value: string): boolean {
   if (key === "gclid" || key === "gbraid" || key === "wbraid") return CLICK_ID_VALUE.test(value);
   if (key === "_gl") return LINKER_VALUE.test(value);
-  return UTM_VALUE.test(value) && !/\d{6,}/.test(value) && !TOKEN_LIKE.test(value);
+  return UTM_VALUE.test(value) && !/\d{6,}/.test(value) && !PHONE_LIKE.test(value) && !TOKEN_LIKE.test(value);
 }
 
-/** origin + path + safe campaign parameters; never the hash or other parameters. */
-export function sanitizedLocation(href: string): string {
+
+/**
+ * The analytics path for a known route: "/", "/advisors" or "/advisors/<slug>" for an
+ * advisor the page actually rendered (published listing or labeled demo fixture).
+ * Anything else is null, and nothing is sent for that page.
+ */
+export function analyticsPath(route: "home" | "catalog" | "advisor", advisorSlug?: string): string | null {
+  if (route === "home") return "/";
+  if (route === "catalog") return "/advisors";
+  return advisorSlug && SLUG.test(advisorSlug) ? `/advisors/${advisorSlug}` : null;
+}
+
+/** origin + the known analytics path + safe campaign parameters; never the raw path or hash. */
+export function sanitizedLocation(href: string, path: string): string {
   const url = new URL(href);
   const kept = new URLSearchParams();
   for (const key of CAMPAIGN_QUERY_PARAMS) {
@@ -161,7 +180,7 @@ export function sanitizedLocation(href: string): string {
     if (value && isSafeCampaignValue(key, value)) kept.set(key, value);
   }
   const query = kept.toString();
-  return `${url.origin}${url.pathname}${query ? `?${query}` : ""}`;
+  return `${url.origin}${path}${query ? `?${query}` : ""}`;
 }
 
 export function referrerOrigin(referrer: string): string {
@@ -182,6 +201,9 @@ export function sanitizeTitle(title: string): string {
 
 let currentPath: string | null = null;
 let firstView = true;
+// The page currently on screen, registered by <AnalyticsPage> on known routes only.
+// A 404 or an unknown advisor registers nothing, so nothing is sent for it.
+let registered: { pathname: string; path: string } | null = null;
 let lastTitle = "";
 // While a client-side page view waits for its title, that page's events wait behind it.
 let held: unknown[][] | null = null;
@@ -193,23 +215,38 @@ function emit(...args: unknown[]) {
   else dispatch(...args);
 }
 
+function registeredPath(): string | null {
+  return registered && registered.pathname === window.location.pathname ? registered.path : null;
+}
+
+/** Called by <AnalyticsPage> when a known page renders; then sends its page view. */
+export function registerPage(path: string | null) {
+  if (!analyticsActive()) return;
+  registered = path ? { pathname: window.location.pathname, path } : null;
+  pageView();
+}
+
 /**
- * One page_view per page visit: the first page, then every pathname change (client-side
- * navigation, back/forward). #section jumps and query-only changes keep the pathname and
- * send nothing. `force` re-sends for a page restored from the back/forward cache.
- * Every later hit on the page uses the same sanitized location, referrer and title.
- * After client-side navigation Next.js sets the new title a moment after the route
- * changes, so the view waits (up to 1 s) for a title other than the previous page's.
+ * One page_view per page visit on a registered page: the first page, then every pathname
+ * change (client-side navigation, back/forward). #section jumps and query-only changes
+ * keep the pathname and send nothing. `force` re-sends for a page restored from the
+ * back/forward cache. Every later hit on the page uses the same sanitized location,
+ * referrer and title. After client-side navigation Next.js sets the new title a moment
+ * after the route changes, so the view waits (up to 1 s) for a title other than the
+ * previous page's.
  */
 export function pageView(force = false) {
   if (!analyticsActive()) return;
+  const known = registeredPath();
+  if (!known) return;
   const path = window.location.pathname;
   if (!force && path === currentPath) return;
   currentPath = path;
   releaseHeld?.();
-  const location = sanitizedLocation(window.location.href);
+  const location = sanitizedLocation(window.location.href, known);
   const referrer = firstView ? referrerOrigin(document.referrer) : `${window.location.origin}/`;
-  const waitForTitle = !firstView;
+  // A restored page (force) already shows its own title.
+  const waitForTitle = !firstView && !force;
   firstView = false;
 
   const queue: unknown[][] = [];
@@ -242,12 +279,15 @@ export function pageView(force = false) {
   setTimeout(poll, 50);
 }
 
-/** Send an allowlisted event. No-op (nothing sent or queued) unless analytics is active. */
+/**
+ * Send an allowlisted event. No-op (nothing sent or queued) unless analytics is active
+ * and the current page is a registered known page.
+ */
 export function track(event: string, params: AnalyticsParams) {
-  if (!analyticsActive()) return;
+  if (!analyticsActive() || !registeredPath()) return;
   const clean = cleanParams(event, params);
   if (!clean) return;
-  pageView(); // a view tracked before the layout's effect still follows its page_view
+  pageView(); // no-op when this page's view was already sent
   const entries = log().sent;
   if (entries.length < 50) entries.push({ name: event, params: clean });
   emit("event", event, clean);

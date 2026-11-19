@@ -7,7 +7,7 @@ import { Footer } from "@/components/shared/Footer";
 import { formatDate, formatPrice, getPublishedAdvisor, safeAnalysisUrl } from "@/lib/catalog";
 import { ACCESS_ONBOARDING_OPEN, links, selectAdvisorUrl } from "@/lib/site";
 import { OnboardingAction } from "@/components/shared/OnboardingAction";
-import { TrackView } from "@/components/analytics/TrackView";
+import { AnalyticsPage } from "@/components/analytics/AnalyticsPage";
 import { ctaAttributes } from "@/lib/analytics";
 
 type Params = { slug: string };
@@ -52,7 +52,7 @@ export default async function AdvisorPage({ params }: { params: Promise<Params> 
     <main className="relative isolate min-h-screen overflow-hidden bg-white [font-family:Lato,Arial,sans-serif]">
       <SubpageBackdrop />
       <SubpageHeader />
-      <TrackView event="advisor_view" catalogMode={catalogMode} advisorSlug={advisor.slug} />
+      <AnalyticsPage route="advisor" catalogMode={catalogMode} advisorSlug={advisor.slug} />
 
       <div className="relative z-10 mx-auto w-full max-w-[1200px] px-5 pb-20 sm:px-8 lg:px-[60px]">
         <Link href="/advisors" {...ctaAttributes("advisor_detail_back", "catalog")} className="mt-10 inline-flex text-[13px] font-bold lg:mt-14">

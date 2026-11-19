@@ -35,15 +35,23 @@ is an owner decision (shared plan, section 7).
 - `components/analytics/Analytics.tsx` (root layout): host check, then
   `gtag('config', ID, { cookie_domain: 'auto', send_page_view: false, catalog_mode })`
   and gtag.js. `_ga` cookies live on `ea-forexlab.com`, shared with Rebate.
-- `components/analytics/PageViews.tsx` + `pageView()` in `lib/analytics.ts`: the page
-  views above. `page_location` = origin + path + campaign parameters with tag-like values
-  only; `page_referrer` = origin; `page_title` with digit runs, `#123` and emails masked.
+- `components/analytics/AnalyticsPage.tsx` + `registerPage()` / `pageView()` in
+  `lib/analytics.ts`: each known page declares its analytics path — `/`, `/advisors`, or
+  `/advisors/<slug>` for an advisor the page actually rendered (published listing or
+  labeled demo fixture; slug validated). The raw URL path is never sent. A 404 or an
+  unknown advisor declares nothing, so it sends no page view and no events.
+  `page_location` = origin + that path + campaign parameters with safe values only (same
+  rules and examples as Rebate: `tests/analytics/campaign-value-examples.json`);
+  `page_referrer` = origin; `page_title` with digit runs, `#123` and emails masked.
+- `components/analytics/PageViews.tsx`: re-sends the view for pages restored from the
+  back/forward cache.
   After client-side navigation the view waits (≤1 s) for the new title, and that page's
   events are held behind it.
 - `components/analytics/AnalyticsClicks.tsx`: click/auxclick delegate for links marked
   with `ctaAttributes()`. Never cancels or delays navigation; repeat within 800 ms counts
   once.
-- `components/analytics/TrackView.tsx`: `catalog_view` and `advisor_view`, once per view.
+- `catalog_view` and `advisor_view` are sent by `AnalyticsPage` right after the page view,
+  once per view.
 - `OnboardingAction` adds tracking only while onboarding is open. A closed "Coming soon"
   control has no tracking attributes and never sends an event.
 - `track()` / `pageView()` check the build flag and hostname before anything is sent or
@@ -73,3 +81,6 @@ reported separately from live.
 ```powershell
 node --experimental-strip-types --test tests/analytics/analytics.test.mjs tests/analytics/dispatch.test.mjs
 ```
+
+`tests/analytics/campaign-value-examples.json` must stay identical to the Rebate file
+`apps/core/testdata/campaign_value_examples.json`.

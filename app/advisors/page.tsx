@@ -5,7 +5,7 @@ import { Footer } from "@/components/shared/Footer";
 import { formatPrice, getPublishedAdvisors } from "@/lib/catalog";
 import { links } from "@/lib/site";
 import { OnboardingAction } from "@/components/shared/OnboardingAction";
-import { TrackView } from "@/components/analytics/TrackView";
+import { AnalyticsPage } from "@/components/analytics/AnalyticsPage";
 import { catalogModeOf, ctaAttributes } from "@/lib/analytics";
 
 export const metadata: Metadata = {
@@ -22,7 +22,7 @@ export default async function AdvisorsPage() {
     <main className="relative isolate min-h-screen overflow-hidden bg-white [font-family:Lato,Arial,sans-serif]">
       <SubpageBackdrop />
       <SubpageHeader />
-      <TrackView event="catalog_view" catalogMode={catalogMode} />
+      <AnalyticsPage route="catalog" catalogMode={catalogMode} />
 
       <div className="relative z-10 mx-auto w-full max-w-[1200px] px-5 pb-24 sm:px-8 lg:px-[60px]">
         <div className="mt-14 max-w-[760px] lg:mt-20">

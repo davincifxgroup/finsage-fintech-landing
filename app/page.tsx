@@ -8,6 +8,8 @@ import { BrandTransition } from "@/components/shared/BrandTransition";
 import { FinalCTA } from "@/components/shared/FinalCTA";
 import { Footer } from "@/components/shared/Footer";
 import { ResearchToolsStrip } from "@/components/tools/ResearchToolsStrip";
+import { AnalyticsPage } from "@/components/analytics/AnalyticsPage";
+import { catalogModeOf } from "@/lib/analytics";
 import { getPublishedAdvisors } from "@/lib/catalog";
 
 export default async function Home() {
@@ -15,6 +17,7 @@ export default async function Home() {
   const advisors = await getPublishedAdvisors();
   return (
     <main>
+      <AnalyticsPage route="home" catalogMode={catalogModeOf(advisors)} />
       <LandingMotionController />
       <Hero />
       <ResearchToolsStrip />
