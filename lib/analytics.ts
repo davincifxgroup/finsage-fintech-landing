@@ -14,7 +14,8 @@
  * only when the app confirms a known page (registerPage); a direct visit to a 404 or an
  * unknown advisor never loads it. Every send is checked at dispatch:
  * a disabled build or another hostname never sends or queues anything, even if
- * window.gtag exists. NEXT_PUBLIC_GA4_DEBUG_MODE=true adds debug_mode (test streams);
+ * window.gtag exists. NEXT_PUBLIC_GA4_DEBUG_MODE=true adds debug_mode: true to every event
+ * (test streams); when it is off, no event carries debug_mode at all.
  * NEXT_PUBLIC_GA4_TRANSPORT_URL sends hits to a local capture server (review only).
  *
  * Every event and parameter is allowlisted below. Nothing else is sent: no emails,
@@ -132,6 +133,14 @@ function enabledHere(): boolean {
  */
 export function analyticsActive(): boolean {
   return enabledHere() && !visitorOptedOut();
+}
+
+/**
+ * Event parameters with debug_mode: true added in a debug build, unchanged otherwise.
+ * Set on each event because some published Google tags ignore debug_mode in 'config'.
+ */
+function withDebug<T extends Record<string, string>>(params: T): T | (T & { debug_mode: true }) {
+  return GA4_DEBUG_MODE ? { ...params, debug_mode: true } : params;
 }
 
 function dispatch(...args: unknown[]) {
@@ -357,7 +366,7 @@ function sendVisit() {
   };
   firstView = false;
   dispatch("set", fields);
-  dispatch("event", "page_view", fields);
+  dispatch("event", "page_view", withDebug(fields));
   if (page.route === "catalog") track("catalog_view", {});
   if (page.route === "advisor") track("advisor_view", { advisor_slug: page.advisorSlug });
 }
@@ -372,7 +381,7 @@ export function track(event: string, params: AnalyticsParams) {
   if (!clean) return;
   const entries = log().sent;
   if (entries.length < 50) entries.push({ name: event, params: clean });
-  dispatch("event", event, clean);
+  dispatch("event", event, withDebug(clean));
 }
 
 /** data-* attributes for a tracked link. Spread onto <a>. */

@@ -320,3 +320,23 @@ test('unsafe campaign values are dropped from page_location', () => {
     'https://access.example.test/advisors?utm_source=telegram&utm_medium=social&utm_campaign=rebate_launch&utm_content=pinned_post',
   );
 });
+
+test('debug build adds debug_mode: true to every event; a normal build never sends it', async () => {
+  const debug = await load({ ...ENABLED_ENV, NEXT_PUBLIC_GA4_DEBUG_MODE: 'true' });
+  for (const [mod, on] of [[debug, true], [enabled, false]]) {
+    fakeWindow('https://access.example.test/advisors');
+    visit(mod, 'catalog');
+    mod.track('rebate_handoff_click', { cta_placement: 'catalog_card', destination: 'register' });
+    const events = calls.filter((c) => c[0] === 'event');
+    assert.deepEqual(events.map((c) => c[1]), ['page_view', 'catalog_view', 'rebate_handoff_click']);
+    for (const [, name, params] of events) {
+      if (on) assert.equal(params.debug_mode, true, name);
+      else assert.equal('debug_mode' in params, false, name);
+    }
+    // Page fields set for later hits never carry it, and one page_view per visit.
+    for (const c of calls.filter((c) => c[0] === 'set')) assert.equal('debug_mode' in c[1], false);
+    assert.equal(pageViews().length, 1);
+    // The local log of sent events stays the allowlisted params only.
+    for (const entry of globalThis.window.accessAnalytics.sent) assert.equal('debug_mode' in entry.params, false);
+  }
+});

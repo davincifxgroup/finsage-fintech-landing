@@ -15,7 +15,7 @@ until the owner approves the consent review in the shared plan.
 | `NEXT_PUBLIC_GA4_ID` | the approved web stream ID (production: the Rebate/WordPress stream) | Use a test stream ID for review |
 | `NEXT_PUBLIC_GA4_HISTORY_PAGEVIEWS_DISABLED` | `true` | Required. Confirms the stream's Enhanced Measurement "Page changes based on browser history events" is **off** (see below). Without it analytics stays off |
 | `NEXT_PUBLIC_ANALYTICS_HOSTS` | default `access.ea-forexlab.com` | Every send checks the hostname; other hosts send and queue nothing |
-| `NEXT_PUBLIC_GA4_DEBUG_MODE` | `true` for DebugView | Test streams only |
+| `NEXT_PUBLIC_GA4_DEBUG_MODE` | `true` for DebugView | Test streams only. Adds `debug_mode: true` to every event (some published tags ignore it in `config`); when off, no event carries `debug_mode` |
 | `NEXT_PUBLIC_GA4_TRANSPORT_URL` | local capture server URL | Review only; never in production |
 
 `NEXT_PUBLIC_*` values are inlined at build time: rebuild after changing them.
