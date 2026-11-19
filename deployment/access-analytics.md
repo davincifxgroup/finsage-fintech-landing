@@ -35,7 +35,11 @@ changing it is an owner decision (shared plan, section 7).
 - **The tag loads only on a page the app confirms.** `components/analytics/Analytics.tsx`
   (root layout) does not load gtag.js. The first `<AnalyticsPage>` to mount — on `/`,
   `/advisors`, or an advisor the page actually rendered — loads and initializes it
-  (`gtag('config', ID, { cookie_domain: 'auto', send_page_view: false })`). A direct
+  (`gtag('set', { send_page_view: false })` queued before `gtag('js')`, then
+  `gtag('config', ID, { cookie_domain: 'auto', send_page_view: false })`). The early
+  `set` matters for Google tags that initialize the GA4 destination at `gtm.init`, before
+  `config` is read: without it they send an extra automatic `page_view` of the raw URL
+  (seen on the test stream `G-WE1WCCN2PF`). A direct
   visit to a 404 or an unknown advisor never loads or initializes the tag. `_ga` cookies
   live on `ea-forexlab.com`, shared with Rebate.
 - **One visit per `<AnalyticsPage>` mount** (`registerPage()` in `lib/analytics.ts`):

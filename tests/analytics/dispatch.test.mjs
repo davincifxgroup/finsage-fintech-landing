@@ -103,8 +103,11 @@ test('the tag is loaded and initialized only on a page the app confirms', () => 
   assert.equal(scripts.length, 1);
   assert.match(scripts[0].src, /googletagmanager\.com\/gtag\/js\?id=G-TEST000000/);
   const layer = globalThis.window.dataLayer.map((args) => Array.from(args));
-  assert.deepEqual(layer.map((a) => (a[0] === 'event' ? a[1] : a[0])), ['js', 'config', 'set', 'page_view', 'catalog_view']);
-  assert.deepEqual(layer[1][2], { cookie_domain: 'auto', send_page_view: false });
+  assert.deepEqual(layer.map((a) => (a[0] === 'event' ? a[1] : a[0])), ['set', 'js', 'config', 'set', 'page_view', 'catalog_view']);
+  // Queued before 'js': stops the automatic page_view of tags that initialize the GA4
+  // destination at gtm.init, before 'config' is read.
+  assert.deepEqual(layer[0][1], { send_page_view: false });
+  assert.deepEqual(layer[2][2], { cookie_domain: 'auto', send_page_view: false });
 });
 
 test('a direct 404 or unknown advisor never loads the tag', () => {

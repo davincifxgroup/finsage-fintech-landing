@@ -200,6 +200,12 @@ function ensureLoaded() {
   const config: Record<string, unknown> = { cookie_domain: "auto", send_page_view: false };
   if (GA4_DEBUG_MODE) config.debug_mode = true;
   if (GA4_TRANSPORT_URL) config.transport_url = GA4_TRANSPORT_URL;
+  // Some published Google tags initialize the GA4 destination when the tag starts
+  // ("gtm.init"), before the 'config' command below is read, and send a page_view of the
+  // raw URL. Only a 'set' queued before 'js' reaches that step; this one stops that
+  // automatic page_view, so the visit's own page_view (sanitized, with catalog_mode) is
+  // the only one. Harmless for tags that initialize on 'config'.
+  window.gtag("set", { send_page_view: false });
   window.gtag("js", new Date());
   window.gtag("config", GA4_ID, config);
   if (typeof document.createElement === "function") {
